@@ -1,0 +1,52 @@
+Sombok - Unicode Text Segmentation Package.
+
+Copyright (C) 2009-2011 by Hatuka*nezumi - IKEDA Soji.
+This file is part of the Sombok Package.  This program is free
+software; you can redistribute it and/or modify it under the terms of
+the GNU General Public License as published by the Free Software
+Foundation; either version 2 of the License, or (at your option) any
+later version.  This program is distributed in the hope that it will
+be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+COPYING file for more details.
+
+$Id$
+
+おおまかな説明
+==============
+
+ソンボク ライブラリパッケージは、ユニコード標準附属書14 (UAX #14) に述べ
+る「ユニコード行分割アルゴリズム」を実行できます。附属書11 (UAX #11) で
+定義する East_AsianWidth 参考特性を考慮して行分割位置を決定できます。
+またこのパッケージでは、附属書29 (UAX #29) で述べる「初期の」書記素クラ
+スタをも実装しています。
+
+要件
+====
+
+* ANSI C コンパイラ (たとえば GCC C compiler) が要ります。
+
+* pkg-config の 0.9.0 以降が要ります。
+
+* 必須ではありませんが、タイ語の単語文節に対応するには libthai パッケー
+  ジをインストールする必要があります。次の場所で入手できます。
+  http://linux.thai.net/projects/libthai
+
+インストール
+============
+
+配布物を展開し、次のように実行します。
+
+  $ ./configure [オプション……]
+  $ make
+  # make install
+
+``./configure --help'' を実行すれば、どんなオプションが使えるかわかりま
+す。
+
+著者
+====
+
+Hatuka*nezumi - IKEDA Soji <hatuka(at)nezumi.nu>.
+
+$$

@@ -1,0 +1,81 @@
+Name: sombok
+Version: @VERSION@
+Release: 1%{?dist}
+License: GPLv2+
+Group: System Environment/Libraries
+Summary: Unicode Text Segmentation Package
+Summary(ja): ユニコード テキスト分節パッケージ
+
+Source: sombok-@VERSION@.tar.gz
+URL: http://hatuka.nezumi.nu/repos/sombok/
+BuildRoot: %{_tmppath}/%{name}-%{version}-root-%(%{__id_u} -n)
+
+BuildRequires: pkgconfig
+# we edit the Makefile.am's
+BuildRequires: automake
+BuildRequires: autoconf
+BuildRequires: libtool
+BuildRequires: libthai-devel
+Requires: libthai
+
+%description
+sombok package performs Line Breaking Algorithm described in
+Unicode Standards Annex #14 (UAX #14).  East_Asian_Width
+informative properties defined by Annex #11 (UAX #11) will be
+concerned to determin breaking positions.  This package also
+implements ``default'' Grapheme Cluster segmentation described in
+Annex #29 (UAX #29).
+
+%description -l ja
+sombok パッケージはユニコード標準附属書14 (UAX #14) で述べるユニ
+コード行分割アルゴリズムを実行する。行分割位置の決定にあたって、附
+属書11 (UAX #11) で定める East_Asian_Width 参考特性を考慮する。ま
+た、附属書29 (UAX #29) で述べる「初期の」書記素クラスタ分節も実装
+している。
+
+%package devel
+Summary: Unicode Text Segmentation package
+Summary(ja): ユニコード テキスト分節パッケージ
+Group: Development/Libraries
+Requires: %{name} = %{version}-%{release}
+Requires: pkgconfig
+
+%description devel
+The sombok-devel package includes the header files and developer docs 
+for the sombok package.  Install sombok-devel if you want to develop
+programs which will use sombok.
+
+%prep
+%setup -q -n %{name}-%{version}
+
+%build
+autoreconf -i -f
+%configure
+make
+
+%install
+rm -rf $RPM_BUILD_ROOT
+%makeinstall
+rm $RPM_BUILD_ROOT%{_libdir}/*.la
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%post -p /sbin/ldconfig
+
+%postun -p /sbin/ldconfig
+
+%files
+%defattr(-, root, root)
+%doc README AUTHORS COPYING ChangeLog
+%{_libdir}/lib*.so.*
+
+%files devel
+%defattr(-, root, root)
+%{_includedir}/*
+%{_libdir}/lib*.a
+%{_libdir}/lib*.so
+%{_libdir}/pkgconfig/*
+#%{_mandir}/man3/*
+
+%changelog

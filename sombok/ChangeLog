@@ -1,0 +1,25 @@
+2011.0b2	Thu Jan 20 2011
+	* Fix: Eliminated all (maybe, ...hopefully) memory leaks.
+	* Chg: split part of gcstring_substr() to gcstring_replace().
+
+2011.0b1	Sun Jan 15 2011 
+	* First beta of new major release.
+
+Important Changes beside Linebreak 1.x:
+
+	* 1.x has memory leaks & potantial buffer overrun vulnerabilities.
+	  Switching to release 20XX is strongly recommended.
+	* Renamed package name from Linebreak to Sombok.
+	* Major changes on public interface:
+	- urgent_func callback takes two arguments, not five.
+	- sizing_func callback with extra 6th argument was obsoleted.
+	- default sizing method simply returns number of grapheme
+	  clusters, not number of columns based on UAX #11.  For
+	  compatible behavior with 1.x, use linebreak_sizing_UAX11()
+	  built-in callback function.
+	- linebreak_break*() functions return array of lines, not
+	  single Unicode string.  Additinally, elements of array are
+	  grapheme cluster strings.
+
+About change history until release 1.x see ChangeLog.REL1 file.
+

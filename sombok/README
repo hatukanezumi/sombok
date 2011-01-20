@@ -1,0 +1,50 @@
+Sombok - Unicode Text Segmentation Package.
+
+Copyright (C) 2009-2011 by Hatuka*nezumi - IKEDA Soji.
+
+This file is part of the Sombok Package.  This program is free
+software; you can redistribute it and/or modify it under the terms of
+the GNU General Public License as published by the Free Software
+Foundation; either version 2 of the License, or (at your option) any
+later version.  This program is distributed in the hope that it will
+be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+COPYING file for more details.
+
+$Id$
+
+What is this
+============
+
+Sombok library paclage performs Line Breaking Algorithm described in 
+Unicode Standards Annex #14 (UAX #14).  East_Asian_Width informative 
+properties defined by Annex #11 (UAX #11) may be concerned to determin 
+breaking positions.  This package also implements ``default'' Grapheme 
+Cluster segmentation described in Annex #29 (UAX #29).
+
+Prerequisites
+=============
+
+* ANSI C compiler, for example GCC C compiler, is required.
+
+* Optionally, libthai package need to be installed to support Thai 
+  word segmentation:
+  http://linux.thai.net/projects/libthai
+
+Install
+=======
+
+Extract tarball then run as follows.
+
+  $ ./configure [options...]
+  $ make
+  # make install
+
+``./configure --help'' will show available options.
+
+Author
+======
+
+Hatuka*nezumi - IKEDA Soji <hatuka(at)nezumi.nu>.
+
+$$

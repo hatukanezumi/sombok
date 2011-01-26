@@ -1,4 +1,8 @@
-2011.0b2	Thu Jan 20 2011
+2011.0	Wed Jan 26 2011
+	* Brush-up documentations.
+	* ``make check'' feature (incomplete).
+
+2011.0RC	Thu Jan 20 2011
 	* Fix: Eliminated all (maybe, ...hopefully) memory leaks.
 	* Chg: split part of gcstring_substr() to gcstring_replace().
 

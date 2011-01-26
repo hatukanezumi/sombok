@@ -24,39 +24,12 @@ extern void linebreak_charprop(linebreak_t *, unichar_t,
 		       propval_t *, propval_t *, propval_t *,
 		       propval_t *);
 
-static
-const linebreak_t initlbobj = {
-    1UL,			/* refcount */
-    LINEBREAK_STATE_NONE,	/* state */
-    {(unichar_t *)NULL, 0},	/* bufstr */
-    {(unichar_t *)NULL, 0},	/* bufspc */
-    0.0,			/* bufcols */
-    {(unichar_t *)NULL, 0},	/* unread */
-    LINEBREAK_DEFAULT_CHARMAX,	/* charmax */
-    0.0,			/* colmax */
-    0.0,			/* colmin */
-    (mapent_t *)NULL,		/* map */
-    0,				/* mapsiz */
-    {(unichar_t *)NULL, 0},	/* newline */
-    0,				/* options */
-    NULL,			/* format_data */
-    NULL,			/* sizing_data */
-    NULL,			/* urgent_data */
-    NULL,			/* user_data */
-    NULL,			/* stash */
-    (gcstring_t *(*)())NULL,	/* format_func */
-    (double (*)())NULL,		/* sizing_func */
-    (gcstring_t *(*)())NULL,	/* urgent_func */
-    (gcstring_t *(*)())NULL,	/* user_func */
-    (void (*)())NULL,		/* ref_func */
-    0				/* errnum */
-};
-
 /** Constructor
  *
  * Creates new linebreak object.
  * Reference count of it will be set to 1.
- * @param[in] ref_func function to handle reference count of external objects. 
+ * @param[in] ref_func function to handle reference count of external objects,
+ * or NULL.
  * @return New linebreak object.
  * If error occurred, errno is set then NULL is returned.
  */
@@ -65,7 +38,6 @@ linebreak_t *linebreak_new(void (*ref_func)())
     linebreak_t *obj;
     if ((obj = malloc(sizeof(linebreak_t)))== NULL)
 	return NULL;
-    // memcpy(obj, &initlbobj, sizeof(linebreak_t));
     memset(obj, 0, sizeof(linebreak_t));
 
 #ifdef USE_LIBTHAI
@@ -79,8 +51,9 @@ linebreak_t *linebreak_new(void (*ref_func)())
 /** Increase Reference Count
  *
  * Increse reference count of linebreak object.
- * @param[in] obj linebreak object.
- * @return linebreak object.
+ * @param[in] obj linebreak object, must not be NULL.
+ * @return linebreak object itself.
+ * If error occurred, errno is set then NULL is returned.
  */
 linebreak_t *linebreak_incref(linebreak_t *obj)
 {
@@ -95,7 +68,7 @@ linebreak_t *linebreak_incref(linebreak_t *obj)
  * If ref_func member of object is not NULL, it will be executed to increase
  * reference count of user_data, format_data, sizing_data, urgent_data and
  * stash members.
- * @param[in] obj linebreak object.
+ * @param[in] obj linebreak object, must not be NULL.
  * @return New linebreak object.
  * If error occurred, errno is set then NULL is returned.
  */
@@ -105,6 +78,8 @@ linebreak_t *linebreak_copy(linebreak_t *obj)
     mapent_t *newmap;
     unichar_t *newstr;
 
+    if (obj == NULL)
+	return (errno = EINVAL), NULL;
     if ((newobj = malloc(sizeof(linebreak_t)))== NULL)
 	return NULL;
     memcpy(newobj, obj, sizeof(linebreak_t));
@@ -195,6 +170,7 @@ linebreak_t *linebreak_copy(linebreak_t *obj)
  * sizing_data, urgent_data and stash members.
  * @param[in] obj linebreak object.
  * @return none.
+ * If obj was NULL, do nothing.
  */
 void linebreak_destroy(linebreak_t *obj)
 {
@@ -224,8 +200,9 @@ void linebreak_destroy(linebreak_t *obj)
 
 /** Setter: Update newline member
  *
- * @param[in] lbobj target linebreak object.
+ * @param[in] lbobj target linebreak object, must not be NULL.
  * @param[in] newline pointer to Unicode string.
+ * @return none.
  * Copy of newline is set.
  * If error occurred, lbobj->errnum is set.
  */
@@ -252,8 +229,11 @@ void linebreak_set_newline(linebreak_t *lbobj, unistr_t *newline)
 
 /** Setter: Update stash Member
  *
- * @param[in] lbobj target linebreak object.
- * @param[in] stash new stash value.
+ * @param[in] lbobj target linebreak object, must not be NULL.
+ * @param[in] stash new stash value or NULL.
+ * @return none.
+ * New stash value is set.
+ * Reference count of stash member will be handled appropriately.
  */
 void linebreak_set_stash(linebreak_t *lbobj, void *stash)
 {
@@ -269,8 +249,11 @@ void linebreak_set_stash(linebreak_t *lbobj, void *stash)
 /** Setter: Update format_func/format_data Member
  *
  * @param[in] lbobj target linebreak object.
- * @param[in] format_func format callback function.
+ * @param[in] format_func format callback function or NULL.
  * @param[in] format_data new format_data value.
+ * @return none.
+ * New format callback is set.
+ * Reference count of format_data member will be handled appropriately.
  */
 void linebreak_set_format(linebreak_t *lbobj, gcstring_t *(*format_func)(),
 			  void *format_data)
@@ -288,7 +271,11 @@ void linebreak_set_format(linebreak_t *lbobj, gcstring_t *(*format_func)(),
 /** Setter: Update sizing_func/sizing_data Member
  *
  * @param[in] lbobj target linebreak object.
+ * @param[in] sizing_func sizing callback function or NULL.
  * @param[in] sizing_data new sizing_data value.
+ * @return none.
+ * New sizing callback is set.
+ * Reference count of sizing_data member will be handled appropriately.
  */
 void linebreak_set_sizing(linebreak_t *lbobj, double (*sizing_func)(),
 			  void *sizing_data)
@@ -306,7 +293,11 @@ void linebreak_set_sizing(linebreak_t *lbobj, double (*sizing_func)(),
 /** Setter: Update urgent_func/urgent_data Member
  *
  * @param[in] lbobj target linebreak object.
+ * @param[in] urgent_func urgent breaking callback function or NULL.
  * @param[in] urgent_data new urgent_data value.
+ * @return none.
+ * New urgent breaking callback is set.
+ * Reference count of urgent_data member will be handled appropriately.
  */
 void linebreak_set_urgent(linebreak_t *lbobj, gcstring_t *(*urgent_func)(),
 			  void *urgent_data)
@@ -324,7 +315,11 @@ void linebreak_set_urgent(linebreak_t *lbobj, gcstring_t *(*urgent_func)(),
 /** Setter: Update user_func/user_data Member
  *
  * @param[in] lbobj target linebreak object.
+ * @param[in] user_func preprocessing callback function or NULL.
  * @param[in] user_data new user_data value.
+ * @return none.
+ * New preprocessing callback is set.
+ * Reference count of user_data member will be handled appropriately.
  */
 void linebreak_set_user(linebreak_t *lbobj, gcstring_t *(*user_func)(),
 			void *user_data)
@@ -371,7 +366,8 @@ void linebreak_reset(linebreak_t *lbobj)
  * internal data.
  * @param[in] a_idx line breaking class.
  * @param[in] b_idx line breaking class.
- * @return line breaking action: MANDATORY, DIRECT, INDIRECT, PROHIBITED.
+ * @return line breaking action: MANDATORY, DIRECT, INDIRECT or PROHIBITED.
+ * If action was not determined, returns DIRECT.
  */
 propval_t linebreak_lbrule(propval_t b_idx, propval_t a_idx)
 {
@@ -391,7 +387,7 @@ propval_t linebreak_lbrule(propval_t b_idx, propval_t a_idx)
  *
  * Get UAX #14 line breaking class of Unicode character.
  * Classes XX and SG will be resolved to AL.
- * @param[in] obj linebreak object.
+ * @param[in] obj linebreak object, must not be NULL.
  * @param[in] c Unicode character.
  * @return line breaking class property value.
  */
@@ -413,7 +409,7 @@ propval_t linebreak_lbclass(linebreak_t *obj, unichar_t c)
  *
  * Get UAX #11 East_Asian_Width property value of Unicode character.
  * Class A will be resolved to appropriate property F or N.
- * @param[in] obj linebreak object.
+ * @param[in] obj linebreak object, must not be NULL.
  * @param[in] c Unicode character.
  * @return East_Asian_Width property value.
  */

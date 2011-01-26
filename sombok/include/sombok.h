@@ -101,9 +101,8 @@ typedef struct {
 
 /** LineBreak object */
 typedef struct {
-    /***
-     * private members
-     */
+    /** @name private members
+     *@{*/
     /** reference count */
     unsigned long int refcount;
     /** state */
@@ -116,10 +115,10 @@ typedef struct {
     double bufcols;
     /** unread input */
     unistr_t unread;
+    /*@}*/
 
-    /***
-     * public members
-     */
+    /** @name public members
+     *@{*/
     /** Maximum number of Unicode characters each line may contain. */
     size_t charmax;
     /** Maximum number of columns. */
@@ -160,6 +159,7 @@ typedef struct {
      * may be a value of errno defined in <errno.h> or LINEBREAK_ELONG below.
      */
     int errnum;
+    /*@}*/
 } linebreak_t;
 
 /***
@@ -279,5 +279,7 @@ extern gcstring_t *linebreak_urgent_FORCE(linebreak_t *, gcstring_t *);
 #define _SOMBOK_H_
 #endif /* _SOMBOK_H_ */
 
-// #include "src/mymalloc.h"
+#ifdef MALLOC_DEBUG
+#include "src/mymalloc.h"
+#endif /* MALLOC_DEBUG */
 

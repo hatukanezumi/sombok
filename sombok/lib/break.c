@@ -103,11 +103,13 @@ gcstring_t *_urgent_break(linebreak_t *lbobj, gcstring_t *str)
 	return NULL;						\
     }
 
-/** Perform line breaking algorithm with incremental inputs.
+/** @fn gcstring_t** linebreak_break_partial(linebreak_t *lbobj, unistr_t *input)
+ *
+ * Perform line breaking algorithm with incremental inputs.
  *
  * @param[in] lbobj linebreak object.
  * @param[in] input Unicode string; give NULL to specify end of input.
- * @return array of (partial) broken grapheme cluster strings
+ * @return array of (partial) broken grapheme cluster strings terminated by NULL.
  * If internal error occurred, lbobj->errnum is set then NULL is returned.
  */
 static
@@ -738,14 +740,15 @@ gcstring_t **linebreak_break_partial(linebreak_t *lbobj, unistr_t *input)
     return _break_partial(lbobj, input, NULL);
 }
 
-/** Perform line breaking algorithm on complete input.
+/**
+ * Perform line breaking algorithm on complete input.
  *
  * This function will consume heap size proportional to input size.
  * linebreak_break() is highly recommended.
  *
  * @param[in] lbobj linebreak object.
  * @param[in] input Unicode string.
- * @return array of broken grapheme cluster string
+ * @return array of broken grapheme cluster strings terminated by NULL.
  * If internal error occurred, lbobj->errnum is set then NULL is returned.
  */
 gcstring_t **linebreak_break_fast(linebreak_t *lbobj, unistr_t *input)
@@ -753,8 +756,10 @@ gcstring_t **linebreak_break_fast(linebreak_t *lbobj, unistr_t *input)
     gcstring_t **ret, **appe, **r;
     size_t i, j, retlen, appelen;
 
-    if (input == NULL || input->len == 0) {
-	if ((ret = malloc(sizeof(gcstring_t *))) != NULL)
+    if (input == NULL) {
+	if ((ret = malloc(sizeof(gcstring_t *))) == NULL)
+	    lbobj->errnum = errno? errno: ENOMEM;
+	else
 	    ret[0] = NULL;
 	return ret;
     }
@@ -797,7 +802,7 @@ gcstring_t **linebreak_break_fast(linebreak_t *lbobj, unistr_t *input)
  *
  * @param[in] lbobj linebreak object.
  * @param[in] input Unicode string.
- * @return array of broken grapheme cluster strings
+ * @return array of broken grapheme cluster strings terminated by NULL.
  * If internal error occurred, lbobj->errnum is set then NULL is returned.
  */
 gcstring_t **linebreak_break(linebreak_t *lbobj, unistr_t *input)
@@ -806,9 +811,12 @@ gcstring_t **linebreak_break(linebreak_t *lbobj, unistr_t *input)
     gcstring_t **ret, **appe, **r;
     size_t i, j, k, retlen, appelen;
 
-    if ((ret = malloc(sizeof(gcstring_t *))) != NULL)
+    if ((ret = malloc(sizeof(gcstring_t *))) == NULL) {
+	lbobj->errnum = errno? errno: ENOMEM;
+	return NULL;
+    } else
 	ret[0] = NULL;
-    if (input == NULL || input->str == NULL || input->len == 0)
+    if (input == NULL)
 	return ret;
     retlen = 0;
 

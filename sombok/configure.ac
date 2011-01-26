@@ -1,7 +1,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(sombok, 2011.0RC, hatuka@nezumi.nu)
+AC_INIT(sombok, 2011.0, hatuka@nezumi.nu)
 DEFAULT_UNICODE_VERSION="6.0.0"
 LPATH="$PATH:/usr/local/bin"
 
@@ -38,7 +38,7 @@ PKG_CHECK_MODULES(LIBTHAI, [libthai],
   [LIBTHAI="libthai/`$PKG_CONFIG --modversion libthai`"], [LIBTHAI=])
 AC_MSG_CHECKING(whether libthai support enabled)
 AC_ARG_ENABLE(libthai,
-  [  --disable-libthai       Disable libthai support],
+  AC_HELP_STRING(--disable-libthai, [Disable libthai support]),
   [],
   [enable_libthai=yes])
 if test -z "$LIBTHAI"
@@ -65,6 +65,20 @@ AC_CHECK_FILE([lib/$UNICODE_VERSION.c],
   AC_MSG_RESULT(Use Unicode version $UNICODE_VERSION),
   AC_MSG_ERROR(unknown Unicode version $UNICODE_VERSION))
 AC_SUBST(UNICODE_VERSION)
+
+AC_ARG_ENABLE(malloc-debug,
+  AC_HELP_STRING(--enable-malloc-debug,
+    [Enable codes to debug memory allocation/deallocation]),
+  [MALLOC_DEBUG=yes],
+  [])
+AM_CONDITIONAL(MALLOC_DEBUG, [test "$MALLOC_DEBUG" = "yes"])
+if test "$MALLOC_DEBUG" = "yes"
+then
+  AC_MSG_RESULT(use mymalloc.)
+  AC_DEFINE_UNQUOTED(MALLOC_DEBUG, "$MALLOC_DEBUG",
+    [ Set this to use mymalloc wrapper. ])
+  AC_SUBST(MALLOC_DEBUG)
+fi
 
 AC_CONFIG_FILES(Makefile sombok.pc sombok.spec)
 AC_OUTPUT

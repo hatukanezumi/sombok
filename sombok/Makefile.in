@@ -38,8 +38,12 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+@MALLOC_DEBUG_TRUE@am__append_1 = src/mymalloc.c
+check_PROGRAMS = sombok$(EXEEXT)
+@HAVE_STRERROR_FALSE@am__append_2 = src/strerror.c
+@HAVE_STRCASECMP_FALSE@am__append_3 = src/strcasecmp.c
 DIST_COMMON = README $(am__configure_deps) $(include_HEADERS) \
-	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(noinst_HEADERS) $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/config.h.in $(srcdir)/sombok.pc.in \
 	$(srcdir)/sombok.spec.in $(top_srcdir)/configure AUTHORS \
 	COPYING ChangeLog INSTALL NEWS compile config.guess config.sub \
@@ -65,11 +69,23 @@ am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(pkgconfigdir)" \
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libsombok_la_LIBADD =
+am__libsombok_la_SOURCES_DIST = lib/break.c lib/charprop.c \
+	lib/gcstring.c lib/linebreak.c lib/southeastasian.c \
+	lib/utils.c lib/@UNICODE_VERSION@.c src/mymalloc.c
+@MALLOC_DEBUG_TRUE@am__objects_1 = libsombok_la-mymalloc.lo
 am_libsombok_la_OBJECTS = libsombok_la-break.lo \
 	libsombok_la-charprop.lo libsombok_la-gcstring.lo \
 	libsombok_la-linebreak.lo libsombok_la-southeastasian.lo \
-	libsombok_la-utils.lo libsombok_la-@UNICODE_VERSION@.lo
+	libsombok_la-utils.lo libsombok_la-@UNICODE_VERSION@.lo \
+	$(am__objects_1)
 libsombok_la_OBJECTS = $(am_libsombok_la_OBJECTS)
+am__sombok_SOURCES_DIST = src/sombok.c src/strerror.c src/strcasecmp.c
+@HAVE_STRERROR_FALSE@am__objects_2 = sombok-strerror.$(OBJEXT)
+@HAVE_STRCASECMP_FALSE@am__objects_3 = sombok-strcasecmp.$(OBJEXT)
+am_sombok_OBJECTS = sombok-sombok.$(OBJEXT) $(am__objects_2) \
+	$(am__objects_3)
+sombok_OBJECTS = $(am_sombok_OBJECTS)
+sombok_DEPENDENCIES = libsombok.la
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -81,13 +97,15 @@ LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(libsombok_la_SOURCES)
-DIST_SOURCES = $(libsombok_la_SOURCES)
+SOURCES = $(libsombok_la_SOURCES) $(sombok_SOURCES)
+DIST_SOURCES = $(am__libsombok_la_SOURCES_DIST) \
+	$(am__sombok_SOURCES_DIST)
 pkgconfigDATA_INSTALL = $(INSTALL_DATA)
 DATA = $(pkgconfig_DATA)
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
 nodist_includeHEADERS_INSTALL = $(INSTALL_HEADER)
-HEADERS = $(include_HEADERS) $(nodist_include_HEADERS)
+HEADERS = $(include_HEADERS) $(nodist_include_HEADERS) \
+	$(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -147,6 +165,9 @@ LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAKEINFO = @MAKEINFO@
+MALLOC_DEBUG = @MALLOC_DEBUG@
+MALLOC_DEBUG_FALSE = @MALLOC_DEBUG_FALSE@
+MALLOC_DEBUG_TRUE = @MALLOC_DEBUG_TRUE@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
@@ -209,27 +230,27 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 lib_LTLIBRARIES = libsombok.la
 libsombok_la_SOURCES = lib/break.c lib/charprop.c lib/gcstring.c \
-			lib/linebreak.c lib/southeastasian.c lib/utils.c \
-			lib/@UNICODE_VERSION@.c
-
+	lib/linebreak.c lib/southeastasian.c lib/utils.c \
+	lib/@UNICODE_VERSION@.c $(am__append_1)
 libsombok_la_CFLAGS = -I. -Iinclude @LIBTHAI_CFLAGS@
 libsombok_la_LDFLAGS = -version-info 3:0:0 @LIBTHAI_LIBS@
-#if !HAVE_STRERROR
-#libsombok_la_SOURCES += src/strerror.c
-#endif
-#if !HAVE_STRCASECMP
-#libsombok_la_SOURCES += src/strcasecmp.c
-#endif
 include_HEADERS = include/sombok.h include/sombok_constants.h
 nodist_include_HEADERS = 
+noinst_HEADERS = src/mymalloc.h
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = sombok.pc
+sombok_SOURCES = src/sombok.c $(am__append_2) $(am__append_3)
+sombok_CFLAGS = -Iinclude
+sombok_LDFLAGS = 
+sombok_LDADD = libsombok.la
+TESTS = tests/*.t
 
 #pkgdata_DATA =
 #pkgdatasubdir =
 #pkgdatasub_DATA =
 EXTRA_DIST = sombok.spec \
 	lib/5.1.0.c lib/5.2.0.c \
+	tests/lb.sh $(TESTS) \
 	data/makefile data/constants.pl data/custom.pl data/data.pl \
 	data/*.custom data/Rules-*.txt data/LBCLASSES \
 	ChangeLog.REL1
@@ -323,6 +344,16 @@ clean-libLTLIBRARIES:
 libsombok.la: $(libsombok_la_OBJECTS) $(libsombok_la_DEPENDENCIES) 
 	$(LINK) -rpath $(libdir) $(libsombok_la_LDFLAGS) $(libsombok_la_OBJECTS) $(libsombok_la_LIBADD) $(LIBS)
 
+clean-checkPROGRAMS:
+	@list='$(check_PROGRAMS)'; for p in $$list; do \
+	  f=`echo $$p|sed 's/$(EXEEXT)$$//'`; \
+	  echo " rm -f $$p $$f"; \
+	  rm -f $$p $$f ; \
+	done
+sombok$(EXEEXT): $(sombok_OBJECTS) $(sombok_DEPENDENCIES) 
+	@rm -f sombok$(EXEEXT)
+	$(LINK) $(sombok_LDFLAGS) $(sombok_OBJECTS) $(sombok_LDADD) $(LIBS)
+
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 
@@ -334,8 +365,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsombok_la-charprop.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsombok_la-gcstring.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsombok_la-linebreak.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsombok_la-mymalloc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsombok_la-southeastasian.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsombok_la-utils.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sombok-sombok.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sombok-strcasecmp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sombok-strerror.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -406,6 +441,55 @@ libsombok_la-@UNICODE_VERSION@.lo: lib/@UNICODE_VERSION@.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lib/@UNICODE_VERSION@.c' object='libsombok_la-@UNICODE_VERSION@.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsombok_la_CFLAGS) $(CFLAGS) -c -o libsombok_la-@UNICODE_VERSION@.lo `test -f 'lib/@UNICODE_VERSION@.c' || echo '$(srcdir)/'`lib/@UNICODE_VERSION@.c
+
+libsombok_la-mymalloc.lo: src/mymalloc.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsombok_la_CFLAGS) $(CFLAGS) -MT libsombok_la-mymalloc.lo -MD -MP -MF "$(DEPDIR)/libsombok_la-mymalloc.Tpo" -c -o libsombok_la-mymalloc.lo `test -f 'src/mymalloc.c' || echo '$(srcdir)/'`src/mymalloc.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libsombok_la-mymalloc.Tpo" "$(DEPDIR)/libsombok_la-mymalloc.Plo"; else rm -f "$(DEPDIR)/libsombok_la-mymalloc.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/mymalloc.c' object='libsombok_la-mymalloc.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsombok_la_CFLAGS) $(CFLAGS) -c -o libsombok_la-mymalloc.lo `test -f 'src/mymalloc.c' || echo '$(srcdir)/'`src/mymalloc.c
+
+sombok-sombok.o: src/sombok.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(sombok_CFLAGS) $(CFLAGS) -MT sombok-sombok.o -MD -MP -MF "$(DEPDIR)/sombok-sombok.Tpo" -c -o sombok-sombok.o `test -f 'src/sombok.c' || echo '$(srcdir)/'`src/sombok.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/sombok-sombok.Tpo" "$(DEPDIR)/sombok-sombok.Po"; else rm -f "$(DEPDIR)/sombok-sombok.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/sombok.c' object='sombok-sombok.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(sombok_CFLAGS) $(CFLAGS) -c -o sombok-sombok.o `test -f 'src/sombok.c' || echo '$(srcdir)/'`src/sombok.c
+
+sombok-sombok.obj: src/sombok.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(sombok_CFLAGS) $(CFLAGS) -MT sombok-sombok.obj -MD -MP -MF "$(DEPDIR)/sombok-sombok.Tpo" -c -o sombok-sombok.obj `if test -f 'src/sombok.c'; then $(CYGPATH_W) 'src/sombok.c'; else $(CYGPATH_W) '$(srcdir)/src/sombok.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/sombok-sombok.Tpo" "$(DEPDIR)/sombok-sombok.Po"; else rm -f "$(DEPDIR)/sombok-sombok.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/sombok.c' object='sombok-sombok.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(sombok_CFLAGS) $(CFLAGS) -c -o sombok-sombok.obj `if test -f 'src/sombok.c'; then $(CYGPATH_W) 'src/sombok.c'; else $(CYGPATH_W) '$(srcdir)/src/sombok.c'; fi`
+
+sombok-strerror.o: src/strerror.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(sombok_CFLAGS) $(CFLAGS) -MT sombok-strerror.o -MD -MP -MF "$(DEPDIR)/sombok-strerror.Tpo" -c -o sombok-strerror.o `test -f 'src/strerror.c' || echo '$(srcdir)/'`src/strerror.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/sombok-strerror.Tpo" "$(DEPDIR)/sombok-strerror.Po"; else rm -f "$(DEPDIR)/sombok-strerror.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/strerror.c' object='sombok-strerror.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(sombok_CFLAGS) $(CFLAGS) -c -o sombok-strerror.o `test -f 'src/strerror.c' || echo '$(srcdir)/'`src/strerror.c
+
+sombok-strerror.obj: src/strerror.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(sombok_CFLAGS) $(CFLAGS) -MT sombok-strerror.obj -MD -MP -MF "$(DEPDIR)/sombok-strerror.Tpo" -c -o sombok-strerror.obj `if test -f 'src/strerror.c'; then $(CYGPATH_W) 'src/strerror.c'; else $(CYGPATH_W) '$(srcdir)/src/strerror.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/sombok-strerror.Tpo" "$(DEPDIR)/sombok-strerror.Po"; else rm -f "$(DEPDIR)/sombok-strerror.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/strerror.c' object='sombok-strerror.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(sombok_CFLAGS) $(CFLAGS) -c -o sombok-strerror.obj `if test -f 'src/strerror.c'; then $(CYGPATH_W) 'src/strerror.c'; else $(CYGPATH_W) '$(srcdir)/src/strerror.c'; fi`
+
+sombok-strcasecmp.o: src/strcasecmp.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(sombok_CFLAGS) $(CFLAGS) -MT sombok-strcasecmp.o -MD -MP -MF "$(DEPDIR)/sombok-strcasecmp.Tpo" -c -o sombok-strcasecmp.o `test -f 'src/strcasecmp.c' || echo '$(srcdir)/'`src/strcasecmp.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/sombok-strcasecmp.Tpo" "$(DEPDIR)/sombok-strcasecmp.Po"; else rm -f "$(DEPDIR)/sombok-strcasecmp.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/strcasecmp.c' object='sombok-strcasecmp.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(sombok_CFLAGS) $(CFLAGS) -c -o sombok-strcasecmp.o `test -f 'src/strcasecmp.c' || echo '$(srcdir)/'`src/strcasecmp.c
+
+sombok-strcasecmp.obj: src/strcasecmp.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(sombok_CFLAGS) $(CFLAGS) -MT sombok-strcasecmp.obj -MD -MP -MF "$(DEPDIR)/sombok-strcasecmp.Tpo" -c -o sombok-strcasecmp.obj `if test -f 'src/strcasecmp.c'; then $(CYGPATH_W) 'src/strcasecmp.c'; else $(CYGPATH_W) '$(srcdir)/src/strcasecmp.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/sombok-strcasecmp.Tpo" "$(DEPDIR)/sombok-strcasecmp.Po"; else rm -f "$(DEPDIR)/sombok-strcasecmp.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='src/strcasecmp.c' object='sombok-strcasecmp.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(sombok_CFLAGS) $(CFLAGS) -c -o sombok-strcasecmp.obj `if test -f 'src/strcasecmp.c'; then $(CYGPATH_W) 'src/strcasecmp.c'; else $(CYGPATH_W) '$(srcdir)/src/strcasecmp.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -516,10 +600,83 @@ GTAGS:
 distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
+check-TESTS: $(TESTS)
+	@failed=0; all=0; xfail=0; xpass=0; skip=0; \
+	srcdir=$(srcdir); export srcdir; \
+	list='$(TESTS)'; \
+	if test -n "$$list"; then \
+	  for tst in $$list; do \
+	    if test -f ./$$tst; then dir=./; \
+	    elif test -f $$tst; then dir=; \
+	    else dir="$(srcdir)/"; fi; \
+	    if $(TESTS_ENVIRONMENT) $${dir}$$tst; then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *" $$tst "*) \
+		xpass=`expr $$xpass + 1`; \
+		failed=`expr $$failed + 1`; \
+		echo "XPASS: $$tst"; \
+	      ;; \
+	      *) \
+		echo "PASS: $$tst"; \
+	      ;; \
+	      esac; \
+	    elif test $$? -ne 77; then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *" $$tst "*) \
+		xfail=`expr $$xfail + 1`; \
+		echo "XFAIL: $$tst"; \
+	      ;; \
+	      *) \
+		failed=`expr $$failed + 1`; \
+		echo "FAIL: $$tst"; \
+	      ;; \
+	      esac; \
+	    else \
+	      skip=`expr $$skip + 1`; \
+	      echo "SKIP: $$tst"; \
+	    fi; \
+	  done; \
+	  if test "$$failed" -eq 0; then \
+	    if test "$$xfail" -eq 0; then \
+	      banner="All $$all tests passed"; \
+	    else \
+	      banner="All $$all tests behaved as expected ($$xfail expected failures)"; \
+	    fi; \
+	  else \
+	    if test "$$xpass" -eq 0; then \
+	      banner="$$failed of $$all tests failed"; \
+	    else \
+	      banner="$$failed of $$all tests did not behave as expected ($$xpass unexpected passes)"; \
+	    fi; \
+	  fi; \
+	  dashes="$$banner"; \
+	  skipped=""; \
+	  if test "$$skip" -ne 0; then \
+	    skipped="($$skip tests were not run)"; \
+	    test `echo "$$skipped" | wc -c` -le `echo "$$banner" | wc -c` || \
+	      dashes="$$skipped"; \
+	  fi; \
+	  report=""; \
+	  if test "$$failed" -ne 0 && test -n "$(PACKAGE_BUGREPORT)"; then \
+	    report="Please report to $(PACKAGE_BUGREPORT)"; \
+	    test `echo "$$report" | wc -c` -le `echo "$$banner" | wc -c` || \
+	      dashes="$$report"; \
+	  fi; \
+	  dashes=`echo "$$dashes" | sed s/./=/g`; \
+	  echo "$$dashes"; \
+	  echo "$$banner"; \
+	  test -z "$$skipped" || echo "$$skipped"; \
+	  test -z "$$report" || echo "$$report"; \
+	  echo "$$dashes"; \
+	  test "$$failed" -eq 0; \
+	else :; fi
+
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkdir_p) $(distdir)/. $(distdir)/data $(distdir)/include $(distdir)/lib
+	$(mkdir_p) $(distdir)/. $(distdir)/data $(distdir)/include $(distdir)/lib $(distdir)/src $(distdir)/tests
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
@@ -644,6 +801,8 @@ distcleancheck: distclean
 	       $(distcleancheck_listfiles) ; \
 	       exit 1; } >&2
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
+	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
 all-am: Makefile $(LTLIBRARIES) $(DATA) $(HEADERS) config.h
 installdirs:
@@ -676,8 +835,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
-	mostlyclean-am
+clean-am: clean-checkPROGRAMS clean-generic clean-libLTLIBRARIES \
+	clean-libtool mostlyclean-am
 
 distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
@@ -731,23 +890,24 @@ uninstall-am: uninstall-includeHEADERS uninstall-info-am \
 	uninstall-libLTLIBRARIES uninstall-nodist_includeHEADERS \
 	uninstall-pkgconfigDATA
 
-.PHONY: CTAGS GTAGS all all-am am--refresh check check-am clean \
-	clean-generic clean-libLTLIBRARIES clean-libtool ctags dist \
-	dist-all dist-bzip2 dist-gzip dist-shar dist-tarZ dist-zip \
-	distcheck distclean distclean-compile distclean-generic \
-	distclean-hdr distclean-libtool distclean-tags distcleancheck \
-	distdir distuninstallcheck dvi dvi-am html html-am info \
-	info-am install install-am install-data install-data-am \
-	install-exec install-exec-am install-includeHEADERS \
-	install-info install-info-am install-libLTLIBRARIES \
-	install-man install-nodist_includeHEADERS \
-	install-pkgconfigDATA install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-includeHEADERS \
-	uninstall-info-am uninstall-libLTLIBRARIES \
-	uninstall-nodist_includeHEADERS uninstall-pkgconfigDATA
+.PHONY: CTAGS GTAGS all all-am am--refresh check check-TESTS check-am \
+	clean clean-checkPROGRAMS clean-generic clean-libLTLIBRARIES \
+	clean-libtool ctags dist dist-all dist-bzip2 dist-gzip \
+	dist-shar dist-tarZ dist-zip distcheck distclean \
+	distclean-compile distclean-generic distclean-hdr \
+	distclean-libtool distclean-tags distcleancheck distdir \
+	distuninstallcheck dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am install-exec \
+	install-exec-am install-includeHEADERS install-info \
+	install-info-am install-libLTLIBRARIES install-man \
+	install-nodist_includeHEADERS install-pkgconfigDATA \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags uninstall uninstall-am \
+	uninstall-includeHEADERS uninstall-info-am \
+	uninstall-libLTLIBRARIES uninstall-nodist_includeHEADERS \
+	uninstall-pkgconfigDATA
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

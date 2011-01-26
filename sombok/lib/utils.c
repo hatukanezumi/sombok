@@ -1,5 +1,5 @@
 /*
- * linebreak.c - implementation of Linebreak object.
+ * utls.c - Utility functions.
  * 
  * Copyright (C) 2009-2011 by Hatuka*nezumi - IKEDA Soji.
  *
@@ -18,18 +18,23 @@
 #include "sombok_constants.h"
 #include "sombok.h"
 
-/** Sizing
+/** @name Sizing callback
+ * Sizing behavior specified by ``sizing_func'' member of linebreak_t.
+ * ``sizing_data'' member can be used to modify behavior.
  * @param[in] obj linebreak object.
  * @param[in] len Number of columns of preceding grapheme cluster string.
  * @param[in] pre Preceding grapheme cluster string.
  * @param[in] spc Trailing spaces of preceding string.
  * @param[in] str Appended grapheme cluster string.
- * @param[in] max Maximum size.
  * @return number of columns of pre+spc+str.
- *
- * One built-in Sizing callback is based on UAX #11.
+ * If error occurred, callback must set lbobj->errnum nonzero then return NULL.
  */
 
+/*@{*/
+
+/**
+ * built-in Sizing callback based on UAX #11.
+ */
 double linebreak_sizing_UAX11(linebreak_t *obj, double len, gcstring_t *pre,
 			      gcstring_t *spc, gcstring_t *str)
 {
@@ -47,17 +52,20 @@ double linebreak_sizing_UAX11(linebreak_t *obj, double len, gcstring_t *pre,
     return len;
 }
 
-/** Format
+/*@}*/
+
+/** @name Formatting callback
+ * Formatting behaviors specified by ``format_func'' member of linebreak_t. 
+ * ``formt_data'' member can be used to modify behavior.
  * @param[in] obj linebreak object.
  * @param[in] state state.
  * @param[in] gcstr text fragment.
  * @return new text fragment or, if no modification needed, NULL.
+ * If error occurred, callback must set lbobj->errnum nonzero then return NULL.
  *
- * Built-in format brehaviors specified by ``format'' member of linebreak_t. 
+ * Following table describes behavior of built-in format callbacks.
  *
- * Following table describes behavior of built-in format callbacks
- * by each option.
- *
+ * @verbatim
  * state| SIMPLE          | NEWLINE           | TRIM
  * -----+-----------------+-------------------+-------------------
  * SOT  |
@@ -68,7 +76,10 @@ double linebreak_sizing_UAX11(linebreak_t *obj, double len, gcstring_t *pre,
  * EOP  | not modify      | replace by newline| remove SPACEs
  * EOT  | not modify      | replace by newline| remove SPACEs
  * ----------------------------------------------------------------
+ * @endverbatim
  */
+
+/*@{*/
 
 gcstring_t *linebreak_format_SIMPLE(linebreak_t *lbobj,
 				    linebreak_state_t state,
@@ -156,15 +167,24 @@ gcstring_t *linebreak_format_TRIM(linebreak_t *lbobj,
 	return NULL;
     }
 }
+/*@}*/
 
-/** Urgent
+/** @name Urgent breaking callbacks
+ * Urgent breaking behaviors specified by ``urgent_func'' member of linebreak_t. 
+ * ``urgent_data'' member can be used to modify behavior.
  * @param[in] obj linebreak object.
  * @param[in] str text to be broken.
  * @return new text or, if no modification needed, NULL.
+ * If error occurred, callback must set lbobj->errnum nonzero then return NULL.
  *
  * There are two built-in urgent breaking callbacks.
  */
 
+/*@{*/
+
+/**
+ * abort processing.
+ */
 gcstring_t *linebreak_urgent_ABORT(linebreak_t *lbobj, gcstring_t *str)
 
 {
@@ -172,6 +192,9 @@ gcstring_t *linebreak_urgent_ABORT(linebreak_t *lbobj, gcstring_t *str)
     return NULL;
 }
 
+/**
+ * force break lines.
+ */
 gcstring_t *linebreak_urgent_FORCE(linebreak_t *lbobj, gcstring_t *str)
 {
     gcstring_t *result, *s, empty = {NULL, 0, NULL, 0, 0, lbobj};
@@ -221,4 +244,19 @@ gcstring_t *linebreak_urgent_FORCE(linebreak_t *lbobj, gcstring_t *str)
     gcstring_destroy(s);
     return result;
 }
+
+/*@}*/
+
+/** @name Preprocessing callbacks
+ * Preprocessing behaviors specified by ``user_func'' member of linebreak_t. 
+ * ``user_data'' member can be used to modify behavior.
+ * @param[in] obj linebreak object.
+ * @param[in] str Unicode string (not grapheme cluster string) to be processed.
+ * @return new grapheme cluster string.  NULL means no data.
+ * If error occurred, callback must set lbobj->errnum nonzero then return NULL.
+ *
+ * Currently no built-in preprocessing callbacks are defined.
+ * NOTE: Feature of this callback described here is planned to be changed
+ * by next release.
+ */
 

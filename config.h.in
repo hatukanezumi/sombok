@@ -45,6 +45,9 @@
 /* Define to 1 if you have the <wchar.h> header file. */
 #undef HAVE_WCHAR_H
 
+/* Set this to use mymalloc wrapper. */
+#undef MALLOC_DEBUG
+
 /* Name of package */
 #undef PACKAGE
 

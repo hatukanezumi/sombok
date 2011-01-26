@@ -1,0 +1,12 @@
+PROJECT_NAME           = @PACKAGE@
+PROJECT_NUMBER         = @VERSION@
+OUTPUT_DIRECTORY       = doc
+OPTIMIZE_OUTPUT_FOR_C  = YES
+EXTRACT_ALL            = YES
+INPUT                  = lib include
+FILE_PATTERNS          = *.c *.h
+EXCLUDE_PATTERNS       = sombok_constants.h [0-9].[0-9].[0-9].c charprop.c
+GENERATE_LATEX         = NO
+GENERATE_MAN           = NO
+ENABLE_PREPROCESSING   = NO
+

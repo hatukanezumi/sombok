@@ -27,16 +27,15 @@ function dotest {
     fi
     out=$1
     shift
-    options="$*"
 
-    ./sombok $OPTIONS $options -o tmp.out testin/$in.in
+    ./sombok $OPTIONS $* -o tmp.out test-data/$in.in
     rc=$?
     if [ $rc = 0 ]; then
-	if [ -e testin/$out.out ]; then
-	    cmp tmp.out testin/$out.out
+	if [ -e test-data/$out.out ]; then
+	    cmp tmp.out test-data/$out.out
 	    rc=$?
 	else
-	    cat tmp.out > testin/$out.xxx
+	    cat tmp.out > test-data/$out.xxx
 	    rc=255
 	fi
     fi

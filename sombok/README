@@ -38,6 +38,7 @@ Extract tarball then run as follows.
 
   $ ./configure [options...]
   $ make
+  $ make check
   # make install
 
 ``./configure --help'' will show available options.

@@ -136,7 +136,7 @@ typedef struct {
     void *format_data;
     void *sizing_data;
     void *urgent_data;
-    void *user_data;
+    void *user_data; /** obsoleted. */
     /** User-defined private data. */
     void *stash;
     /** Format callback function.  See utils.c. */
@@ -145,12 +145,12 @@ typedef struct {
     double (*sizing_func)();
     /** Urgent breaking callback function.  See utils.c. */
     gcstring_t *(*urgent_func)();
-    /** Preprocessing callback function.  See utils.c. */
+    /** Preprocessing callback function.  See utils.c. - obsoleted. */
     gcstring_t *(*user_func)();
     /** Reference Count function.
      * This may be called with 3 arguments: ref_func(data, type, action).
      * data is a (pointer to) external object assinged to stash, format_data,
-     * sizing_data, urgent_data or user_data members.  type is type of object.
+     * sizing_data, urgent_data or prep_data members.  type is type of object.
      * according to action being negative or positive, this function should
      * decrement or increment reference count of object, respectively.
      */
@@ -159,6 +159,14 @@ typedef struct {
      * may be a value of errno defined in <errno.h> or LINEBREAK_ELONG below.
      */
     int errnum;
+    /*@}*/
+
+    /** @name public members addendum on release 2011.1.
+     *@{*/
+    /** Array of preprocessing callback functions.  See utils.c. */
+    gcstring_t *(**prep_func)();    
+    /** Data argument of each preprocessing callback functions. See utils.c. */
+    void **prep_data;
     /*@}*/
 } linebreak_t;
 
@@ -170,8 +178,9 @@ typedef struct {
 #define PROP_UNKNOWN ((propval_t)~0)
 
 /** gcchar_t: standard flag values. */
-#define LINEBREAK_FLAG_BREAK_BEFORE (2)
 #define LINEBREAK_FLAG_PROHIBIT_BEFORE (1)
+#define LINEBREAK_FLAG_ALLOW_BEFORE (2)
+#define LINEBREAK_FLAG_BREAK_BEFORE LINEBREAK_FLAG_ALLOW_BEFORE
 
 /** linebreak_t: default of charmax member. */
 #define LINEBREAK_DEFAULT_CHARMAX (998)
@@ -202,6 +211,7 @@ typedef enum {
 #define LINEBREAK_REF_SIZING (2)
 #define LINEBREAK_REF_URGENT (3)
 #define LINEBREAK_REF_USER (4)
+#define LINEBREAK_REF_PREP (5)
 
 /** Line breaking action. */
 #define LINEBREAK_ACTION_MANDATORY (4)
@@ -245,6 +255,7 @@ extern void linebreak_destroy(linebreak_t *);
 extern void linebreak_set_newline(linebreak_t *, unistr_t *);
 extern void linebreak_set_stash(linebreak_t *, void *);
 extern void linebreak_set_format(linebreak_t *, gcstring_t *(*)(), void *);
+extern void linebreak_add_prep(linebreak_t *, gcstring_t *(*)(), void *);
 extern void linebreak_set_sizing(linebreak_t *, double (*)(), void *);
 extern void linebreak_set_urgent(linebreak_t *, gcstring_t *(*)(), void *);
 extern void linebreak_set_user(linebreak_t *, gcstring_t *(*)(), void *);
@@ -271,6 +282,8 @@ extern gcstring_t *linebreak_format_NEWLINE(linebreak_t *, linebreak_state_t,
 					    gcstring_t *);
 extern gcstring_t *linebreak_format_TRIM(linebreak_t *, linebreak_state_t,
 					 gcstring_t *);
+extern gcstring_t *linebreak_prep_URIBREAK(linebreak_t *, void *, unistr_t *,
+					   unistr_t *);
 extern double linebreak_sizing_UAX11(linebreak_t *, double, gcstring_t *,
 				     gcstring_t *, gcstring_t *);
 extern gcstring_t *linebreak_urgent_ABORT(linebreak_t *, gcstring_t *);

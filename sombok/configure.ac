@@ -80,5 +80,46 @@ then
   AC_SUBST(MALLOC_DEBUG)
 fi
 
+AC_MSG_CHECKING(which shell program will be used)
+AC_ARG_WITH(shell-program,
+  AC_HELP_STRING(--with-shell-program=program,
+  [shell program used by test suite]),
+  sombok_shell_program=$withval,sombok_shell_program=none)
+if test "$sombok_shell_program" '!=' "none" -a \
+    "`basename $sombok_shell_program`" = "$sombok_shell_program"
+then
+  sombok_names="$sombok_shell_program"
+  sombok_shell_program="none"
+else
+  sombok_names="sh ash dash bash bash2 ksh dtksh pdksh"
+fi
+if test "$sombok_shell_program" = "none"
+then
+  for sombok_path in /bin /usr/bin /usr/sfw/bin /usr/xpg4/bin /usr/dt/bin \
+      /usr/local/bin /usr/gnu/bin
+  do
+    for sombok_name in $sombok_names
+    do
+      if test -x "$sombok_path/$sombok_name"
+      then
+	if test "`$sombok_path/$sombok_name -c 'echo $1' arg0 arg1`" = "arg1"
+	then
+	  sombok_shell_program="$sombok_path/$sombok_name"
+	    AC_DEFINE_UNQUOTED(SHELL_PROGRAM, "$sombok_shell_program",
+	  [ Shell program. ])
+	  AC_DEFINE_UNQUOTED(SHELL_NAME, "$sombok_name",
+	    [ Name of shell. ])
+	  break
+	fi
+      fi
+    done
+    if test "$sombok_shell_program" '!=' "none"
+    then
+      break
+    fi
+  done
+fi
+AC_MSG_RESULT($sombok_shell_program)
+
 AC_CONFIG_FILES(Makefile sombok.pc sombok.spec)
 AC_OUTPUT

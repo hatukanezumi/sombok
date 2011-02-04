@@ -1,4 +1,7 @@
+#include <sys/types.h>
+#include <fcntl.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <assert.h>
 #include "sombok.h"
 
@@ -107,7 +110,9 @@ size_t encode_utf8(char *utf8str, unichar_t * unistr, size_t unilen)
     size_t i, utf8len = 0;
     unichar_t unichar;
 
-    assert(unistr != NULL);
+    // assert(unistr != NULL);
+    if (unistr == NULL)
+	return 0;
 
     for (i = 0; i < unilen; i++) {
 	unichar = unistr[i];
@@ -268,6 +273,105 @@ unichar_t *parse_string(char *utf8str, size_t * lenp)
     return ret;
 }
 
+static
+pid_t popen2(const char *cmd, const char *arg, int *ifd, int *ofd)
+{
+    int ipipe[2], opipe[2], errnum;
+    pid_t pid;
+
+    if (pipe(ipipe) != 0 || pipe(opipe) != 0)
+	return -1;
+
+    if ((pid = fork()) < 0)
+	return -1;
+    if (pid == 0) {
+	close(ipipe[1]);
+	dup2(ipipe[0], 0);
+	close(opipe[0]);
+	dup2(opipe[1], 1);
+
+	execl(SHELL_PROGRAM, SHELL_NAME, "-c", cmd, SHELL_NAME, arg, NULL);
+	errnum = errno;
+	perror("execl");
+	exit(errnum);
+    }
+
+    *ifd = ipipe[1];
+    *ofd = opipe[0];
+    return pid;
+}
+
+static
+gcstring_t *format_SHELL(linebreak_t * lbobj, linebreak_state_t state,
+			 gcstring_t * gcstr)
+{
+    size_t len;
+    int ifd = 0, ofd = 1;
+    int l;
+    char *statestr;
+    unistr_t unistr;
+    gcstring_t *ret;
+    unichar_t *unibuf;
+
+    switch (state) {
+    case LINEBREAK_STATE_SOT:
+	statestr = "sot";
+	break;
+    case LINEBREAK_STATE_SOP:
+	statestr = "sop";
+	break;
+    case LINEBREAK_STATE_SOL:
+	statestr = "sol";
+	break;
+    case LINEBREAK_STATE_LINE:
+	statestr = "";
+	break;
+    case LINEBREAK_STATE_EOL:
+	statestr = "eol";
+	break;
+    case LINEBREAK_STATE_EOP:
+	statestr = "eop";
+	break;
+    case LINEBREAK_STATE_EOT:
+	statestr = "eot";
+	break;
+    default:
+	lbobj->errnum = EINVAL;
+	return NULL;
+    }
+    len = encode_utf8(buf, gcstr->str, gcstr->len);
+
+    popen2(lbobj->format_data, statestr, &ifd, &ofd);
+    write(ifd, buf, len);
+    close(ifd);
+    if ((len = read(ofd, buf, BUFSIZ)) == -1) {
+	lbobj->errnum = errno ? errno : ESTRPIPE;
+	close(ofd);
+	return NULL;
+    }
+    if (close(ofd) < 0) {
+	lbobj->errnum = errno ? errno : ESTRPIPE;
+	return NULL;
+    }
+
+    if (len == 0)
+	unibuf = NULL;
+    else if ((unibuf = decode_utf8(buf, &len)) == NULL) {
+	lbobj->errnum = errno ? errno : ENOMEM;
+	return NULL;
+    }
+
+    unistr.str = unibuf;
+    unistr.len = len;
+    if ((ret = gcstring_newcopy(&unistr, lbobj)) == NULL) {
+	lbobj->errnum = errno ? errno : ENOMEM;
+	free(unibuf);
+	return NULL;
+    }
+    free(unibuf);
+    return ret;
+}
+
 int main(int argc, char **argv)
 {
     linebreak_t *lbobj;
@@ -277,6 +381,7 @@ int main(int argc, char **argv)
     gcstring_t **lines;
     char *outfile = NULL;
     FILE *ifp, *ofp;
+    int errnum;
 
     lbobj = linebreak_new(NULL);
 
@@ -337,8 +442,20 @@ int main(int argc, char **argv)
 		else if (strcasecmp(argv[i], "TRIM") == 0)
 		    linebreak_set_format(lbobj, linebreak_format_TRIM,
 					 NULL);
+		else
+		    linebreak_set_format(lbobj, format_SHELL, argv[i]);
+	    } else if (strcmp(argv[i] + 2, "prep-func") == 0) {
+		i++;
+		if (strcasecmp(argv[i], "NONE") == 0)
+		    linebreak_add_prep(lbobj, NULL, NULL);
+		else if (strcasecmp(argv[i], "BREAKURI") == 0)
+		    linebreak_add_prep(lbobj, linebreak_prep_URIBREAK, "");
+		else if (strcasecmp(argv[i], "NONBREAKURI") == 0)
+		    linebreak_add_prep(lbobj, linebreak_prep_URIBREAK,
+				       NULL);
 		else {
 		    fprintf(stderr, "unknown option value: %s\n", argv[i]);
+		    linebreak_destroy(lbobj);
 		    exit(1);
 		}
 	    } else if (strcmp(argv[i] + 2, "sizing-func") == 0) {
@@ -350,6 +467,7 @@ int main(int argc, char **argv)
 					 NULL);
 		else {
 		    fprintf(stderr, "unknown option value: %s\n", argv[i]);
+		    linebreak_destroy(lbobj);
 		    exit(1);
 		}
 	    } else if (strcmp(argv[i] + 2, "urgent-func") == 0) {
@@ -364,6 +482,7 @@ int main(int argc, char **argv)
 					 NULL);
 		else {
 		    fprintf(stderr, "unknown option value: %s\n", argv[i]);
+		    linebreak_destroy(lbobj);
 		    exit(1);
 		}
 	    } else if (strcmp(argv[i] + 2, "version") == 0) {
@@ -371,12 +490,13 @@ int main(int argc, char **argv)
 		linebreak_destroy(lbobj);
 		exit(0);
 	    } else if (strcmp(argv[i] + 2, "sea-support") == 0) {
-		printf("%s\n", linebreak_southeastasian_supported?
-		       linebreak_southeastasian_supported: "none");
+		printf("%s\n", linebreak_southeastasian_supported ?
+		       linebreak_southeastasian_supported : "none");
 		linebreak_destroy(lbobj);
 		exit(0);
 	    } else {
 		fprintf(stderr, "unknown option: %s\n", argv[i]);
+		linebreak_destroy(lbobj);
 		exit(1);
 	    }
 	} else if (argv[i][0] == '-' && argv[i][1] != '\0' &&
@@ -388,7 +508,8 @@ int main(int argc, char **argv)
 		break;
 	    default:
 		fprintf(stderr, "Unknown optoion %s\n", argv[i]);
-		exit(255);
+		linebreak_destroy(lbobj);
+		exit(1);
 	    }
 	} else
 	    break;
@@ -397,21 +518,27 @@ int main(int argc, char **argv)
     if (outfile == NULL)
 	ofp = stdout;
     else if ((ofp = fopen(outfile, "wb")) == NULL) {
-	fprintf(stderr, "%s\n", strerror(errno));
-	exit(errno);
+	errnum = errno;
+	perror(outfile);
+	linebreak_destroy(lbobj);
+	exit(errnum);
     }
 
     if (argc <= i) {
 	len = fread(buf, sizeof(char), BUFLEN - 1, stdin);
 	if (len <= 0 && errno) {
-	    fprintf(stderr, "%s\n", strerror(errno));
-	    exit(errno);
+	    errnum = errno;
+	    perror("(stdin)");
+	    linebreak_destroy(lbobj);
+	    exit(errnum);
 	}
 	if (len == 0)
 	    unibuf = NULL;
 	else if ((unibuf = decode_utf8(buf, &len)) == NULL) {
-	    fprintf(stderr, "%s\n", strerror(errno));
-	    exit(errno);
+	    errnum = errno;
+	    perror("decode_utf8");
+	    linebreak_destroy(lbobj);
+	    exit(errnum);
 	}
 
 	unistr.str = unibuf;
@@ -420,10 +547,13 @@ int main(int argc, char **argv)
 	free(unistr.str);
 	if (lbobj->errnum == LINEBREAK_ELONG) {
 	    fprintf(stderr, "Excessive line was found\n");
-	    exit(lbobj->errnum);
+	    linebreak_destroy(lbobj);
+	    exit(LINEBREAK_ELONG);
 	} else if (lbobj->errnum) {
-	    fprintf(stderr, "%s\n", strerror(lbobj->errnum));
-	    exit(lbobj->errnum);
+	    errno = errnum = lbobj->errnum;
+	    perror("linebreak_break");
+	    linebreak_destroy(lbobj);
+	    exit(errnum);
 	}
 
 	for (j = 0; lines[j] != NULL; j++) {
@@ -439,20 +569,26 @@ int main(int argc, char **argv)
 	    if (argv[i][0] == '-' && argv[i][1] == '\0')
 		ifp = stdin;
 	    else if ((ifp = fopen(argv[i], "rb")) == NULL) {
-		fprintf(stderr, "%s\n", strerror(errno));
-		exit(errno);
+		errnum = errno;
+		perror(argv[i]);
+		linebreak_destroy(lbobj);
+		exit(errnum);
 	    }
 
 	    len = fread(buf, sizeof(char), BUFLEN - 1, ifp);
 	    if (len <= 0 && errno) {
-		fprintf(stderr, "%s\n", strerror(errno));
-		exit(errno);
+		errnum = errno;
+		perror("fread");
+		linebreak_destroy(lbobj);
+		exit(errnum);
 	    }
 	    if (len == 0)
 		unibuf = NULL;
 	    else if ((unibuf = decode_utf8(buf, &len)) == NULL) {
-		fprintf(stderr, "%s\n", strerror(errno));
-		exit(errno);
+		errnum = errno;
+		perror("decode_utf8");
+		linebreak_destroy(lbobj);
+		exit(errnum);
 	    }
 	    fclose(ifp);
 
@@ -462,10 +598,13 @@ int main(int argc, char **argv)
 	    free(unistr.str);
 	    if (lbobj->errnum == LINEBREAK_ELONG) {
 		fprintf(stderr, "Excessive line was found\n");
-		exit(lbobj->errnum);
+		linebreak_destroy(lbobj);
+		exit(LINEBREAK_ELONG);
 	    } else if (lbobj->errnum) {
-		fprintf(stderr, "%s\n", strerror(lbobj->errnum));
-		exit(lbobj->errnum);
+		errno = errnum = lbobj->errnum;
+		perror("linebreak_break_partial");
+		linebreak_destroy(lbobj);
+		exit(errnum);
 	    }
 
 	    for (j = 0; lines[j] != NULL; j++) {
@@ -480,10 +619,13 @@ int main(int argc, char **argv)
 	lines = linebreak_break_partial(lbobj, NULL);
 	if (lbobj->errnum == LINEBREAK_ELONG) {
 	    fprintf(stderr, "Excessive line was found\n");
-	    exit(lbobj->errnum);
+	    linebreak_destroy(lbobj);
+	    exit(LINEBREAK_ELONG);
 	} else if (lbobj->errnum) {
-	    fprintf(stderr, "%s\n", strerror(lbobj->errnum));
-	    exit(lbobj->errnum);
+	    errno = errnum = lbobj->errnum;
+	    perror("linebreak_break_partial");
+	    linebreak_destroy(lbobj);
+	    exit(errnum);
 	}
 
 	for (j = 0; lines[j] != NULL; j++) {

@@ -39,6 +39,7 @@ $Id$
 
   $ ./configure [オプション……]
   $ make
+  $ make check
   # make install
 
 ``./configure --help'' を実行すれば、どんなオプションが使えるかわかりま

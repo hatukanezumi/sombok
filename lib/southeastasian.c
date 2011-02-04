@@ -33,7 +33,7 @@ const char *linebreak_southeastasian_supported =
 #endif /* USE_LIBTHAI */
     ;
 
-void linebreak_southeastasian_flagbreak(gcstring_t *gcstr)
+void linebreak_southeastasian_flagbreak(gcstring_t * gcstr)
 {
 #ifdef USE_LIBTHAI
     wchar_t *buf;
@@ -42,7 +42,7 @@ void linebreak_southeastasian_flagbreak(gcstring_t *gcstr)
 
     if (gcstr == NULL || gcstr->gclen == 0)
 	return;
-    if (!(((linebreak_t *)gcstr->lbobj)->options &
+    if (!(((linebreak_t *) gcstr->lbobj)->options &
 	  LINEBREAK_OPTION_COMPLEX_BREAKING))
 	return;
 
@@ -51,7 +51,7 @@ void linebreak_southeastasian_flagbreak(gcstring_t *gcstr)
 	return;
     for (i = 0; i < gcstr->len; i++)
 	buf[i] = gcstr->str[i];
-    buf[i] = (wchar_t)0;
+    buf[i] = (wchar_t) 0;
     k = i;
 
     /* Flag breaking points. */
@@ -73,17 +73,17 @@ void linebreak_southeastasian_flagbreak(gcstring_t *gcstr)
 		else if (gcstr->gcstr[i].flag)
 		    /* already flagged by _preprocess(). */
 		    ;
-		else if (linebreak_lbclass(
-			    gcstr->lbobj,
-			    gcstr->str[gcstr->gcstr[i].idx - 1])
+		else if (linebreak_lbclass(gcstr->lbobj,
+					   gcstr->str[gcstr->gcstr[i].idx -
+						      1])
 			 != LB_SA)
 		    /* bogus breaking by libthai on non-SA grapheme extender
 		     * (e.g. SA CM). */
 		    ;
 		else
-		    gcstr->gcstr[i].flag = 
-			(gcstr->gcstr[i].idx == j + brk)?
-			LINEBREAK_FLAG_BREAK_BEFORE:
+		    gcstr->gcstr[i].flag =
+			(gcstr->gcstr[i].idx == j + brk) ?
+			LINEBREAK_FLAG_ALLOW_BEFORE :
 			LINEBREAK_FLAG_PROHIBIT_BEFORE;
 	    } else
 		sa = 0;
@@ -96,4 +96,3 @@ void linebreak_southeastasian_flagbreak(gcstring_t *gcstr)
     free(buf);
 #endif /* USE_LIBTHAI */
 }
-

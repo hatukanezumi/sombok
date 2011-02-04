@@ -31,7 +31,7 @@ void MYatexit(void)
     size_t i, j;
     void *realbuf;
 
-    qsort(alloclist, allocindex, sizeof(void *), MYcmp);
+    qsort(alloclist, allocindex, sizeof(void *), (int (*)())MYcmp);
 
     for (i = 0; i < allocindex; i++) {
 	if (alloclist[i] == NULL)

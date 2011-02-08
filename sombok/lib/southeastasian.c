@@ -23,6 +23,11 @@
 #    include "thai/thwbrk.h"
 #endif /* USE_LIBTHAI */
 
+/** @defgroup linebreak_southeastasian southeastasian
+ * @brief Supports for breaking in South East Asian complex context.
+ *
+ *@{*/
+
 /** Flag to determin whether South East Asian word segmentation is supported.
  */
 const char *linebreak_southeastasian_supported =

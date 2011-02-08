@@ -35,10 +35,12 @@
 /* Primitive types */
 /** Unicode character */
 typedef unsigned int unichar_t;
-/** Character property */
+/** Character property
+ * @ingroup linebreak */
 typedef unsigned char propval_t;
 
-/** Unicode string */
+/** Unicode string
+ * @ingroup gcstring,linebreak,linebreak_break */
 typedef struct {
     /** Sequence of Unicode character.
      * Note that NUL character (U+0000) may be contained.
@@ -48,7 +50,9 @@ typedef struct {
     size_t len;
 } unistr_t;
 
-/** Grapheme cluster */
+/** Grapheme cluster
+ * @ingroup gcstring
+ */
 typedef struct {
     /** Offset of Unicode string. */
     size_t idx;
@@ -64,7 +68,8 @@ typedef struct {
     unsigned char flag;
 } gcchar_t;
 
-/** Property map entry */
+/** Property map entry
+ * @ingroup linebreak */
 typedef struct {
     /** Beginning of UCS range. */
     unichar_t beg;
@@ -80,7 +85,8 @@ typedef struct {
     propval_t scr;
 } mapent_t;
 
-/** Grapheme cluster string. */
+/** Grapheme cluster string.
+ * @ingroup gcstring,linebreak,linebreak_break */
 typedef struct {
     /** Sequence of Unicode characters.
      * Note that NUL character (U+0000) may be contained.
@@ -99,7 +105,8 @@ typedef struct {
     void *lbobj;
 } gcstring_t;
 
-/** LineBreak object */
+/** LineBreak object.
+ * @ingroup linebreak */
 typedef struct {
     /** @name private members
      *@{*/
@@ -177,22 +184,26 @@ typedef struct {
 /** General: Unknown property value. */
 #define PROP_UNKNOWN ((propval_t)~0)
 
-/** gcchar_t: standard flag values. */
+/** @ingroup gcstring
+ * standard flag values. */
 #define LINEBREAK_FLAG_PROHIBIT_BEFORE (1)
 #define LINEBREAK_FLAG_ALLOW_BEFORE (2)
 #define LINEBREAK_FLAG_BREAK_BEFORE LINEBREAK_FLAG_ALLOW_BEFORE
 
-/** linebreak_t: default of charmax member. */
+/** @ingroup linebreak
+ * default of charmax member. */
 #define LINEBREAK_DEFAULT_CHARMAX (998)
 
-/** linebreak_t: bitwise options. */
+/** @ingroup linebreak
+ * bitwise options. */
 #define LINEBREAK_OPTION_EASTASIAN_CONTEXT (1)
 #define LINEBREAK_OPTION_HANGUL_AS_AL (2)
 #define LINEBREAK_OPTION_LEGACY_CM (4)
 #define LINEBREAK_OPTION_BREAK_INDENT (8)
 #define LINEBREAK_OPTION_COMPLEX_BREAKING (16)
 
-/** linebreak_t: state argument for format callback. */
+/** @ingroup linebreak
+ * state argument for format callback. */
 typedef enum {
     LINEBREAK_STATE_NONE = 0,
     LINEBREAK_STATE_SOT, LINEBREAK_STATE_SOP, LINEBREAK_STATE_SOL,
@@ -200,12 +211,14 @@ typedef enum {
     LINEBREAK_STATE_EOL, LINEBREAK_STATE_EOP, LINEBREAK_STATE_EOT,
     LINEBREAK_STATE_MAX
 } linebreak_state_t;
-/** internal states. */
+/** @ingroup linebreak
+ * internal states. */
 #define LINEBREAK_STATE_SOT_FORMAT (-LINEBREAK_STATE_SOT)
 #define LINEBREAK_STATE_SOP_FORMAT (-LINEBREAK_STATE_SOP)
 #define LINEBREAK_STATE_SOL_FORMAT (-LINEBREAK_STATE_SOL)
 
-/** linebreak_t: type argument of ref_func callback. */
+/** @ingroup linebreak
+ * type argument of ref_func callback. */
 #define LINEBREAK_REF_STASH (0)
 #define LINEBREAK_REF_FORMAT (1)
 #define LINEBREAK_REF_SIZING (2)
@@ -213,13 +226,15 @@ typedef enum {
 #define LINEBREAK_REF_USER (4)
 #define LINEBREAK_REF_PREP (5)
 
-/** Line breaking action. */
+/** @ingroup linebreak
+ * Line breaking action. */
 #define LINEBREAK_ACTION_MANDATORY (4)
 #define LINEBREAK_ACTION_DIRECT (3)
 #define LINEBREAK_ACTION_INDIRECT (2)
 #define LINEBREAK_ACTION_PROHIBITED (1)
 
-/** linebreak_t: errnum value for exsessive line. */
+/** @ingroup linebreak
+ * special errnum value. */
 #define LINEBREAK_ELONG (-2)
 #define LINEBREAK_EEXTN (-3)
 
@@ -227,6 +242,10 @@ typedef enum {
 /***
  *** Public functions, global variables and macros.
  ***/
+
+extern void linebreak_charprop(linebreak_t *, unichar_t,
+			       propval_t *, propval_t *, propval_t *,
+			       propval_t *);
 
 extern gcstring_t *gcstring_new(unistr_t *, linebreak_t *);
 extern gcstring_t *gcstring_newcopy(unistr_t *, linebreak_t *);

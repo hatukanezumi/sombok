@@ -18,9 +18,9 @@
 #include "sombok_constants.h"
 #include "sombok.h"
 
-extern void linebreak_charprop(linebreak_t *, unichar_t,
-			       propval_t *, propval_t *, propval_t *,
-			       propval_t *);
+/** @defgroup gcstring gcstring
+ * @brief Grapheme cluster string
+ *@{*/
 
 #define eaw2col(e) (((e) == EA_F || (e) == EA_W)? 2: (((e) == EA_Z)? 0: 1))
 

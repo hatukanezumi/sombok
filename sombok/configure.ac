@@ -121,5 +121,5 @@ then
 fi
 AC_MSG_RESULT($sombok_shell_program)
 
-AC_CONFIG_FILES(Makefile sombok.pc sombok.spec)
+AC_CONFIG_FILES(Makefile sombok.pc sombok.spec doc/doxyfile)
 AC_OUTPUT

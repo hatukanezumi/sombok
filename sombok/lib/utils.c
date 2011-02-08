@@ -18,7 +18,13 @@
 #include "sombok_constants.h"
 #include "sombok.h"
 
-/** @name Preprocess callback
+/** @defgroup linebreak_utils utils
+ * @brief Callback functions used by linebreak
+ *@{*/
+
+/** @name Preprocessing callback
+ * gcstring_t *callback(linebreak_t *lbobj, void *data, unistr_t *str, unistr_t *text)
+ *
  * Preprocessing behaviors specified by item of ``prep_func'' member of
  * linebreak_t.  Corresponding item of ``prep_data'' member can be used to
  * modify behavior.
@@ -28,14 +34,14 @@
  * @param[in] text whole text to be broken, or NULL.
  * @return This callback is past twice by each substring of text:
  *
- * In the first pass, it should set the first occurrance in substr
- * matching its criteria, with substr->str to be a pointer midst of
- * original substr->str and substr->len to be length.
+ * On the first pass, when text is not NULL, it should return the first
+ * occurrance in substr matching its criteria, setting a pointer midst of
+ * original substr->str to substr->str and length to substr->len.
  * Return value shall be discarded. 
  *
- * In the second pass, when text is NULL, it should return new grapheme
+ * On the second pass, when text is NULL, it should return new grapheme
  * cluster string created from substr. Return value should not share
- * Unicode buffer with that of substr (use gcstring_newcopy()).
+ * Unicode buffer with substr (i.e. use gcstring_newcopy()).
  *
  * If error occurred, callback must set lbobj->errnum nonzero then return NULL.
  */
@@ -70,8 +76,9 @@ int startswith(unistr_t * unistr, size_t idx, char *str, size_t len,
     return 1;
 }
 
-/**
- * Built-in preprocess callback to break or not to break URLs according to
+/** Built-in preprocessing callback
+ *
+ * Built-in preprocessing callback to break or not to break URLs according to
  * rules by Chicago Manual of Style.
  * If data is NULL, prohibit break.
  * Otherwise, allow break by rule above.
@@ -83,7 +90,7 @@ gcstring_t *linebreak_prep_URIBREAK(linebreak_t * lbobj, void *data,
     size_t i, idx;
     unichar_t *ptr;
 
-    /** Pass I */
+    /* Pass I */
 
     if (text != NULL) {
 	for (ptr = NULL, i = 0; i < str->len; ptr = NULL, i++) {
@@ -138,21 +145,21 @@ gcstring_t *linebreak_prep_URIBREAK(linebreak_t * lbobj, void *data,
 	return NULL;
     }
 
-    /** Pass II */
+    /* Pass II */
 
     if ((gcstr = gcstring_newcopy(str, lbobj)) == NULL) {
 	lbobj->errnum = errno ? errno : ENOMEM;
 	return NULL;
     }
 
-    /** non-break URI. */
+    /* non-break URI. */
     if (data == NULL) {
 	for (i = 1; i < gcstr->gclen; i++)
 	    gcstr->gcstr[i].flag = LINEBREAK_FLAG_PROHIBIT_BEFORE;
 	return gcstr;
     }
 
-    /** break URI. */
+    /* break URI. */
     if (startswith((unistr_t *) gcstr, 0, "url:", 4, 0)) {
 	gcstr->gcstr[4].flag = LINEBREAK_FLAG_ALLOW_BEFORE;
 	i = 5;
@@ -201,6 +208,8 @@ gcstring_t *linebreak_prep_URIBREAK(linebreak_t * lbobj, void *data,
 /*@}*/
 
 /** @name Sizing callback
+ * double callback(linebreak_t *obj, double len, gcstring_t *pre, gcstring_t *spc, gcstring_t *str)
+ *
  * Sizing behavior specified by ``sizing_func'' member of linebreak_t.
  * ``sizing_data'' member can be used to modify behavior.
  * @param[in] obj linebreak object.
@@ -214,8 +223,9 @@ gcstring_t *linebreak_prep_URIBREAK(linebreak_t * lbobj, void *data,
 
 /*@{*/
 
-/**
- * built-in Sizing callback based on UAX #11.
+/** Built-in Sizing callback
+ *
+ * Built-in Sizing callback based on UAX #11.
  */
 double linebreak_sizing_UAX11(linebreak_t * obj, double len,
 			      gcstring_t * pre, gcstring_t * spc,
@@ -239,6 +249,8 @@ double linebreak_sizing_UAX11(linebreak_t * obj, double len,
 /*@}*/
 
 /** @name Formatting callback
+ * gcstring_t *callback(linebreak_t *lbobj, linebreak_state_t state, gcstring_t *gcstr)
+ *
  * Formatting behaviors specified by ``format_func'' member of linebreak_t. 
  * ``formt_data'' member can be used to modify behavior.
  * @param[in] obj linebreak object.
@@ -265,6 +277,9 @@ double linebreak_sizing_UAX11(linebreak_t * obj, double len,
 
 /*@{*/
 
+/** Built-in formatting callback
+ *
+ */
 gcstring_t *linebreak_format_SIMPLE(linebreak_t * lbobj,
 				    linebreak_state_t state,
 				    gcstring_t * gcstr)
@@ -295,6 +310,9 @@ gcstring_t *linebreak_format_SIMPLE(linebreak_t * lbobj,
     }
 }
 
+/** Built-in formatting callback
+ *
+ */
 gcstring_t *linebreak_format_NEWLINE(linebreak_t * lbobj,
 				     linebreak_state_t state,
 				     gcstring_t * gcstr)
@@ -318,6 +336,9 @@ gcstring_t *linebreak_format_NEWLINE(linebreak_t * lbobj,
     }
 }
 
+/** Built-in formatting callback
+ *
+ */
 gcstring_t *linebreak_format_TRIM(linebreak_t * lbobj,
 				  linebreak_state_t state,
 				  gcstring_t * gcstr)
@@ -355,8 +376,10 @@ gcstring_t *linebreak_format_TRIM(linebreak_t * lbobj,
 /*@}*/
 
 /** @name Urgent breaking callbacks
- * Urgent breaking behaviors specified by ``urgent_func'' member of linebreak_t. 
- * ``urgent_data'' member can be used to modify behavior.
+ * gcstring_t *callback(linebreak_t *lbobj, gcstring_t *str)
+ *
+ * Urgent breaking behaviors specified by ``urgent_func'' member of
+ * linebreak_t. ``urgent_data'' member can be used to modify behavior.
  * @param[in] obj linebreak object.
  * @param[in] str text to be broken.
  * @return new text or, if no modification needed, NULL.
@@ -367,8 +390,9 @@ gcstring_t *linebreak_format_TRIM(linebreak_t * lbobj,
 
 /*@{*/
 
-/**
- * abort processing.
+/** Built-in urgent brealing callback
+ *
+ * Abort processing.  lbobj->errnum is set to LINEBREAK_ELONG.
  */
 gcstring_t *linebreak_urgent_ABORT(linebreak_t * lbobj, gcstring_t * str)
 {
@@ -376,8 +400,9 @@ gcstring_t *linebreak_urgent_ABORT(linebreak_t * lbobj, gcstring_t * str)
     return NULL;
 }
 
-/**
- * force break lines.
+/** Built-in urgent brealing callback
+ *
+ * Force breaking lines.
  */
 gcstring_t *linebreak_urgent_FORCE(linebreak_t * lbobj, gcstring_t * str)
 {
@@ -434,6 +459,8 @@ gcstring_t *linebreak_urgent_FORCE(linebreak_t * lbobj, gcstring_t * str)
 /*@}*/
 
 /** @name Preprocessing callbacks - obsoleted form
+ * gcstring_t *callback(linebreak_t *lbobj, unistr_t *str)
+
  * Preprocessing behaviors specified by ``user_func'' member of linebreak_t. 
  * ``user_data'' member can be used to modify behavior.
  * @param[in] obj linebreak object.

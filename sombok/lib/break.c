@@ -18,6 +18,11 @@
 #include "sombok_constants.h"
 #include "sombok.h"
 
+/**
+ * @defgroup linebreak_break break
+ * @brief Perform line breaking algorithm
+ *@{*/
+
 static
 gcstring_t *_user(linebreak_t * lbobj, unistr_t * str)
 {
@@ -61,12 +66,27 @@ gcstring_t *_prep_sub(linebreak_t * lbobj, unistr_t * substr,
     prev_str = substr->str;
     prev_len = substr->len;
     while (1) {
+	/* Pass I: search. */
 	unistr.str = prev_str;
 	unistr.len = prev_len;
 	gcstring_destroy((*func) (lbobj, data, &unistr, text));
+	/* - no match: stop searching. */
 	if (unistr.str == NULL)
 	    break;
+	/* - buffer may be modified: abort. */
+	if (unistr.len < 0 ||
+	    unistr.str < text->str ||
+	    text->str + text->len < unistr.str + unistr.len) {
+	    gcstring_destroy(ret);
+	    lbobj->errnum = EINVAL;
+	    return NULL;
+	}
+	/* - out of range: stop searching. */
+	if (unistr.str < substr->str ||
+	    substr->str + substr->len < unistr.str + unistr.len)
+	    break;
 
+	/* apply next callback to unmatched part. */
 	if (prev_str <= unistr.str) {
 	    unistr_t us;
 	    us.len = unistr.str - prev_str;
@@ -83,6 +103,7 @@ gcstring_t *_prep_sub(linebreak_t * lbobj, unistr_t * substr,
 	    gcstring_destroy(s);
 	}
 
+	/* Pass II: process matched string. */
 	if ((s = (*func) (lbobj, data, &unistr, NULL)) == NULL) {
 	    if (lbobj->errnum != 0) {
 		gcstring_destroy(ret);
@@ -100,10 +121,23 @@ gcstring_t *_prep_sub(linebreak_t * lbobj, unistr_t * substr,
 	}
 	gcstring_destroy(s);
 
+	/* skip zero length match to avoid infinite loop. */
+	if (unistr.len == 0) {
+	    if (substr->str + substr->len <= unistr.str) {
+		prev_str = unistr.str;
+		prev_len = 0;
+		break;
+	    } else {
+		prev_str = unistr.str + 1;
+		prev_len = substr->str + substr->len - prev_str;
+		continue;
+	    }
+	}
 	prev_str = unistr.str + unistr.len;
-	prev_len = substr->str + substr->len - (unistr.str + unistr.len);
+	prev_len = substr->str + substr->len - prev_str;
     }
 
+    /* apply next callback to the rest of string. */
     if (prev_str < substr->str + substr->len) {
 	unistr.str = prev_str;
 	unistr.len = prev_len;
@@ -122,6 +156,7 @@ gcstring_t *_prep_sub(linebreak_t * lbobj, unistr_t * substr,
     return ret;
 }
 
+static
 gcstring_t *_prep(linebreak_t * lbobj, unistr_t * text)
 {
     gcstring_t *ret;
@@ -404,7 +439,7 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 	    gcstring_next(str);
 
 	    /* skip to end of unbreakable fragment by user/complex/urgent
-	       breaking. */
+	     * breaking. */
 	    while (!gcstring_eos(str) && str->gcstr[str->pos].flag &
 		   LINEBREAK_FLAG_PROHIBIT_BEFORE)
 		gcstring_next(str);
@@ -444,8 +479,8 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 	    (lbc != LB_CR || eot || !gcstring_eos(str))) {
 	    /* CR at end of input may be part of CR LF therefore not be eop. */
 	    action = LINEBREAK_ACTION_MANDATORY;
-	/* LB11 - LB31: Tailorable rules (except LB11, LB12). */
-	/* Or urgent breaking. */
+	/* LB11 - LB31: Tailorable rules (except LB11, LB12).
+	 * Or urgent breaking. */
 	} else if (bBeg + bLen + bSpc < str->pos) {
 	    if (str->gcstr[bBeg + bLen + bSpc].flag &
 		LINEBREAK_FLAG_ALLOW_BEFORE)
@@ -523,7 +558,7 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 	    if (action == LINEBREAK_ACTION_PROHIBITED ||
 		(action == LINEBREAK_ACTION_INDIRECT && bSpc == 0)) {
 		/* When conjunction is expected to exceed charmax,
-		   try urgent breaking. */
+		 * try urgent breaking. */
 		if (lbobj->charmax < str->gcstr[str->pos - 1].idx +
 		    str->gcstr[str->pos - 1].len - str->gcstr[bBeg].idx) {
 		    size_t charmax, chars;
@@ -535,7 +570,7 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 		    gcstring_DESTROY(s);
 
 		    /* If any of urgently broken fragments still
-		       exceed CharactersMax, force chop them. */
+		     * exceed CharactersMax, force chop them. */
 		    charmax = lbobj->charmax;
 		    broken->pos = 0;
 		    chars = gcstring_next(broken)->len;

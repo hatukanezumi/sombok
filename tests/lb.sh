@@ -54,7 +54,7 @@ function dotest {
 }
 
 function check_result {
-    echo "$SUCCESS of $PLANNED subtests succeeded."
+    echo "$SUCCESS of $PLANNED subtests passed."
 
     if [ "$PLANNED" = "$SUCCESS" ]; then
 	exit 0

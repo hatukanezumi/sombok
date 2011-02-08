@@ -18,11 +18,13 @@
 #include "sombok_constants.h"
 #include "sombok.h"
 
+/** @defgroup linebreak linebreak
+ * @brief Handle linebreak object.
+ *
+ *@{*/
+
 extern propval_t *linebreak_rules[];
 extern size_t linebreak_rulessiz;
-extern void linebreak_charprop(linebreak_t *, unichar_t,
-			       propval_t *, propval_t *, propval_t *,
-			       propval_t *);
 
 /** Constructor
  *
@@ -148,6 +150,39 @@ linebreak_t *linebreak_copy(linebreak_t * obj)
 	newobj->unread.str = newstr;
     } else
 	newobj->unread.str = NULL;
+
+    if (obj->prep_func != NULL) {
+	size_t i;
+	for (i = 0; obj->prep_func[i] != NULL; i++);
+	if ((newobj->prep_func =
+	     malloc(sizeof(gcstring_t * (*)()) * (i + 1)))
+	    == NULL) {
+	    free(newobj->map);
+	    free(newobj->newline.str);
+	    free(newobj->bufstr.str);
+	    free(newobj->bufspc.str);
+	    free(newobj->unread.str);
+	    free(newobj);
+	    return NULL;
+	}
+	memcpy(newobj->prep_func, obj->prep_func,
+	       sizeof(gcstring_t * (*)()) * (i + 1));
+	if ((newobj->prep_data = malloc(sizeof(void *) * (i + 1))) == NULL) {
+	    free(newobj->map);
+	    free(newobj->newline.str);
+	    free(newobj->bufstr.str);
+	    free(newobj->bufspc.str);
+	    free(newobj->unread.str);
+	    free(newobj->prep_func);
+	    free(newobj);
+	    return NULL;
+	}
+	if (obj->prep_data == NULL)
+	    memset(newobj->prep_data, 0, sizeof(void *) * (i + 1));
+	else
+	    memcpy(newobj->prep_data, obj->prep_data,
+		   sizeof(void *) * (i + 1));
+    }
 
     if (newobj->ref_func != NULL) {
 	if (newobj->stash != NULL)

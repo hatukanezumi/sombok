@@ -539,7 +539,7 @@ void gcstring_shrink(gcstring_t *gcstr, int length)
  */
 gcstring_t *gcstring_substr(gcstring_t *gcstr, int offset, int length)
 {
-    gcstring_t *new, *tail;
+    gcstring_t *new;
     size_t ulength, i;
 
     if (gcstr == NULL)

@@ -1,5 +1,5 @@
-2011.1	Xxx Xxx XX 2011
-	* New: ``preprocess'' callback feature. user_func is obsoleted.
+2011.1RC	Fri Feb 11 2011
+	* break.c: New: ``preprocess'' callback feature. user_func is obsoleted.
 	* utils.c: built-in preprocess callback linebreak_prep_URIBREAK().
 	* sombok.c: custom format callback using shell script.
 	* Test: added test data for ``make check''.

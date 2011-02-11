@@ -35,8 +35,9 @@
  * @return This callback is past twice by each substring of text:
  *
  * On the first pass, when text is not NULL, it should return the first
- * occurrance in substr matching its criteria, setting a pointer midst of
- * original substr->str to substr->str and length to substr->len.
+ * occurrance in substr matching its criteria, update substr->str to be
+ * matching position and substr->len to be length.  Otherwise, should set
+ * NULL to substr->str.
  * Return value shall be discarded. 
  *
  * On the second pass, when text is NULL, it should return new grapheme
@@ -79,7 +80,7 @@ int startswith(unistr_t * unistr, size_t idx, char *str, size_t len,
 /** Built-in preprocessing callback
  *
  * Built-in preprocessing callback to break or not to break URLs according to
- * rules by Chicago Manual of Style.
+ * some rules by Chicago Manual of Style 15th ed.
  * If data is NULL, prohibit break.
  * Otherwise, allow break by rule above.
  */
@@ -87,7 +88,7 @@ gcstring_t *linebreak_prep_URIBREAK(linebreak_t * lbobj, void *data,
 				    unistr_t * str, unistr_t * text)
 {
     gcstring_t *gcstr;
-    size_t i, idx;
+    size_t i;
     unichar_t *ptr;
 
     /* Pass I */
@@ -171,7 +172,7 @@ gcstring_t *linebreak_prep_URIBREAK(linebreak_t * lbobj, void *data,
 	v = gcstr->str[gcstr->gcstr[i].idx];
 
 	/*
-	 * Rules based on CMoS 15th ed.
+	 * Some rules based on CMoS 15th ed.
 	 * 17.11 1.1: [/] ÷ [^/]
 	 * 17.11 2:   [-] ×
 	 * 6.17 2:   [.] ×

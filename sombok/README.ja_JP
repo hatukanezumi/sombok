@@ -12,8 +12,8 @@ COPYING file for more details.
 
 $Id$
 
-おおまかな説明
-==============
+これはなにか
+============
 
 ソンボク ライブラリパッケージは、ユニコード標準附属書14 (UAX #14) に述べ
 る「ユニコード行分割アルゴリズム」を実行できます。附属書11 (UAX #11) で
@@ -21,16 +21,21 @@ $Id$
 またこのパッケージでは、附属書29 (UAX #29) で述べる「初期の」書記素クラ
 スタをも実装しています。
 
+ソンボクの入手
+==============
+
+ソンボクは次の場所で入手できます。
+    http://sf.net/projects/linefold/
+
 要件
 ====
 
-* ANSI C コンパイラ (たとえば GCC C compiler) が要ります。
-
-* pkg-config が要ります。
+* ANSI C コンパイラ (たとえば GCC C Compiler) が要ります。
 
 * 必須ではありませんが、タイ語の単語文節に対応するには libthai パッケー
   ジをインストールする必要があります。次の場所で入手できます。
-  http://linux.thai.net/projects/libthai
+    http://linux.thai.net/projects/libthai
+  この場合、pkg-config も要ります。
 
 インストール
 ============
@@ -44,6 +49,12 @@ $Id$
 
 ``./configure --help'' を実行すれば、どんなオプションが使えるかわかりま
 す。
+
+言語バインディング
+==================
+
+Perl
+    Unicode-LineBreak: http://search.cpan.org/dist/Unicode-LineBreak/
 
 著者
 ====

@@ -1,3 +1,7 @@
+2011.1	Sat Feb 19 2011
+	* Chg: update -version-info to 4:0:1.
+	* Doc: some additions.
+
 2011.1RC	Fri Feb 11 2011
 	* break.c: New: ``preprocess'' callback feature. user_func is obsoleted.
 	* utils.c: built-in preprocess callback linebreak_prep_URIBREAK().

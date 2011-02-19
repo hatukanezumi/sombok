@@ -110,7 +110,7 @@ size_t encode_utf8(char *utf8str, unichar_t * unistr, size_t unilen)
     size_t i, utf8len = 0;
     unichar_t unichar;
 
-    // assert(unistr != NULL);
+    /* assert(unistr != NULL); */
     if (unistr == NULL)
 	return 0;
 

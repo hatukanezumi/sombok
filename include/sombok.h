@@ -58,7 +58,7 @@ typedef struct {
     size_t idx;
     /** Length of Unicode string. */
     size_t len;
-    /** Caliculated number of columns. */
+    /** Calculated number of columns. */
     size_t col;
     /** Line breaking class of grapheme base. */
     propval_t lbc;
@@ -85,6 +85,8 @@ typedef struct {
     propval_t scr;
 } mapent_t;
 
+struct linebreak_t;
+
 /** Grapheme cluster string.
  * @ingroup gcstring,linebreak,linebreak_break */
 typedef struct {
@@ -94,20 +96,20 @@ typedef struct {
     unichar_t *str;
     /** Number of Unicode characters. */
     size_t len;
-    /** Sequence of grapheme clusters. */
+    /** Sequence of grapheme clusters.
+     * NULL may specify zero-length grapheme cluster string. */
     gcchar_t *gcstr;
-    /** Number of grapheme clusters.
-	NULL may specify zero-length string. */
+    /** Number of grapheme clusters. */
     size_t gclen;
     /** Next position. */
     size_t pos;
     /** linebreak object. */
-    void *lbobj;
+    struct linebreak_t *lbobj;
 } gcstring_t;
 
 /** LineBreak object.
  * @ingroup linebreak */
-typedef struct {
+typedef struct linebreak_t {
     /** @name private members
      *@{*/
     /** reference count */
@@ -118,7 +120,7 @@ typedef struct {
     unistr_t bufstr;
     /** spaces trailing to buffered line */
     unistr_t bufspc;
-    /** caliculated columns of buffered line */
+    /** calculated columns of buffered line */
     double bufcols;
     /** unread input */
     unistr_t unread;

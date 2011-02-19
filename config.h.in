@@ -48,6 +48,9 @@
 /* Set this to use mymalloc wrapper. */
 #undef MALLOC_DEBUG
 
+/* Define to 1 if your C compiler doesn't accept -c and -o together. */
+#undef NO_MINUS_C_MINUS_O
+
 /* Name of package */
 #undef PACKAGE
 

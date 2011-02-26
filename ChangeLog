@@ -1,3 +1,12 @@
+2011.2beta1  Sat Feb 26 2011
+	* charprop.c: New: linebreak_update_lbclass(),
+	  linebreak_clear_lbclass(), linebreak_update_eawidth(),
+	  linebreak_clear_eawidth().
+	* tests/03ns.t: added test on custom map.
+	* tests/06context.t: added test on custom map.
+	* Typos: GBC will be GCB.
+	* Chg: update -version-info to 4:1:1.
+
 2011.1	Sat Feb 19 2011
 	* Chg: update -version-info to 4:0:1.
 	* Doc: some additions.

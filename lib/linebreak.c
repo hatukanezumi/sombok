@@ -437,6 +437,7 @@ void linebreak_set_urgent(linebreak_t * lbobj,
 }
 
 /** Setter: Update user_func/user_data Member
+ * @deprecated Use linebreak_add_prep() instead.
  *
  * @param[in] lbobj target linebreak object.
  * @param[in] user_func preprocessing callback function or NULL.
@@ -517,15 +518,15 @@ propval_t linebreak_lbrule(propval_t b_idx, propval_t a_idx)
  */
 propval_t linebreak_lbclass(linebreak_t * obj, unichar_t c)
 {
-    propval_t lbc, gbc, scr;
+    propval_t lbc, gcb, scr;
 
-    linebreak_charprop(obj, c, &lbc, NULL, &gbc, &scr);
+    linebreak_charprop(obj, c, &lbc, NULL, &gcb, &scr);
     if (lbc == LB_SA) {
 #ifdef USE_LIBTHAI
 	if (scr != SC_Thai)
 #endif /* USE_LIBTHAI */
-	    lbc = (gbc == GB_Extend
-		   || gbc == GB_SpacingMark) ? LB_CM : LB_AL;
+	    lbc = (gcb == GB_Extend
+		   || gcb == GB_SpacingMark) ? LB_CM : LB_AL;
     }
     return lbc;
 }

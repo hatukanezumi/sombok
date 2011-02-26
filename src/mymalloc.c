@@ -15,7 +15,6 @@ static int atexit_set = 0;
 static
 int MYcmp(char **x, char **y)
 {
-    int ret;
     if (*x == NULL) {
 	if (*y == NULL)
 	    return 0;
@@ -28,7 +27,7 @@ int MYcmp(char **x, char **y)
 
 void MYatexit(void)
 {
-    size_t i, j;
+    size_t i;
     void *realbuf;
 
     qsort(alloclist, allocindex, sizeof(void *), (int (*)())MYcmp);
@@ -39,7 +38,7 @@ void MYatexit(void)
 
 	realbuf = alloclist[i] + INFOLEN * 2;
 	fprintf(stderr, "================================\n*%s\n",
-		alloclist[i]);
+		(char *)alloclist[i]);
 	if (strstr(alloclist[i], "gcstring_t *") == NULL &&
 	    strstr(alloclist[i], "gcstring_t") != NULL)
 	    fprintf(stderr, "    str:[%016lx];  len:%d\n"

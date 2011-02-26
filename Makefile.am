@@ -1,3 +1,4 @@
+ACLOCAL_AMFLAGS = -I m4
 lib_LTLIBRARIES = libsombok.la
 libsombok_la_SOURCES = lib/break.c lib/charprop.c lib/gcstring.c \
 	lib/linebreak.c lib/southeastasian.c lib/utils.c \

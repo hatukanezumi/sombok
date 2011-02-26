@@ -1,12 +1,13 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(sombok, 2011.2beta1, hatuka@nezumi.nu)
+AC_INIT(sombok, 2011.2beta2, hatuka@nezumi.nu)
 DEFAULT_UNICODE_VERSION="6.0.0"
 LPATH="$PATH:/usr/local/bin"
 
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADER([config.h])
+AC_CONFIG_MACRO_DIR([m4])
 
 # Checks for programs.
 AC_PROG_MAKE_SET
@@ -14,7 +15,6 @@ AM_PROG_LIBTOOL
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_CC
-#AC_PROG_RANLIB
 AM_PROG_CC_C_O
 
 # Checks for libraries.

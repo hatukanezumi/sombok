@@ -80,7 +80,7 @@ typedef struct {
     /** UAX #11 East_Asian_Width property value. */
     propval_t eaw;
     /** UAX #29 Grapheme_Cluster_Break property value. */
-    propval_t gbc;
+    propval_t gcb;
     /** Script property value. */
     propval_t scr;
 } mapent_t;
@@ -145,7 +145,8 @@ typedef struct linebreak_t {
     void *format_data;
     void *sizing_data;
     void *urgent_data;
-    void *user_data; /** obsoleted. */
+    /** @deprecated Use prep_data instead. */
+    void *user_data;
     /** User-defined private data. */
     void *stash;
     /** Format callback function.  See utils.c. */
@@ -154,7 +155,8 @@ typedef struct linebreak_t {
     double (*sizing_func)();
     /** Urgent breaking callback function.  See utils.c. */
     gcstring_t *(*urgent_func)();
-    /** Preprocessing callback function.  See utils.c. - obsoleted. */
+    /** Preprocessing callback function.  See utils.c.
+     * @deprecated Use prep_func instead. */
     gcstring_t *(*user_func)();
     /** Reference Count function.
      * This may be called with 3 arguments: ref_func(data, type, action).
@@ -163,7 +165,7 @@ typedef struct linebreak_t {
      * according to action being negative or positive, this function should
      * decrement or increment reference count of object, respectively.
      */
-    void (*ref_func)();
+    void (*ref_func)(void *, int, int);
     /** Number of last error.
      * may be a value of errno defined in <errno.h> or LINEBREAK_ELONG below.
      */
@@ -281,6 +283,10 @@ extern void linebreak_set_sizing(linebreak_t *, double (*)(), void *);
 extern void linebreak_set_urgent(linebreak_t *, gcstring_t *(*)(), void *);
 extern void linebreak_set_user(linebreak_t *, gcstring_t *(*)(), void *);
 extern void linebreak_reset(linebreak_t *);
+extern void linebreak_update_lbclass(linebreak_t *, unichar_t, propval_t);
+extern void linebreak_clear_lbclass(linebreak_t *);
+extern void linebreak_update_eawidth(linebreak_t *, unichar_t, propval_t);
+extern void linebreak_clear_eawidth(linebreak_t *);
 
 extern propval_t linebreak_eawidth(linebreak_t *, unichar_t);
 extern propval_t linebreak_lbclass(linebreak_t *, unichar_t);
@@ -291,6 +297,8 @@ extern gcstring_t **linebreak_break_fast(linebreak_t *, unistr_t *);
 extern gcstring_t **linebreak_break_partial(linebreak_t *, unistr_t *);
 
 extern const char *linebreak_unicode_version;
+extern const char *linebreak_propvals_EA[];
+extern const char *linebreak_propvals_LB[];
 extern const char *linebreak_southeastasian_supported;
 extern void linebreak_southeastasian_flagbreak(gcstring_t *);
 

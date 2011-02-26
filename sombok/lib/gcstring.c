@@ -31,7 +31,7 @@ void _gcinfo(linebreak_t *obj, unistr_t *str, size_t pos,
 {
     propval_t glbc = PROP_UNKNOWN, elbc = PROP_UNKNOWN;
     size_t glen, gcol, pcol, ecol;
-    propval_t lbc, eaw, gbc, ngbc, scr;
+    propval_t lbc, eaw, gcb, ngcb, scr;
 
     if (!str || !str->str || !str->len) {
 	*glenptr = 0;
@@ -41,7 +41,7 @@ void _gcinfo(linebreak_t *obj, unistr_t *str, size_t pos,
 	return;
     }
 
-    linebreak_charprop(obj, str->str[pos], &lbc, &eaw, &gbc, &scr);
+    linebreak_charprop(obj, str->str[pos], &lbc, &eaw, &gcb, &scr);
     pos++;
     glen = 1;
     gcol = eaw2col(eaw);
@@ -52,28 +52,28 @@ void _gcinfo(linebreak_t *obj, unistr_t *str, size_t pos,
     else if (scr == SC_Thai)
 	glbc = lbc;
 #endif /* USE_LIBTHAI */
-    else if (gbc == GB_Extend || gbc == GB_SpacingMark)
+    else if (gcb == GB_Extend || gcb == GB_SpacingMark)
 	glbc = LB_CM;
     else
 	glbc = LB_AL;
 
-    switch (gbc) {
+    switch (gcb) {
     case GB_LF: /* GB5 */
-	break; /* switch (gbc) */
+	break; /* switch (gcb) */
 
     case GB_CR: /* GB3, GB4, GB5 */
 	if (pos < str->len) {
-	    linebreak_charprop(obj, str->str[pos], NULL, &eaw, &gbc, NULL);
-	    if (gbc == GB_LF) {
+	    linebreak_charprop(obj, str->str[pos], NULL, &eaw, &gcb, NULL);
+	    if (gcb == GB_LF) {
 		pos++;
 		glen++;
 		gcol += eaw2col(eaw);
 	    }
 	}
-	break; /* switch (gbc) */
+	break; /* switch (gcb) */
 
     case GB_Control: /* GB4 */
-	break; /* switch (gbc) */
+	break; /* switch (gcb) */
 
     default:
 	if (lbc == LB_SP) /* Special case. */
@@ -82,28 +82,28 @@ void _gcinfo(linebreak_t *obj, unistr_t *str, size_t pos,
 	pcol = 0;
 	ecol = 0;
 	while (pos < str->len) { /* GB2 */
-	    linebreak_charprop(obj, str->str[pos], &lbc, &eaw, &ngbc, &scr);
+	    linebreak_charprop(obj, str->str[pos], &lbc, &eaw, &ngcb, &scr);
 	    /* GB5 */
-	    if (ngbc == GB_Control || ngbc == GB_CR || ngbc == GB_LF)
+	    if (ngcb == GB_Control || ngcb == GB_CR || ngcb == GB_LF)
 		break; /* while (pos < str->len) */
 	    /* GB6 - GB8 */
 	    /*
 	     * Assume hangul syllable block is always wide, while most of
 	     * isolated junseong (V) and jongseong (T) are narrow.
 	     */
-	    else if ((gbc == GB_L &&
-		      (ngbc == GB_L || ngbc == GB_V || ngbc == GB_LV ||
-		       ngbc == GB_LVT)) ||
-		     ((gbc == GB_LV || gbc == GB_V) &&
-		      (ngbc == GB_V || ngbc == GB_T)) ||
-		     ((gbc == GB_LVT || gbc == GB_T) && ngbc == GB_T))
+	    else if ((gcb == GB_L &&
+		      (ngcb == GB_L || ngcb == GB_V || ngcb == GB_LV ||
+		       ngcb == GB_LVT)) ||
+		     ((gcb == GB_LV || gcb == GB_V) &&
+		      (ngcb == GB_V || ngcb == GB_T)) ||
+		     ((gcb == GB_LVT || gcb == GB_T) && ngcb == GB_T))
 		gcol = 2;
 	    /* GB9, GB9a */
 	    /*
 	     * Some morbid sequences such as <L Extend V T> are allowed
 	       according to UAX #14 LB9.
 	     */
-	    else if (ngbc == GB_Extend || ngbc == GB_SpacingMark) {
+	    else if (ngcb == GB_Extend || ngcb == GB_SpacingMark) {
 		ecol += eaw2col(eaw);
 		pos++;
 		glen++;
@@ -115,7 +115,7 @@ void _gcinfo(linebreak_t *obj, unistr_t *str, size_t pos,
 		continue; /* while (pos < str->len) */
 	    }
 	    /* GB9b */
-	    else if (gbc == GB_Prepend) {
+	    else if (gcb == GB_Prepend) {
 		/* Here, next char shall grapheme base (or additional prepend
 		 * character), since its GCB property is neither Control,
 		 * Extend nor SpacingMark. */
@@ -136,11 +136,11 @@ void _gcinfo(linebreak_t *obj, unistr_t *str, size_t pos,
 
 	    pos++;
 	    glen++;
-	    gbc = ngbc;
+	    gcb = ngcb;
 	} /* while (pos < str->len) */
 	gcol += pcol + ecol;
-	break; /* switch (gbc) */
-    } /* switch (gbc) */
+	break; /* switch (gcb) */
+    } /* switch (gcb) */
 
     *glenptr = glen;
     *gcolptr = gcol;

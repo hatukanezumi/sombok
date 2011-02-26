@@ -228,18 +228,6 @@ unichar_t *parse_string(char *utf8str, size_t * lenp)
 		case (unichar_t) 'e':
 		    ret[j] = 0x001B;	/* escape */
 		    break;
-		case (unichar_t) 'N':
-		    ret[j] = 0x0085;	/* next line */
-		    break;
-		case (unichar_t) 'L':
-		    ret[j] = 0x2028;	/* LINE SEPARATOR */
-		    break;
-		case (unichar_t) 'P':
-		    ret[j] = 0x2029;	/* PARAGRAPH SEPARATOR */
-		    break;
-		case (unichar_t) '?':
-		    ret[j] = 0xFFFD;	/* REPLACEMENT CHARACTER */
-		    break;
 		case (unichar_t) 'x':	/* \xhh */
 		    if ((ret[j] = hextou(buf + i + 1, 2)) == -1)
 			ret[j] = buf[i];
@@ -307,7 +295,6 @@ gcstring_t *format_SHELL(linebreak_t * lbobj, linebreak_state_t state,
 {
     size_t len;
     int ifd = 0, ofd = 1;
-    int l;
     char *statestr;
     unistr_t unistr;
     gcstring_t *ret;
@@ -484,6 +471,84 @@ int main(int argc, char **argv)
 		    fprintf(stderr, "unknown option value: %s\n", argv[i]);
 		    linebreak_destroy(lbobj);
 		    exit(1);
+		}
+	    } else if (strcmp(argv[i] + 2, "eawidth") == 0) {
+		char *p, *q, *codes, *propname = "";
+		size_t j;
+		propval_t propval = PROP_UNKNOWN;
+		unichar_t beg, end, c;
+
+		i++;
+		p = argv[i];
+		while ((q = strchr(p, '=')) != NULL) {
+		    *q = '\0';
+		    codes = p;
+		    propname = q + 1;
+		    if ((q = strchr(propname, ',')) != NULL) {
+			*q = '\0';
+			p = q + 1;
+			while (*p == ' ' || *p == '\t') p++;
+		    } else while (*p) p++;
+
+		    for (j = 0; linebreak_propvals_EA[j] != NULL; j++)
+			if (strcasecmp(linebreak_propvals_EA[j], propname)
+			    == 0) {
+			    propval = j;
+			    break;
+			}
+		    if ((q = strchr(codes, '-')) != NULL) {
+			*q = '\0';
+			beg = (unichar_t)strtoul(codes, NULL, 16);
+			end = (unichar_t)strtoul(q + 1, NULL, 16);
+			if (end < beg) {
+			    c = beg;
+			    beg = end;
+			    end = c;
+			}
+		    } else
+			beg = end = (unichar_t)strtoul(codes, NULL, 16);
+
+		    for (c = beg; c <= end; c++)
+			linebreak_update_eawidth(lbobj, c, propval);
+		}
+	    } else if (strcmp(argv[i] + 2, "lbclass") == 0) {
+		char *p, *q, *codes, *propname = "";
+		size_t j;
+		propval_t propval = PROP_UNKNOWN;
+		unichar_t beg, end, c;
+
+		i++;
+		p = argv[i];
+		while ((q = strchr(p, '=')) != NULL) {
+		    *q = '\0';
+		    codes = p;
+		    propname = q + 1;
+		    if ((q = strchr(propname, ',')) != NULL) {
+			*q = '\0';
+			p = q + 1;
+			while (*p == ' ' || *p == '\t') p++;
+		    } else while (*p) p++;
+
+		    for (j = 0; linebreak_propvals_LB[j] != NULL; j++)
+			if (strcasecmp(linebreak_propvals_LB[j], propname)
+			    == 0) {
+			    propval = j;
+			    break;
+			}
+		    if ((q = strchr(codes, '-')) != NULL) {
+			*q = '\0';
+			beg = (unichar_t)strtoul(codes, NULL, 16);
+			end = (unichar_t)strtoul(q + 1, NULL, 16);
+			if (end < beg) {
+			    c = beg;
+			    beg = end;
+			    end = c;
+			}
+		    } else
+			beg = end = (unichar_t)strtoul(codes, NULL, 16);
+
+		    for (c = beg; c <= end; c++)
+			linebreak_update_lbclass(lbobj, c, propval);
 		}
 	    } else if (strcmp(argv[i] + 2, "version") == 0) {
 		printf(PACKAGE_NAME " " PACKAGE_VERSION "\n");

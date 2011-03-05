@@ -278,6 +278,7 @@ void _add_prop(linebreak_t * obj, unichar_t c, propval_t p, int idx)
 	    cur->beg = c + 1;
 	    INSERT_CUR(&newmap);
 	} else if (c == cur->end && cur < map + mapsiz - 1) {
+	    cur->end = c - 1;
 	    cur++;
 	    INSERT_CUR(&newmap);
 	    cur++;
@@ -285,14 +286,12 @@ void _add_prop(linebreak_t * obj, unichar_t c, propval_t p, int idx)
 	    cur->end = c - 1;
 	    cur++;
 	    INSERT_CUR(&newmap);
-	    cur--;
 	} else {
 	    INSERT_CUR(cur);
 	    cur->end = c - 1;
 	    (cur + 1)->beg = c + 1;
 	    cur++;
 	    INSERT_CUR(&newmap);
-	    cur--;
 	}
     } else if (cur->end < c) {
 	SET_PROP(&newmap, p);
@@ -310,7 +309,6 @@ void _add_prop(linebreak_t * obj, unichar_t c, propval_t p, int idx)
 	} else {
 	    cur++;
 	    INSERT_CUR(&newmap);
-	    cur--;
 	}
     }
 

@@ -46,7 +46,8 @@ DIST_COMMON = README $(am__configure_deps) $(include_HEADERS) \
 	$(noinst_HEADERS) $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/config.h.in $(srcdir)/sombok.pc.in \
 	$(srcdir)/sombok.spec.in $(top_srcdir)/configure \
-	$(top_srcdir)/doc/doxyfile.in AUTHORS COPYING ChangeLog \
+	$(top_srcdir)/doc/doxyfile.in \
+	$(top_srcdir)/include/sombok.h.in AUTHORS COPYING ChangeLog \
 	INSTALL NEWS compile config.guess config.sub depcomp \
 	install-sh ltmain.sh missing
 subdir = .
@@ -61,7 +62,8 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno configure.status.lineno
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES = sombok.pc sombok.spec doc/doxyfile
+CONFIG_CLEAN_FILES = include/sombok.h sombok.pc sombok.spec \
+	doc/doxyfile
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -189,6 +191,10 @@ RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+SOMBOK_UNICHAR_T = @SOMBOK_UNICHAR_T@
+SOMBOK_UNICHAR_T_IS_UNSIGNED_INT = @SOMBOK_UNICHAR_T_IS_UNSIGNED_INT@
+SOMBOK_UNICHAR_T_IS_UNSIGNED_LONG = @SOMBOK_UNICHAR_T_IS_UNSIGNED_LONG@
+SOMBOK_UNICHAR_T_IS_WCHAR_T = @SOMBOK_UNICHAR_T_IS_WCHAR_T@
 STRIP = @STRIP@
 UNICODE_VERSION = @UNICODE_VERSION@
 VERSION = @VERSION@
@@ -246,8 +252,8 @@ libsombok_la_SOURCES = lib/break.c lib/charprop.c lib/gcstring.c \
 	lib/@UNICODE_VERSION@.c $(am__append_1)
 libsombok_la_CFLAGS = -I. -Iinclude @LIBTHAI_CFLAGS@
 libsombok_la_LDFLAGS = -version-info 4:1:1 @LIBTHAI_LIBS@
-include_HEADERS = include/sombok.h include/sombok_constants.h
-nodist_include_HEADERS = 
+include_HEADERS = include/sombok_constants.h
+nodist_include_HEADERS = include/sombok.h
 noinst_HEADERS = src/mymalloc.h
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = sombok.pc
@@ -322,6 +328,8 @@ $(srcdir)/config.h.in:  $(am__configure_deps)
 
 distclean-hdr:
 	-rm -f config.h stamp-h1
+include/sombok.h: $(top_builddir)/config.status $(top_srcdir)/include/sombok.h.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
 sombok.pc: $(top_builddir)/config.status $(srcdir)/sombok.pc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 sombok.spec: $(top_builddir)/config.status $(srcdir)/sombok.spec.in

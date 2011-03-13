@@ -252,9 +252,8 @@ gcstring_t *_urgent_break(linebreak_t * lbobj, gcstring_t * str)
  */
 static
 gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
-			    size_t * lenp)
+			    size_t * lenp, int eot)
 {
-    int eot = (input == NULL);
     int state;
     gcstring_t *str = NULL, *bufStr = NULL, *bufSpc = NULL;
     double bufCols;
@@ -889,7 +888,7 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 
 gcstring_t **linebreak_break_partial(linebreak_t * lbobj, unistr_t * input)
 {
-    return _break_partial(lbobj, input, NULL);
+    return _break_partial(lbobj, input, NULL, (input == NULL));
 }
 
 /**
@@ -905,8 +904,7 @@ gcstring_t **linebreak_break_partial(linebreak_t * lbobj, unistr_t * input)
  */
 gcstring_t **linebreak_break_fast(linebreak_t * lbobj, unistr_t * input)
 {
-    gcstring_t **ret, **appe, **r;
-    size_t i, j, retlen, appelen;
+    gcstring_t **ret;
 
     if (input == NULL) {
 	if ((ret = malloc(sizeof(gcstring_t *))) == NULL)
@@ -916,34 +914,7 @@ gcstring_t **linebreak_break_fast(linebreak_t * lbobj, unistr_t * input)
 	return ret;
     }
 
-    if ((ret = _break_partial(lbobj, input, &retlen)) == NULL)
-	return NULL;
-
-    if ((appe = _break_partial(lbobj, NULL, &appelen)) == NULL) {
-	for (i = 0; i < retlen; i++)
-	    gcstring_destroy(ret[i]);
-	free(ret);
-	return NULL;
-    }
-    if (appelen) {
-	if ((r = realloc(ret,
-			 sizeof(gcstring_t *) *
-			 (retlen + appelen + 1))) == NULL) {
-	    lbobj->errnum = errno ? errno : ENOMEM;
-	    for (i = 0; i < retlen; i++)
-		gcstring_destroy(ret[i]);
-	    free(ret);
-	    for (j = 0; j < appelen; j++)
-		gcstring_destroy(appe[j]);
-	    free(appe);
-	    return NULL;
-	} else
-	    ret = r;
-	memcpy(ret + retlen, appe, sizeof(gcstring_t *) * (appelen + 1));
-    }
-    free(appe);
-
-    return ret;
+    return _break_partial(lbobj, input, NULL, 1);
 }
 
 #define PARTIAL_LENGTH (1000)
@@ -975,7 +946,7 @@ gcstring_t **linebreak_break(linebreak_t * lbobj, unistr_t * input)
     unistr.len = PARTIAL_LENGTH;
     for (k = 0; PARTIAL_LENGTH < input->len - k; k += PARTIAL_LENGTH) {
 	unistr.str = input->str + k;
-	if ((appe = _break_partial(lbobj, &unistr, &appelen)) == NULL) {
+	if ((appe = _break_partial(lbobj, &unistr, &appelen, 0)) == NULL) {
 	    for (i = 0; i < retlen; i++)
 		gcstring_destroy(ret[i]);
 	    free(ret);
@@ -1003,54 +974,33 @@ gcstring_t **linebreak_break(linebreak_t * lbobj, unistr_t * input)
     }
     unistr.len = input->len - k;
     unistr.str = input->str + k;
-    if ((appe = _break_partial(lbobj, &unistr, &appelen)) == NULL) {
-	for (i = 0; i < retlen; i++)
-	    gcstring_destroy(ret[i]);
-	free(ret);
-	return NULL;
-    }
-    if (appelen) {
-	if ((r = realloc(ret,
-			 sizeof(gcstring_t *) *
-			 (retlen + appelen + 1))) == NULL) {
-	    lbobj->errnum = errno ? errno : ENOMEM;
+    if (k < input->len) {
+	if ((appe = _break_partial(lbobj, &unistr, &appelen, 1)) == NULL) {
 	    for (i = 0; i < retlen; i++)
 		gcstring_destroy(ret[i]);
 	    free(ret);
-	    for (j = 0; j < appelen; j++)
-		gcstring_destroy(appe[j]);
-	    free(appe);
 	    return NULL;
-	} else
-	    ret = r;
-	memcpy(ret + retlen, appe, sizeof(gcstring_t *) * (appelen + 1));
-	retlen += appelen;
+	}
+	if (appelen) {
+	    if ((r = realloc(ret,
+			     sizeof(gcstring_t *) *
+			     (retlen + appelen + 1))) == NULL) {
+		lbobj->errnum = errno ? errno : ENOMEM;
+		for (i = 0; i < retlen; i++)
+		    gcstring_destroy(ret[i]);
+		free(ret);
+		for (j = 0; j < appelen; j++)
+		    gcstring_destroy(appe[j]);
+		free(appe);
+		return NULL;
+	    } else
+		ret = r;
+	    memcpy(ret + retlen, appe,
+		   sizeof(gcstring_t *) * (appelen + 1));
+	    retlen += appelen;
+	}
+	free(appe);
     }
-    free(appe);
-
-    if ((appe = _break_partial(lbobj, NULL, &appelen)) == NULL) {
-	for (i = 0; i < retlen; i++)
-	    gcstring_destroy(ret[i]);
-	free(ret);
-	return NULL;
-    }
-    if (appelen) {
-	if ((r = realloc(ret,
-			 sizeof(gcstring_t *) *
-			 (retlen + appelen + 1))) == NULL) {
-	    lbobj->errnum = errno ? errno : ENOMEM;
-	    for (i = 0; i < retlen; i++)
-		gcstring_destroy(ret[i]);
-	    free(ret);
-	    for (j = 0; j < appelen; j++)
-		gcstring_destroy(appe[j]);
-	    free(appe);
-	    return NULL;
-	} else
-	    ret = r;
-	memcpy(ret + retlen, appe, sizeof(gcstring_t *) * (appelen + 1));
-    }
-    free(appe);
 
     return ret;
 }

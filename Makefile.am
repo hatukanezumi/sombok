@@ -9,8 +9,8 @@ endif
 libsombok_la_CFLAGS = -I. -Iinclude @LIBTHAI_CFLAGS@
 libsombok_la_LDFLAGS = -version-info 4:1:1 @LIBTHAI_LIBS@
 
-include_HEADERS = include/sombok.h include/sombok_constants.h
-nodist_include_HEADERS =
+include_HEADERS = include/sombok_constants.h
+nodist_include_HEADERS = include/sombok.h
 noinst_HEADERS = src/mymalloc.h
 
 pkgconfigdir = $(libdir)/pkgconfig

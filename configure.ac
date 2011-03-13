@@ -1,7 +1,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(sombok, 2011.2, hatuka@nezumi.nu)
+AC_INIT(sombok, 2011.3RC, hatuka@nezumi.nu)
 DEFAULT_UNICODE_VERSION="6.0.0"
 LPATH="$PATH:/usr/local/bin"
 
@@ -39,7 +39,7 @@ PKG_CHECK_MODULES(LIBTHAI, [libthai],
   [LIBTHAI="libthai/`$PKG_CONFIG --modversion libthai`"], [LIBTHAI=])
 AC_MSG_CHECKING(whether libthai support enabled)
 AC_ARG_ENABLE(libthai,
-  AC_HELP_STRING(--disable-libthai, [Disable libthai support]),
+  AC_HELP_STRING(--disable-libthai, [disable libthai support]),
   [],
   [enable_libthai=yes])
 if test -z "$LIBTHAI"
@@ -57,19 +57,78 @@ else
   AC_MSG_RESULT($LIBTHAI)
 fi
 
-AC_MSG_CHECKING(what version of Unicode standard will be used)
+# determine type of Unicode character
+AC_MSG_RESULT(checking what type to be used for Unicode character...)
+if test "$ac_cv_header_wchar_h" = "yes"
+then
+  INCLUDE_WCHAR_H='#include <wchar.h>'
+else
+  INCLUDE_WCHAR_H=
+fi
+AC_CHECK_SIZEOF([wchar_t], 2, [$INCLUDE_WCHAR_H])
+AC_CHECK_SIZEOF([unsigned int], 4)
+AC_CHECK_SIZEOF([unsigned long], 8)
+AC_ARG_WITH(unicode-type,
+	    AC_HELP_STRING(--with-unicode-type=TYPE,
+			   [type of Unicode character @<:@default=auto@:>@]),
+	    SOMBOK_UNICHAR_T="$withval", SOMBOK_UNICHAR_T=)
+if test x"$SOMBOK_UNICHAR_T" = x
+then
+  if test "$ac_cv_sizeof_unsigned_int" -ge "4"
+  then
+    SOMBOK_UNICHAR_T="unsigned int"
+  else
+    SOMBOK_UNICHAR_T="unsigned long"
+  fi
+fi
+AC_CHECK_SIZEOF([unichar_t], 4,
+		[$INCLUDE_WCHAR_H
+		 typedef $SOMBOK_UNICHAR_T unichar_t;])
+if test "$ac_cv_sizeof_unichar_t" -lt "4"
+then
+  AC_MSG_ERROR([sizeof(unichar_t) must not be smaller than 4.])
+fi
+
+if test "$ac_cv_sizeof_unichar_t" = "$ac_cv_sizeof_wchar_t"
+then
+  SOMBOK_UNICHAR_T_IS_WCHAR_T='#define SOMBOK_UNICHAR_T_IS_WCHAR_T'
+else
+  SOMBOK_UNICHAR_T_IS_WCHAR_T='#undef SOMBOK_UNICHAR_T_IS_WCHAR_T'
+fi
+if test "$ac_cv_sizeof_unichar_t" = "$ac_cv_sizeof_unsigned_int"
+then
+  SOMBOK_UNICHAR_T_IS_UNSIGNED_INT='#define SOMBOK_UNICHAR_T_IS_UNSIGNED_INT'
+else
+  SOMBOK_UNICHAR_T_IS_UNSIGNED_INT='#undef SOMBOK_UNICHAR_T_IS_UNSIGNED_INT'
+fi
+if test "$ac_cv_sizeof_unichar_t" = "$ac_cv_sizeof_unsigned_long"
+then
+  SOMBOK_UNICHAR_T_IS_UNSIGNED_LONG='#define SOMBOK_UNICHAR_T_IS_UNSIGNED_LONG'
+else
+  SOMBOK_UNICHAR_T_IS_UNSIGNED_LONG='#undef SOMBOK_UNICHAR_T_IS_UNSIGNED_LONG'
+fi
+
+AC_MSG_RESULT([$SOMBOK_UNICHAR_T])
+AC_SUBST(SOMBOK_UNICHAR_T)
+AC_SUBST(SOMBOK_UNICHAR_T_IS_WCHAR_T)
+AC_SUBST(SOMBOK_UNICHAR_T_IS_UNSIGNED_INT)
+AC_SUBST(SOMBOK_UNICHAR_T_IS_UNSIGNED_LONG)
+
+# determin version of Unicode Standard
+AC_MSG_RESULT(checking what version of Unicode Standard will be used...)
 AC_ARG_WITH(unicode-version,
-  AC_HELP_STRING(--with-unicode-version=version,
-  [version of Unicode standard]),
+  AC_HELP_STRING(--with-unicode-version=VERSION,
+  [version of Unicode Standard @<:@default=current version@:>@]),
   UNICODE_VERSION=$withval,UNICODE_VERSION=$DEFAULT_UNICODE_VERSION)
 AC_CHECK_FILE([lib/$UNICODE_VERSION.c],
-  AC_MSG_RESULT(Use Unicode version $UNICODE_VERSION),
-  AC_MSG_ERROR(unknown Unicode version $UNICODE_VERSION))
+  AC_MSG_RESULT($UNICODE_VERSION),
+  AC_MSG_ERROR(Unknown Unicode version $UNICODE_VERSION.))
 AC_SUBST(UNICODE_VERSION)
 
+# check if code to debug memory allocation is enabled.
 AC_ARG_ENABLE(malloc-debug,
   AC_HELP_STRING(--enable-malloc-debug,
-    [Enable codes to debug memory allocation/deallocation]),
+    [enable codes to debug memory allocation/deallocation]),
   [MALLOC_DEBUG=yes],
   [])
 AM_CONDITIONAL(MALLOC_DEBUG, [test "$MALLOC_DEBUG" = "yes"])
@@ -81,10 +140,10 @@ then
   AC_SUBST(MALLOC_DEBUG)
 fi
 
-AC_MSG_CHECKING(which shell program will be used)
+AC_MSG_CHECKING(what shell program will be used)
 AC_ARG_WITH(shell-program,
-  AC_HELP_STRING(--with-shell-program=program,
-  [shell program used by test suite]),
+  AC_HELP_STRING(--with-shell-program=PROGRAM,
+  [shell program used by test suite @<:@default=auto@:>@]),
   sombok_shell_program=$withval,sombok_shell_program=none)
 if test "$sombok_shell_program" '!=' "none" -a \
     "`basename $sombok_shell_program`" = "$sombok_shell_program"
@@ -122,5 +181,5 @@ then
 fi
 AC_MSG_RESULT($sombok_shell_program)
 
-AC_CONFIG_FILES(Makefile sombok.pc sombok.spec doc/doxyfile)
+AC_CONFIG_FILES(Makefile include/sombok.h sombok.pc sombok.spec doc/doxyfile)
 AC_OUTPUT

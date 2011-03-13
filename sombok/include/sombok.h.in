@@ -18,7 +18,7 @@
 #ifndef _SOMBOK_H_
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#    include "config.h"
 #endif
 #include <errno.h>
 #include <stddef.h>
@@ -28,13 +28,19 @@
 #    include <strings.h>
 #endif /* HAVE_STRINGS_H */
 
+@SOMBOK_UNICHAR_T_IS_WCHAR_T@
+@SOMBOK_UNICHAR_T_IS_UNSIGNED_INT@
+@SOMBOK_UNICHAR_T_IS_UNSIGNED_LONG@
+
 /***
  *** Data structure.
  ***/
 
 /* Primitive types */
+
 /** Unicode character */
-typedef unsigned int unichar_t;
+typedef @SOMBOK_UNICHAR_T@ unichar_t;
+
 /** Character property
  * @ingroup linebreak */
 typedef unsigned char propval_t;

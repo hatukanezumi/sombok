@@ -1,3 +1,10 @@
+2011.3  Sun Mar 13 2011
+	* configure.ac: unichar_t may be unsigned int or unsigned long.
+	* include/sombok.h: now generated from include/sombok.h.in.
+	* Bug Fix: southeastasian.c: th_wbrk() may return 0 _or_ -1 when
+	  breaking position was not found.
+	* break.c: some optimizations.
+
 2011.2  Sat Mar 05 2011
 	* charprop.c: Fix: _add_prop() broke custom map.
 

@@ -32,7 +32,7 @@ $Id$
 
 * ANSI C コンパイラ (たとえば GCC C Compiler) が要ります。
 
-* 必須ではありませんが、タイ語の単語文節に対応するには libthai パッケー
+* 必須ではありませんが、タイ語の単語分節に対応するには libthai パッケー
   ジをインストールする必要があります。次の場所で入手できます。
     http://linux.thai.net/projects/libthai
   この場合、pkg-config も要ります。

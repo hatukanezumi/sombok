@@ -1,4 +1,7 @@
-2011.3  Sun Mar 13 2011
+2011.3  Mon Mar 21 2011
+	* tests/01break.t: Added tests for Vietnamese.
+
+2011.3RC  Sun Mar 13 2011
 	* configure.ac: unichar_t may be unsigned int or unsigned long.
 	* include/sombok.h: now generated from include/sombok.h.in.
 	* Bug Fix: southeastasian.c: th_wbrk() may return 0 _or_ -1 when

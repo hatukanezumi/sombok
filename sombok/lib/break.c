@@ -52,7 +52,7 @@ gcstring_t *_prep_sub(linebreak_t * lbobj, unistr_t * substr,
 
     if ((func = lbobj->prep_func[findex]) == NULL) {
 	if ((ret = gcstring_newcopy(substr, lbobj)) == NULL)
-	    return (lbobj->errnum = errno ? errno : ENOMEM), NULL;
+	    lbobj->errnum = errno ? errno : ENOMEM;
 	return ret;
     }
     if (lbobj->prep_data == NULL)
@@ -60,8 +60,10 @@ gcstring_t *_prep_sub(linebreak_t * lbobj, unistr_t * substr,
     else
 	data = lbobj->prep_data[findex];
 
-    if ((ret = gcstring_new(NULL, lbobj)) == NULL)
-	return (lbobj->errnum = errno ? errno : ENOMEM), NULL;
+    if ((ret = gcstring_new(NULL, lbobj)) == NULL) {
+	lbobj->errnum = errno ? errno : ENOMEM;
+	return NULL;
+    }
 
     prev_str = substr->str;
     prev_len = substr->len;
@@ -98,7 +100,8 @@ gcstring_t *_prep_sub(linebreak_t * lbobj, unistr_t * substr,
 	    if (gcstring_append(ret, s) == NULL) {
 		gcstring_destroy(ret);
 		gcstring_destroy(s);
-		return (lbobj->errnum = errno ? errno : ENOMEM), NULL;
+		lbobj->errnum = errno ? errno : ENOMEM;
+		return NULL;
 	    }
 	    gcstring_destroy(s);
 	}
@@ -111,13 +114,15 @@ gcstring_t *_prep_sub(linebreak_t * lbobj, unistr_t * substr,
 	    }
 	    if ((s = gcstring_newcopy(&unistr, lbobj)) == NULL) {
 		gcstring_destroy(ret);
-		return (lbobj->errnum = errno ? errno : ENOMEM), NULL;
+		lbobj->errnum = errno ? errno : ENOMEM;
+		return NULL;
 	    }
 	}
 	if (gcstring_append(ret, s) == NULL) {
 	    gcstring_destroy(ret);
 	    gcstring_destroy(s);
-	    return (lbobj->errnum = errno ? errno : ENOMEM), NULL;
+	    lbobj->errnum = errno ? errno : ENOMEM;
+	    return NULL;
 	}
 	gcstring_destroy(s);
 
@@ -148,7 +153,8 @@ gcstring_t *_prep_sub(linebreak_t * lbobj, unistr_t * substr,
 	if (gcstring_append(ret, s) == NULL) {
 	    gcstring_destroy(ret);
 	    gcstring_destroy(s);
-	    return (lbobj->errnum = errno ? errno : ENOMEM), NULL;
+	    lbobj->errnum = errno ? errno : ENOMEM;
+	    return NULL;
 	}
 	gcstring_destroy(s);
     }
@@ -163,7 +169,7 @@ gcstring_t *_prep(linebreak_t * lbobj, unistr_t * text)
 
     if (lbobj->prep_func == NULL) {
 	if ((ret = gcstring_newcopy(text, lbobj)) == NULL)
-	    return (lbobj->errnum = errno ? errno : ENOMEM), NULL;
+	    lbobj->errnum = errno ? errno : ENOMEM;
 	return ret;
     }
     return _prep_sub(lbobj, text, text, 0);

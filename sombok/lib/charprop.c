@@ -332,7 +332,7 @@ void _add_prop(linebreak_t * obj, unichar_t c, propval_t p, int idx)
  */
 void linebreak_update_lbclass(linebreak_t * obj, unichar_t c, propval_t p)
 {
-    return _add_prop(obj, c, p, 0);
+    _add_prop(obj, c, p, 0);
 }
 
 /** Update custom East_Asian_Width propety map.
@@ -345,7 +345,7 @@ void linebreak_update_lbclass(linebreak_t * obj, unichar_t c, propval_t p)
  */
 void linebreak_update_eawidth(linebreak_t * obj, unichar_t c, propval_t p)
 {
-    return _add_prop(obj, c, p, 1);
+    _add_prop(obj, c, p, 1);
 }
 
 static
@@ -389,7 +389,7 @@ void _clear_prop(linebreak_t * obj, int idx)
  */
 void linebreak_clear_lbclass(linebreak_t * obj)
 {
-    return _clear_prop(obj, 0);
+    _clear_prop(obj, 0);
 }
 
 /** Clear custom East_Asian_Width property map
@@ -400,5 +400,5 @@ void linebreak_clear_lbclass(linebreak_t * obj)
  */
 void linebreak_clear_eawidth(linebreak_t * obj)
 {
-    return _clear_prop(obj, 1);
+    _clear_prop(obj, 1);
 }

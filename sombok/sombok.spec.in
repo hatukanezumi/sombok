@@ -27,11 +27,11 @@ implements ``default'' Grapheme Cluster segmentation described in
 Annex #29 (UAX #29).
 
 %description -l ja
-sombok パッケージはユニコード標準附属書14 (UAX #14) で述べるユニ
-コード行分割アルゴリズムを実行する。行分割位置の決定にあたって、附
-属書11 (UAX #11) で定める East_Asian_Width 参考特性を考慮する。ま
-た、附属書29 (UAX #29) で述べる「初期の」書記素クラスタ分節も実装
-している。
+ソンボク (Sombok) パッケージはユニコード標準附属書14 (UAX #14) で
+述べるユニコード行分割アルゴリズムを実行する。行分割位置の決定にあ
+たって、附属書11 (UAX #11) で定める East_Asian_Width 参考特性を考
+慮する。また、附属書29 (UAX #29) で述べる「初期の」書記素クラスタ
+分節も実装している。
 
 %package devel
 Summary: Unicode Text Segmentation package
@@ -70,7 +70,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-, root, root)
-%doc README AUTHORS COPYING ChangeLog
+%doc README* AUTHORS COPYING ChangeLog*
 %{_libdir}/lib*.so.*
 
 %files devel

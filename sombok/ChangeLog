@@ -1,3 +1,10 @@
+2011.4RC  Sat Mar 26 2011
+	* charprop.c, break.c: Fix groundless coding denied by honest C
+	  compilers (e.g. Solaris cc).
+	* Makefile.am: Added README.ja_JP to EXTRA_DIST.
+	* tests/lb.sh: function definition suitable for both bash and d?ash.
+	* Added debian package info.
+
 2011.3  Mon Mar 21 2011
 	* tests/01break.t: Added tests for Vietnamese.
 

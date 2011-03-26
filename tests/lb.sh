@@ -12,12 +12,12 @@ OPTIONS="\
 --urgent-func NONE \
 "
 
-function plan {
+plan () {
     PLANNED=$1
     SUCCESS=0
 }
 
-function dotest {
+dotest () {
     in=$1
     shift
     if [ "$in" = "negate" ]; then
@@ -53,7 +53,7 @@ function dotest {
     fi
 }
 
-function check_result {
+check_result () {
     echo "$SUCCESS of $PLANNED subtests passed."
 
     if [ "$PLANNED" = "$SUCCESS" ]; then

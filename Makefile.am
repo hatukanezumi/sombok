@@ -32,10 +32,9 @@ TESTS = tests/*.t
 #pkgdata_DATA =
 #pkgdatasubdir =
 #pkgdatasub_DATA =
-EXTRA_DIST = sombok.spec \
+EXTRA_DIST = sombok.spec debian/* \
 	m4/* lib/5.1.0.c lib/5.2.0.c \
 	tests/lb.sh $(TESTS) test-data/* \
 	data/makefile data/constants.pl data/custom.pl data/data.pl \
 	data/*.custom data/Rules-*.txt data/LBCLASSES \
-	ChangeLog.REL1
-
+	ChangeLog.REL1 README.ja_JP

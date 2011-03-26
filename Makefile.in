@@ -266,12 +266,12 @@ TESTS = tests/*.t
 #pkgdata_DATA =
 #pkgdatasubdir =
 #pkgdatasub_DATA =
-EXTRA_DIST = sombok.spec \
+EXTRA_DIST = sombok.spec debian/* \
 	m4/* lib/5.1.0.c lib/5.2.0.c \
 	tests/lb.sh $(TESTS) test-data/* \
 	data/makefile data/constants.pl data/custom.pl data/data.pl \
 	data/*.custom data/Rules-*.txt data/LBCLASSES \
-	ChangeLog.REL1
+	ChangeLog.REL1 README.ja_JP
 
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -698,7 +698,7 @@ check-TESTS: $(TESTS)
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkdir_p) $(distdir)/. $(distdir)/data $(distdir)/doc $(distdir)/include $(distdir)/lib $(distdir)/m4 $(distdir)/src $(distdir)/test-data $(distdir)/tests
+	$(mkdir_p) $(distdir)/. $(distdir)/data $(distdir)/debian $(distdir)/doc $(distdir)/include $(distdir)/lib $(distdir)/m4 $(distdir)/src $(distdir)/test-data $(distdir)/tests
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \

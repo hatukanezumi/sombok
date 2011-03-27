@@ -184,7 +184,7 @@ AC_MSG_RESULT($sombok_shell_program)
 AC_ARG_ENABLE(doc,
 	      [AC_HELP_STRING([--disable-doc],
 			      [disable document generation])],
-	     , ENABLE_DOC="yes")
+	     ENABLE_DOC="$enableval", ENABLE_DOC="yes")
 if test "$ENABLE_DOC" = "yes"
 then
   AC_CHECK_PROG(DOXYGEN,doxygen,doxygen,no)

@@ -13919,7 +13919,7 @@ echo "${ECHO_T}$sombok_shell_program" >&6
 # Check whether --enable-doc or --disable-doc was given.
 if test "${enable_doc+set}" = set; then
   enableval="$enable_doc"
-
+  ENABLE_DOC="$enableval"
 else
   ENABLE_DOC="yes"
 fi;

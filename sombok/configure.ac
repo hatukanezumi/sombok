@@ -1,7 +1,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(sombok, 2011.4RC, hatuka@nezumi.nu)
+AC_INIT(sombok, 2011.4RC2, hatuka@nezumi.nu)
 DEFAULT_UNICODE_VERSION="6.0.0"
 LPATH="$PATH:/usr/local/bin"
 
@@ -180,6 +180,25 @@ then
   done
 fi
 AC_MSG_RESULT($sombok_shell_program)
+
+AC_ARG_ENABLE(doc,
+	      [AC_HELP_STRING([--disable-doc],
+			      [disable document generation])],
+	     , ENABLE_DOC="yes")
+if test "$ENABLE_DOC" = "yes"
+then
+  AC_CHECK_PROG(DOXYGEN,doxygen,doxygen,no)
+  if test "$DOXYGEN" = "no"
+  then
+    ENABLE_DOC="no"
+  fi
+fi
+AM_CONDITIONAL(ENABLE_DOC,test "$ENABLE_DOC" = "yes")
+if test "x$docdir" = "x"
+then
+  docdir="$datadir/doc/$PACKAGE_NAME-$PACKAGE_VERSION"
+fi
+AC_SUBST(docdir)
 
 AC_CONFIG_FILES(Makefile include/sombok.h sombok.pc sombok.spec doc/doxyfile)
 AC_OUTPUT

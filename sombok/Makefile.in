@@ -70,8 +70,9 @@ am__vpath_adj = case $$p in \
     *) f=$$p;; \
   esac;
 am__strip_dir = `echo $$p | sed -e 's|^.*/||'`;
-am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(pkgconfigdir)" \
-	"$(DESTDIR)$(includedir)" "$(DESTDIR)$(includedir)"
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(htmldir)" \
+	"$(DESTDIR)$(pkgconfigdir)" "$(DESTDIR)$(includedir)" \
+	"$(DESTDIR)$(includedir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libsombok_la_LIBADD =
@@ -106,8 +107,9 @@ LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 SOURCES = $(libsombok_la_SOURCES) $(sombok_SOURCES)
 DIST_SOURCES = $(am__libsombok_la_SOURCES_DIST) \
 	$(am__sombok_SOURCES_DIST)
+htmlDATA_INSTALL = $(INSTALL_DATA)
 pkgconfigDATA_INSTALL = $(INSTALL_DATA)
-DATA = $(pkgconfig_DATA)
+DATA = $(html_DATA) $(pkgconfig_DATA)
 includeHEADERS_INSTALL = $(INSTALL_HEADER)
 nodist_includeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(include_HEADERS) $(nodist_include_HEADERS) \
@@ -142,12 +144,15 @@ CPPFLAGS = @CPPFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
+DOXYGEN = @DOXYGEN@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
+ENABLE_DOC_FALSE = @ENABLE_DOC_FALSE@
+ENABLE_DOC_TRUE = @ENABLE_DOC_TRUE@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
 GREP = @GREP@
@@ -224,6 +229,7 @@ build_cpu = @build_cpu@
 build_os = @build_os@
 build_vendor = @build_vendor@
 datadir = @datadir@
+docdir = @docdir@
 exec_prefix = @exec_prefix@
 host = @host@
 host_alias = @host_alias@
@@ -251,7 +257,7 @@ libsombok_la_SOURCES = lib/break.c lib/charprop.c lib/gcstring.c \
 	lib/linebreak.c lib/southeastasian.c lib/utils.c \
 	lib/@UNICODE_VERSION@.c $(am__append_1)
 libsombok_la_CFLAGS = -I. -Iinclude @LIBTHAI_CFLAGS@
-libsombok_la_LDFLAGS = -version-info 4:1:1 @LIBTHAI_LIBS@
+libsombok_la_LDFLAGS = -version-info 4:2:1 @LIBTHAI_LIBS@
 include_HEADERS = include/sombok_constants.h
 nodist_include_HEADERS = include/sombok.h
 noinst_HEADERS = src/mymalloc.h
@@ -262,10 +268,9 @@ sombok_CFLAGS = -Iinclude
 sombok_LDFLAGS = 
 sombok_LDADD = libsombok.la
 TESTS = tests/*.t
-
-#pkgdata_DATA =
-#pkgdatasubdir =
-#pkgdatasub_DATA =
+@ENABLE_DOC_TRUE@html_DATA = doc/html/*
+@ENABLE_DOC_TRUE@MOSTLYCLEANFILES = stamp-html $(html_DATA)
+@ENABLE_DOC_TRUE@htmldir = $(docdir)/html
 EXTRA_DIST = sombok.spec debian/* \
 	m4/* lib/5.1.0.c lib/5.2.0.c \
 	tests/lb.sh $(TESTS) test-data/* \
@@ -522,6 +527,23 @@ clean-libtool:
 distclean-libtool:
 	-rm -f libtool
 uninstall-info-am:
+install-htmlDATA: $(html_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(htmldir)" || $(mkdir_p) "$(DESTDIR)$(htmldir)"
+	@list='$(html_DATA)'; for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  f=$(am__strip_dir) \
+	  echo " $(htmlDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(htmldir)/$$f'"; \
+	  $(htmlDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(htmldir)/$$f"; \
+	done
+
+uninstall-htmlDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(html_DATA)'; for p in $$list; do \
+	  f=$(am__strip_dir) \
+	  echo " rm -f '$(DESTDIR)$(htmldir)/$$f'"; \
+	  rm -f "$(DESTDIR)$(htmldir)/$$f"; \
+	done
 install-pkgconfigDATA: $(pkgconfig_DATA)
 	@$(NORMAL_INSTALL)
 	test -z "$(pkgconfigdir)" || $(mkdir_p) "$(DESTDIR)$(pkgconfigdir)"
@@ -828,7 +850,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(LTLIBRARIES) $(DATA) $(HEADERS) config.h
 installdirs:
-	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(pkgconfigdir)" "$(DESTDIR)$(includedir)" "$(DESTDIR)$(includedir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(htmldir)" "$(DESTDIR)$(pkgconfigdir)" "$(DESTDIR)$(includedir)" "$(DESTDIR)$(includedir)"; do \
 	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
 	done
 install: install-am
@@ -846,6 +868,7 @@ install-strip:
 	  `test -z '$(STRIP)' || \
 	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install
 mostlyclean-generic:
+	-test -z "$(MOSTLYCLEANFILES)" || rm -f $(MOSTLYCLEANFILES)
 
 clean-generic:
 
@@ -877,8 +900,8 @@ info: info-am
 
 info-am:
 
-install-data-am: install-includeHEADERS install-nodist_includeHEADERS \
-	install-pkgconfigDATA
+install-data-am: install-htmlDATA install-includeHEADERS \
+	install-nodist_includeHEADERS install-pkgconfigDATA
 
 install-exec-am: install-libLTLIBRARIES
 
@@ -908,9 +931,9 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-includeHEADERS uninstall-info-am \
-	uninstall-libLTLIBRARIES uninstall-nodist_includeHEADERS \
-	uninstall-pkgconfigDATA
+uninstall-am: uninstall-htmlDATA uninstall-includeHEADERS \
+	uninstall-info-am uninstall-libLTLIBRARIES \
+	uninstall-nodist_includeHEADERS uninstall-pkgconfigDATA
 
 .PHONY: CTAGS GTAGS all all-am am--refresh check check-TESTS check-am \
 	clean clean-checkPROGRAMS clean-generic clean-libLTLIBRARIES \
@@ -920,17 +943,25 @@ uninstall-am: uninstall-includeHEADERS uninstall-info-am \
 	distclean-libtool distclean-tags distcleancheck distdir \
 	distuninstallcheck dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am install-exec \
-	install-exec-am install-includeHEADERS install-info \
-	install-info-am install-libLTLIBRARIES install-man \
-	install-nodist_includeHEADERS install-pkgconfigDATA \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	pdf pdf-am ps ps-am tags uninstall uninstall-am \
+	install-exec-am install-htmlDATA install-includeHEADERS \
+	install-info install-info-am install-libLTLIBRARIES \
+	install-man install-nodist_includeHEADERS \
+	install-pkgconfigDATA install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags uninstall uninstall-am uninstall-htmlDATA \
 	uninstall-includeHEADERS uninstall-info-am \
 	uninstall-libLTLIBRARIES uninstall-nodist_includeHEADERS \
 	uninstall-pkgconfigDATA
 
+
+@ENABLE_DOC_TRUE@$(html_DATA): stamp-html
+
+@ENABLE_DOC_TRUE@stamp-html: doc/doxyfile $(include_HEADERS) $(nodist_include_HEADERS) \
+@ENABLE_DOC_TRUE@	    $(libsombok_la_SOURCES)
+@ENABLE_DOC_TRUE@	$(DOXYGEN) doc/doxyfile
+@ENABLE_DOC_TRUE@	touch stamp-html	
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

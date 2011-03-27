@@ -58,7 +58,7 @@ make check
 
 %install
 rm -rf $RPM_BUILD_ROOT
-%makeinstall
+make install DESTDIR=$RPM_BUILD_ROOT
 rm $RPM_BUILD_ROOT%{_libdir}/*.la
 
 %clean
@@ -75,6 +75,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files devel
 %defattr(-, root, root)
+%doc README* AUTHORS COPYING ChangeLog* doc/html
 %{_includedir}/*
 %{_libdir}/lib*.a
 %{_libdir}/lib*.so

@@ -1,4 +1,5 @@
 ACLOCAL_AMFLAGS = -I m4
+
 lib_LTLIBRARIES = libsombok.la
 libsombok_la_SOURCES = lib/break.c lib/charprop.c lib/gcstring.c \
 	lib/linebreak.c lib/southeastasian.c lib/utils.c \
@@ -7,7 +8,7 @@ if MALLOC_DEBUG
 libsombok_la_SOURCES += src/mymalloc.c
 endif
 libsombok_la_CFLAGS = -I. -Iinclude @LIBTHAI_CFLAGS@
-libsombok_la_LDFLAGS = -version-info 4:1:1 @LIBTHAI_LIBS@
+libsombok_la_LDFLAGS = -version-info 4:2:1 @LIBTHAI_LIBS@
 
 include_HEADERS = include/sombok_constants.h
 nodist_include_HEADERS = include/sombok.h
@@ -29,9 +30,19 @@ sombok_LDFLAGS =
 sombok_LDADD = libsombok.la
 TESTS = tests/*.t
 
-#pkgdata_DATA =
-#pkgdatasubdir =
-#pkgdatasub_DATA =
+if ENABLE_DOC
+html_DATA = doc/html/*
+MOSTLYCLEANFILES = stamp-html $(html_DATA)
+htmldir = $(docdir)/html
+
+$(html_DATA): stamp-html
+
+stamp-html: doc/doxyfile $(include_HEADERS) $(nodist_include_HEADERS) \
+	    $(libsombok_la_SOURCES)
+	$(DOXYGEN) doc/doxyfile
+	touch stamp-html	
+endif
+
 EXTRA_DIST = sombok.spec debian/* \
 	m4/* lib/5.1.0.c lib/5.2.0.c \
 	tests/lb.sh $(TESTS) test-data/* \

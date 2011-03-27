@@ -1,0 +1,30 @@
+Source: sombok
+Priority: optional
+Maintainer: <Maintainer>
+Build-Depends: libthai-dev (>= 0.1.9~), pkg-config, debhelper (>= 7.0.50~), autotools-dev, doxygen
+Standards-Version: 3.9.1
+Section: libs
+Homepage: http://sourceforge.net/projects/linefold/
+
+Package: sombok-dev
+Section: libdevel
+Architecture: any
+Depends: sombok (= ${binary:Version})
+Description: Unicode Text Segmentation Package
+ Sombok library package performs Line Breaking Algorithm described in 
+ Unicode Standards Annex #14 (UAX #14).  East_Asian_Width informative 
+ properties defined by Annex #11 (UAX #11) may be concerned to determin 
+ breaking positions.  This package also implements ``default'' Grapheme 
+ Cluster segmentation described in Annex #29 (UAX #29).
+
+Package: sombok
+Section: libs
+Architecture: any
+Depends: libthai0 (>= 0.1.9~), ${shlibs:Depends}, ${misc:Depends}
+Description: Unicode Text Segmentation Package
+ Sombok library package performs Line Breaking Algorithm described in
+ Unicode Standards Annex #14 (UAX #14).  East_Asian_Width informative
+ properties defined by Annex #11 (UAX #11) may be concerned to determin
+ breaking positions.  This package also implements ``default'' Grapheme
+ Cluster segmentation described in Annex #29 (UAX #29).
+

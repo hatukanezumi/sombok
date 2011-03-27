@@ -7,6 +7,6 @@ INPUT                  = lib include
 FILE_PATTERNS          = *.c *.h
 EXCLUDE_PATTERNS       = sombok_constants.h [0-9].[0-9].[0-9].c
 GENERATE_LATEX         = NO
-GENERATE_MAN           = YES
+GENERATE_MAN           = NO
 ENABLE_PREPROCESSING   = NO
 

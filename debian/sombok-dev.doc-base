@@ -1,0 +1,10 @@
+Document: sombok-dev
+Title: Sombok Documentation
+Author: Hatuka*nezumi - IKEDA Soji <hatuka@nezumi.nu>
+Abstract: Description of Sombok API
+Section: Programming
+
+Format: HTML
+Index: /usr/share/doc/sombok/html/index.html
+Files: /usr/share/doc/sombok/html/*
+

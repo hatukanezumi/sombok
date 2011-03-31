@@ -1,5 +1,5 @@
-2011.4  XXX XXX XX 2011
-	* Added Debian packaging info (testing).
+2011.4  Fri Apr 01 2011
+	* Added Debian packaging info.
 	* Makefile.am:
 	  - increase -version-info from 4.1.1 to 4.2.1.
 	  - added doc rules.

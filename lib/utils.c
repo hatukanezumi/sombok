@@ -48,9 +48,6 @@
  */
 /*@{*/
 
-#define inrange(uc, beg, end) \
-    ((unichar_t) (beg) <= (uc) && (uc) <= (unichar_t) (end))
-
 static
 int startswith(unistr_t * unistr, size_t idx, char *str, size_t len,
 	       int cs)
@@ -77,6 +74,48 @@ int startswith(unistr_t * unistr, size_t idx, char *str, size_t len,
     return 1;
 }
 
+#define is(str, i, c)				\
+    ((i) < (str)->len && (str)->str[i] == (c))
+
+#define _is_alpha(s)						\
+    (('a' <= (s) && (s) <= 'z') || ('A' <= (s) && (s) <= 'Z'))
+#define is_alpha(str, i)				\
+    ((i) < (str)->len && _is_alpha((str)->str[i]))
+
+#define _is_digit(s)				\
+    ('0' <= (s) && (s) <= '9')
+#define is_digit(str, i)				\
+    ((i) < (str)->len && _is_digit((str)->str[i]))
+
+#define _is_hexdig(s)							\
+    (_is_digit(s) || ('a' <= (s) && (s) <= 'f') || ('A' <= (s) && (s) <= 'F'))
+#define is_hexdig(str, i)				\
+    ((i) < (str)->len && _is_hexdig((str)->str[i]))
+
+#define _is_sub_delim(s)						\
+    ((s) == '!' || (s) == '$' || (s) == '&' || (s) == '\'' || (s) == '(' || \
+     (s) == ')' || (s) == '*' || (s) == '+' || (s) == ',' || (s) == ';' || \
+     (s) == '=')
+#define is_sub_delim(str, i)				\
+    ((i) < (str)->len && _is_sub_delim((str)->str[i]))
+
+#define _is_unreserved(s)					\
+    (_is_alpha(s) || _is_digit(s) ||				\
+     (s) == '-' || (s) == '.' || (s) == '_' || (s) == '~')
+#define is_unreserved(str, i)				\
+    ((i) < (str)->len && _is_unreserved((str)->str[i]))
+
+#define _is_pct_encoded(s)			\
+    ((s) == '%' || _is_hexdig(s))
+#define is_pct_encoded(str, i)					\
+    ((i) < (str)->len && _is_pct_encoded((str)->str[i]))
+
+#define _is_pchar(s)							\
+    (_is_unreserved(s) || _is_pct_encoded(s) || _is_sub_delim(s) ||	\
+     (s) == ':' || (s) == '@')
+#define is_pchar(str, i)				\
+     ((i) < (str)->len && _is_pchar((str)->str[i]))
+
 /** Built-in preprocessing callback
  *
  * Built-in preprocessing callback to break or not to break URLs according to
@@ -94,49 +133,147 @@ gcstring_t *linebreak_prep_URIBREAK(linebreak_t * lbobj, void *data,
     /* Pass I */
 
     if (text != NULL) {
+	/*
+	 * Search URL in str.
+	 * Following code loosely refers RFC3986 but some practical
+	 * assumptions are put:
+	 *
+	 * o Broken pct-encoded sequences (e.g. single "%") are allowed.
+	 * o scheme names must end with alphanumeric, must be longer than
+	 *   or equal to two octets, and must not contain more than one
+	 *   non-alphanumeric ("+", "-" or ".").
+	 * o URLs containing neither non-empty path, query part nor fragment
+	 *   (e.g. "about:") are omitted: they are treated as ordinal words.
+	 */
 	for (ptr = NULL, i = 0; i < str->len; ptr = NULL, i++) {
-	    /* skip non-alphanumeric. */
-	    if (!(inrange(str->str[i], '0', '9') ||
-		  inrange(str->str[i], 'A', 'Z') ||
-		  inrange(str->str[i], 'a', 'z')))
+	    int has_double_slash, has_authority, has_empty_path,
+		has_no_query, has_no_fragment;
+	    size_t alphadigit, nonalphadigit;
+
+	    /* skip non-alpha. */
+	    if (!is_alpha(str, i))
 		continue;
 
 	    ptr = str->str + i;
 
-	    /* (url:)? - case insensitive */
+	    /* "url:" - case insensitive */
 	    if (startswith(str, i, "url:", 4, 0))
 		i += 4;
 
-	    /* mailto: */
-	    if (startswith(str, i, "mailto:", 7, 1))
-		i += 7;
-	    /* news: */
-	    else if (startswith(str, i, "news:", 5, 1))
-		i += 5;
-	    /* [0-9a-z][-+.0-9a-z]*:// */
-	    else {
-		if (!(i < str->len &&
-		      (inrange(str->str[i], '0', '9') ||
-		       inrange(str->str[i], 'a', 'z'))))
-		    continue;
+	    /* scheme */
+	    if (is_alpha(str, i))
 		i++;
-		while (i < str->len &&
-		       (str->str[i] == '+' || str->str[i] == '-' ||
-			str->str[i] == '.' ||
-			inrange(str->str[i], '0', '9') ||
-			inrange(str->str[i], 'a', 'z')))
+	    else
+		continue;
+
+	    nonalphadigit = 0;
+	    alphadigit = 1;
+	    while (1) {
+		if (is_alpha(str, i) || is_digit(str, i))
+		    alphadigit++;
+		else if (is(str, i, '+') || is(str, i, '-') || is(str, i, '.'))
+		    nonalphadigit++;
+		else
+		    break;
+		i++;
+	    }
+	    if (alphadigit < 2 || 1 < nonalphadigit ||
+	        ! (is_digit(str, i - 1) || is_alpha(str, i - 1)))
+		continue;
+
+	    /* ":" */
+	    if (is(str, i, ':'))
+		i++;
+	    else
+		continue;
+
+	    /* hier-part */
+	    has_double_slash = 0;
+	    has_authority = 0;
+	    has_empty_path = 0;
+	    has_no_query = 0;
+	    has_no_fragment = 0;
+	    if (startswith(str, i, "//", 2, 0)) {
+		/* "//" */
+		has_double_slash = 1;
+		i += 2;
+
+		/* authority - FIXME:syntax relaxed */
+		if (is(str, i, '[') || is(str, i, ':') || is(str, i, '@') ||
+		    is_unreserved(str, i) || is_pct_encoded(str, i) ||
+		    is_sub_delim(str, i)) {
+		    has_authority = 1;
 		    i++;
-		if (!startswith(str, i, "://", 3, 1))
-		    continue;
-		i += 3;
+		    while (is(str, i, '[') || is(str, i, ']') ||
+			   is(str, i, ':') || is(str, i, '@') ||
+			   is_unreserved(str, i) || is_pct_encoded(str, i) ||
+			   is_sub_delim(str, i))
+			i++;
+		}
 	    }
 
-	    /* [\x21-\x7e]+ */
-	    if (!(i < str->len && inrange(str->str[i], 0x21, 0x7e)))
-		continue;
-	    i++;
-	    while (i < str->len && inrange(str->str[i], 0x21, 0x7e))
+	    /* path */
+	    if (has_double_slash) {
+		if (has_authority)
+		    goto path_abempty;
+		else
+		    goto path_absolute;
+	    } /* else goto path_rootless; */
+
+	    /* path_rootless: */
+	    if (is_pchar(str, i)) { /* FIXME:path-noscheme not concerned */
 		i++;
+		while (is_pchar(str, i))
+		    i++;
+		goto path_abempty;
+	    } else {
+		has_empty_path = 1;
+		goto path_empty;
+	    }
+
+	  path_absolute:
+	    if (startswith(str, i, "//", 2, 0))
+		continue;
+	    else if (is(str, i, '/')) {
+		i++;
+		if (is_pchar(str, i)) {
+		    i++;
+		    while (is_pchar(str, i))
+			i++;
+		}
+		goto path_abempty;
+	    } else
+		continue;
+
+	  path_abempty:
+	    if (is(str, i, '/')) {
+		i++;
+		while (is(str, i, '/') || is_pchar(str, i))
+		    i++;
+	    } /* else goto path_empty; */
+
+	  path_empty:
+	    ;
+
+	    /* query */
+	    if (is(str, i, '?')) {
+		i++;
+		while (is(str, i, '/') || is(str, i, '?') || is_pchar(str, i))
+		    i++;
+	    } else
+		has_no_query = 1;
+
+	    /* fragment */
+	    if (is(str, i, '#')) {
+		i++;
+		while (is(str, i, '/') || is(str, i, '?') || is_pchar(str, i))
+		    i++;
+	    } else
+		has_no_fragment = 1;
+
+	    if (has_empty_path && has_no_query && has_no_fragment)
+		continue;
+
 	    break;
 	}
 

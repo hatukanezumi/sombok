@@ -564,7 +564,8 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 		(action == LINEBREAK_ACTION_INDIRECT && bSpc == 0)) {
 		/* When conjunction is expected to exceed charmax,
 		 * try urgent breaking. */
-		if (lbobj->charmax < str->gcstr[str->pos - 1].idx +
+		if (urgEnd < bBeg + bLen + bSpc &&
+		    lbobj->charmax < str->gcstr[str->pos - 1].idx +
 		    str->gcstr[str->pos - 1].len - str->gcstr[bBeg].idx) {
 		    size_t charmax, chars;
 

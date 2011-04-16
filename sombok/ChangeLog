@@ -1,3 +1,10 @@
+2011.5RC  Wed Apr 16 2011
+	* break.c:
+	  - Bug Fix: Infinite loop occurs when prep_func generated very long
+	    (> charmax) unbreakable line.
+	* utils.c:
+	  - linebreak_prep_URIBREAK(): loosely refers RFC3986.
+
 2011.4  Fri Apr 01 2011
 	* Added Debian packaging info.
 	* Makefile.am:

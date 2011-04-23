@@ -1,0 +1,5 @@
+2.0.5  2011-04-23
+	- Bug Fix: Infinite loop occurs when prep_func generated very long
+	  (> charmax) unbreakable line.
+	- linebreak_prep_URIBREAK(): loosely refers RFC3986.
+

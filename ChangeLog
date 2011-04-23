@@ -1,3 +1,7 @@
+2.0.5  Xxx Xxx XX 2011
+	* No new features.
+	* New versioning scheme. Suggested by Emmanuel Bouthenot.
+
 2011.5RC  Wed Apr 16 2011
 	* break.c:
 	  - Bug Fix: Infinite loop occurs when prep_func generated very long

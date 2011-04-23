@@ -1,6 +1,7 @@
 Name: sombok
 Version: @VERSION@
 Release: 1%{?dist}
+Epoch: 1
 License: GPLv2+
 Group: System Environment/Libraries
 Summary: Unicode Text Segmentation Package
@@ -37,7 +38,7 @@ Annex #29 (UAX #29).
 Summary: Unicode Text Segmentation package
 Summary(ja): ユニコード テキスト分節パッケージ
 Group: Development/Libraries
-Requires: %{name} = %{version}-%{release}
+Requires: %{name} = %{epoch}:%{version}-%{release}
 Requires: pkgconfig
 
 %description devel

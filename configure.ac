@@ -198,7 +198,12 @@ if test "x$docdir" = "x"
 then
   docdir="$datadir/doc/$PACKAGE_NAME-$PACKAGE_VERSION"
 fi
+if test "x$htmldir" = "x"
+then
+  htmldir="$docdir/html"
+fi
 AC_SUBST(docdir)
+AC_SUBST(htmldir)
 
 AC_CONFIG_FILES(Makefile include/sombok.h sombok.pc sombok.spec doc/doxyfile)
 AC_OUTPUT

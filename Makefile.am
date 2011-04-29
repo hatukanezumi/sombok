@@ -33,7 +33,6 @@ TESTS = tests/*.t
 if ENABLE_DOC
 html_DATA = doc/html/*
 MOSTLYCLEANFILES = stamp-html $(html_DATA)
-htmldir = $(docdir)/html
 
 $(html_DATA): stamp-html
 

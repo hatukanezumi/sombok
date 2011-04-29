@@ -54,6 +54,8 @@ autoreconf -i -f
 %configure
 make
 
+[ -e doc/html/search ] && mv doc/html/search doc/html-search
+
 %check
 make check
 
@@ -61,6 +63,9 @@ make check
 rm -rf $RPM_BUILD_ROOT
 make install DESTDIR=$RPM_BUILD_ROOT
 rm $RPM_BUILD_ROOT%{_libdir}/*.la
+
+make uninstall-htmlDATA DESTDIR=$RPM_BUILD_ROOT
+[ -e doc/html-search ] && mv doc/html-search doc/html/search
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -71,12 +76,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-, root, root)
-%doc README* AUTHORS COPYING ChangeLog*
+%doc README* AUTHORS COPYING ChangeLog* NEWS
 %{_libdir}/lib*.so.*
 
 %files devel
 %defattr(-, root, root)
-%doc README* AUTHORS COPYING ChangeLog* doc/html
+%doc README* AUTHORS COPYING ChangeLog* doc/html NEWS
 %{_includedir}/*
 %{_libdir}/lib*.a
 %{_libdir}/lib*.so

@@ -40,6 +40,7 @@
 #define LB_AI ((propval_t)34)
 #define LB_SA ((propval_t)35)
 #define LB_XX ((propval_t)36)
+#define LB_HL ((propval_t)37)
 
 #define EA_Z ((propval_t)0)
 #define EA_Na ((propval_t)1)

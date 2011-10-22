@@ -1,11 +1,11 @@
 Name: sombok
 Version: @VERSION@
 Release: 1%{?dist}
-Epoch: 1
+Epoch: 0
 License: GPLv2+
 Group: System Environment/Libraries
-Summary: Unicode Text Segmentation Package
 Summary(ja): ユニコード テキスト分節パッケージ
+Summary: Unicode Text Segmentation Package
 
 Source: sombok-@VERSION@.tar.gz
 URL: http://hatuka.nezumi.nu/repos/sombok/
@@ -17,7 +17,15 @@ BuildRequires: automake
 BuildRequires: autoconf
 BuildRequires: libtool
 BuildRequires: libthai-devel
+BuildRequires: doxygen
 Requires: libthai
+
+%description -l ja
+ソンボク (Sombok) パッケージはユニコード標準附属書14 (UAX #14) で
+述べるユニコード行分割アルゴリズムを実行する。行分割位置の決定にあ
+たって、附属書11 (UAX #11) で定める East_Asian_Width 参考特性を考
+慮する。また、附属書29 (UAX #29) で述べる「初期の」書記素クラスタ
+分節も実装している。
 
 %description
 sombok package performs Line Breaking Algorithm described in
@@ -27,16 +35,9 @@ concerned to determin breaking positions.  This package also
 implements ``default'' Grapheme Cluster segmentation described in
 Annex #29 (UAX #29).
 
-%description -l ja
-ソンボク (Sombok) パッケージはユニコード標準附属書14 (UAX #14) で
-述べるユニコード行分割アルゴリズムを実行する。行分割位置の決定にあ
-たって、附属書11 (UAX #11) で定める East_Asian_Width 参考特性を考
-慮する。また、附属書29 (UAX #29) で述べる「初期の」書記素クラスタ
-分節も実装している。
-
 %package devel
-Summary: Unicode Text Segmentation package
 Summary(ja): ユニコード テキスト分節パッケージ
+Summary: Unicode Text Segmentation package
 Group: Development/Libraries
 Requires: %{name} = %{epoch}:%{version}-%{release}
 Requires: pkgconfig

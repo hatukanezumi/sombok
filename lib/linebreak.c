@@ -499,6 +499,9 @@ propval_t linebreak_lbrule(propval_t b_idx, propval_t a_idx)
 {
     propval_t result = PROP_UNKNOWN;
 
+    if (b_idx == LB_HL) b_idx = LB_AL;
+    if (a_idx == LB_HL) a_idx = LB_AL;
+
     if (b_idx < 0 || linebreak_rulessiz <= b_idx ||
 	a_idx < 0 || linebreak_rulessiz <= a_idx);
     else

@@ -270,7 +270,7 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
     gcstring_t *s = NULL, *t = NULL, *beforeFrg = NULL, *fmt = NULL,
 	*broken = NULL;
     unistr_t unistr;
-    size_t i;
+    size_t i, j;
     gcstring_t empty = { NULL, 0, NULL, 0, 0, lbobj };
 
     /***
@@ -309,6 +309,15 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
     if (str == NULL)
 	return NULL;
 
+    /* South East Asian complex breaking. */
+    errno = 0;
+    linebreak_southeastasian_flagbreak(str);
+    if (errno) {
+	lbobj->errnum = errno;
+	gcstring_DESTROY(str);
+	return NULL;
+    }
+
     /* Legacy-CM: Treat SP CM+ as if it were ID.  cf. [UAX #14] 9.1. */
     if (lbobj->options & LINEBREAK_OPTION_LEGACY_CM)
 	for (i = 1; i < str->gclen; i++)
@@ -324,14 +333,60 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 		i--;
 	    }
 
-    /* South East Asian complex breaking. */
-    errno = 0;
-    linebreak_southeastasian_flagbreak(str);
-    if (errno) {
-	lbobj->errnum = errno;
-	gcstring_DESTROY(str);
-	return NULL;
+#ifdef LB_HL
+    /* LB21a (as of 6.1.0): HL CM* (HY | BA) CM* × [^ CB] */
+    if (str != NULL && str->gclen) {
+	for (i = 0, j = 0; i < str->len; i++) {
+	    /* HL */
+	    if (linebreak_lbclass(lbobj, str->str[i]) == LB_HL)
+		i++;
+	    else
+		continue;
+
+	    /* CM* */
+	    while (i < str->len &&
+		   linebreak_lbclass(lbobj, str->str[i]) == LB_CM)
+		i++;
+	    if (str->len <= i)
+		break;
+
+	    /* (HY|BA) */
+	    if (linebreak_lbclass(lbobj, str->str[i]) == LB_HY ||
+		linebreak_lbclass(lbobj, str->str[i]) == LB_BA)
+		i++;
+	    else
+		continue;
+
+	    /* CM* */
+	    while (i < str->len &&
+		   linebreak_lbclass(lbobj, str->str[i]) == LB_CM)
+		i++;
+	    if (str->len <= i)
+		break;
+
+	    /* [^CB] */
+	    switch (linebreak_lbclass(lbobj, str->str[i])) {
+	    /* prohibit break by default */
+	    case LB_BK: /* LB6 */
+	    case LB_CR:
+	    case LB_LF:
+	    case LB_NL:
+	    case LB_SP: /* LB7 */
+	    case LB_ZW:
+	    case LB_CM: /* LB9 */
+	    case LB_WJ: /* LB11 */
+	    /* allow break by default */
+	    case LB_CB: /* LB20 */
+		continue;
+	    }
+
+	    while (str->gcstr[j].idx < i)
+		j++;
+	    if (str->gcstr[j].idx == i && ! str->gcstr[j].flag)
+		str->gcstr[j].flag = LINEBREAK_FLAG_PROHIBIT_BEFORE;
+	}
     }
+#endif /* LB_HL */
 
     /***
      *** Initialize status.
@@ -519,6 +574,10 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 		case LB_CM:
 		    blbc = LB_AL;
 		    break;
+		/* LB21a (as of 6.1.0): Treat HL as AL. */
+		case LB_HL:
+		    blbc = LB_AL;
+		    break;
 		/* LB27: Treat hangul syllable as if it were ID (or AL). */
 		case LB_H2:
 		case LB_H3:
@@ -541,6 +600,10 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 		    break;
 		/* LB10: Treat any remaining CM+ as if it were AL. */
 		case LB_CM:
+		    albc = LB_AL;
+		    break;
+		/* LB21a (as of 6.1.0): Treat HL as AL. */
+		case LB_HL:
 		    albc = LB_AL;
 		    break;
 		/* LB27: Treat hangul syllable as if it were ID (or AL). */

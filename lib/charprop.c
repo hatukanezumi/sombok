@@ -35,8 +35,8 @@ static propval_t PROPENT_VSEL[] = { LB_CM, EA_Z, GB_Extend, SC_Inherited };
 /* Private use - XX */
 static propval_t PROPENT_PRIVATE[] = { LB_AL, EA_A, GB_Other, SC_Unknown };
 
-/* Surrogates or other unassigned - XX/SG */
-static propval_t PROPENT_UNKNOWN[] = { LB_AL, EA_N, GB_Other, SC_Unknown };
+/* Reserved or noncharacter - XX */
+static propval_t PROPENT_RESERVED[] = { LB_AL, EA_N, GB_Control, SC_Unknown };
 
 /** Search for character properties.
  * 
@@ -147,7 +147,7 @@ void linebreak_charprop(linebreak_t * obj, unichar_t c,
 		 (0x100000 <= c && c <= 0x10FFFD))
 	    ent = PROPENT_PRIVATE;
 	else
-	    ent = PROPENT_UNKNOWN;
+	    ent = PROPENT_RESERVED;
 
 	if (lbcptr && lbc == PROP_UNKNOWN)
 	    lbc = ent[0];

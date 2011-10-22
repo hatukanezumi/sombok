@@ -45,10 +45,6 @@
 /* Define to 1 if you have the <wchar.h> header file. */
 #undef HAVE_WCHAR_H
 
-/* Define to the sub-directory in which libtool stores uninstalled libraries.
-   */
-#undef LT_OBJDIR
-
 /* Set this to use mymalloc wrapper. */
 #undef MALLOC_DEBUG
 

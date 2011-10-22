@@ -1,3 +1,29 @@
+2.0.6beta1  2011-10-21
+	* Update UCD to 6.1.0beta at Sep 19.
+	* lib/break.c:
+	  - New prep for LB21a about HL (as of UAX#14 rel 27; 6.1.0 draft 2).
+	* lib/charprop.c:
+	  - Unassigned codepoints (Cn) are GCB Control, not Other (as of
+	    Unicode 6.1.0beta data).
+	* lib/linebreak.c:
+	  - linebreak_lbrule(): treat HL as AL.
+	* Makefile.am:
+	  - increase -version-info from 4.2.1 to 4.3.1.
+	* src/sombok.c:
+	  - Fix SF.net bug #3400519(1): removed ESTRPIPE which is specific to
+	    Linux etc.  Reported by Yusuke Muraoka (jbking@sf.net).
+	* tests/01break.t:
+	  - Added Hebrew (he) test.
+	* config.guess:
+	* config.sub:
+	  - Updated.
+	* COPYING:
+	  - Fix CPAN RT#71657: Updated street address of FSF.  Reported by
+	    Xavier Bachelot.
+	* [Note] ``Compact array'' has grown bigger than 8191 entries.
+	  Therefore the architectures with 16-bit signed pointer won't be
+	  supported anymore.
+
 2.0.5  2011-04-23
 	* No new features.
 	* New versioning scheme. Suggested by Emmanuel Bouthenot.

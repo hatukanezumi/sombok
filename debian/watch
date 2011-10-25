@@ -1,0 +1,2 @@
+version=3
+opts="uversionmangle=s/2011/1.9/" http://sf.net/linefold/sombok-(.*)\.tar\.gz

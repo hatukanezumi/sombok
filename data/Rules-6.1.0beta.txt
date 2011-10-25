@@ -131,20 +131,20 @@ PR × (AL | HL)
 PO × (AL | HL)
 
 # LB25
-CL × PO
-CP × PO
-CL × PR
-CP × PR
-NU × PO
-NU × PR
-PO × OP
-PO × NU
-PR × OP
-PR × NU
-HY × NU
-IS × NU
-NU × NU
-SY × NU
+#CL × PO
+#CP × PO
+#CL × PR
+#CP × PR
+#NU × PO
+#NU × PR
+#PO × OP
+#PO × NU
+#PR × OP
+#PR × NU
+#HY × NU
+#IS × NU
+#NU × NU
+#SY × NU
 
 ## Korean syllable blocks
 

@@ -23,9 +23,6 @@
  *
  *@{*/
 
-extern propval_t *linebreak_rules[];
-extern size_t linebreak_rulessiz;
-
 /** Constructor
  *
  * Creates new linebreak object.
@@ -490,25 +487,29 @@ void linebreak_reset(linebreak_t * lbobj)
  *
  * From given two line breaking classes, get breaking rule determined by
  * internal data.
+ * @param[in] obj linebreak object, must not be NULL.
  * @param[in] a_idx line breaking class.
  * @param[in] b_idx line breaking class.
  * @return line breaking action: MANDATORY, DIRECT, INDIRECT or PROHIBITED.
  * If action was not determined, returns DIRECT.
+ *
+ * @note This method gives just approximate description of line breaking
+ * behavior.  Class AI will be resolved to approppriate class.
+ * See also linebreak_lbrule().
+ *
+ * @note This method was introduced by Sombok 2.0.6. 
+ *
  */
-propval_t linebreak_lbrule(propval_t b_idx, propval_t a_idx)
+propval_t linebreak_get_lbrule(linebreak_t * obj, propval_t b_idx,
+			       propval_t a_idx)
 {
-    propval_t result = PROP_UNKNOWN;
-
-    if (b_idx == LB_HL) b_idx = LB_AL;
-    if (a_idx == LB_HL) a_idx = LB_AL;
-
-    if (b_idx < 0 || linebreak_rulessiz <= b_idx ||
-	a_idx < 0 || linebreak_rulessiz <= a_idx);
-    else
-	result = linebreak_rules[b_idx][a_idx];
-    if (result == PROP_UNKNOWN)
-	return LINEBREAK_ACTION_DIRECT;
-    return result;
+    if (b_idx == LB_AI)
+	b_idx = (obj->options & LINEBREAK_OPTION_EASTASIAN_CONTEXT) ?
+		LB_ID : LB_AL;
+    if (a_idx == LB_AI)
+	a_idx = (obj->options & LINEBREAK_OPTION_EASTASIAN_CONTEXT) ?
+		LB_ID : LB_AL;
+    return linebreak_lbrule(b_idx, a_idx);
 }
 
 /** Get Line Breaking Class

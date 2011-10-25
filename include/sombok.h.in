@@ -297,12 +297,13 @@ extern void linebreak_update_eawidth(linebreak_t *, unichar_t, propval_t);
 extern void linebreak_clear_eawidth(linebreak_t *);
 
 extern propval_t linebreak_eawidth(linebreak_t *, unichar_t);
+extern propval_t linebreak_get_lbrule(linebreak_t *, propval_t, propval_t);
 extern propval_t linebreak_lbclass(linebreak_t *, unichar_t);
-extern propval_t linebreak_lbrule(propval_t, propval_t);
 
 extern gcstring_t **linebreak_break(linebreak_t *, unistr_t *);
 extern gcstring_t **linebreak_break_fast(linebreak_t *, unistr_t *);
 extern gcstring_t **linebreak_break_partial(linebreak_t *, unistr_t *);
+extern propval_t linebreak_lbrule(propval_t, propval_t);
 
 extern const char *linebreak_unicode_version;
 extern const char *linebreak_propvals_EA[];

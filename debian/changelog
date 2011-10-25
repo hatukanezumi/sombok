@@ -1,5 +1,13 @@
-libsombok (2.0.5) unstable; urgency=low
+sombok (2.0.5-2) unstable; urgency=low
 
-  * Initial Release.
+  * Add a patch to fix a FTBFS on kFreeBSD (Closes: #630776)
+  * Add some fixes in copyright file.
+  * Update Vcs-* fields.
 
- -- Hatuka*nezumi - IKEDA Soji <hatuka@nezumi.nu>  Sat, 23 Apr 2011 11:59:42 +0900
+ -- Emmanuel Bouthenot <kolter@debian.org>  Fri, 17 Jun 2011 14:34:04 +0000
+
+sombok (2.0.5-1) unstable; urgency=low
+
+  * Initial Release (Closes: #625754).
+
+ -- Emmanuel Bouthenot <kolter@debian.org>  Thu, 05 May 2011 11:33:46 +0000

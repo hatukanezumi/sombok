@@ -1,3 +1,19 @@
+2.0.6beta2  2011-10-26
+	* data/Rule-6.1.0beta.txt:
+	  - Removed LB25 entries since they are handled by hardcoded
+	    preprocessing.
+	* debian/*:
+	  - Updated Debian packaging info by which in Debian sid packaged by
+	    Emmanuel Bouthenot.
+	* lib/break.c:
+	  - Implemented strict LB25 rule.  See also UAX#14 8.2 Example 7.
+	  - Moved linebreak_lbrule() from linebreak.c to break.c.
+	  - For compatibility, linebreak_lbrule() gives results by simplified
+	    rules LB1, LB21a & LB25 and emulates LB9, LB10.
+	* lib/linebreak.c:
+	  - New: linebreak_get_lbrule(): Resolve AI then apply
+	    linebreak_lbrule().
+
 2.0.6beta1  2011-10-21
 	* Update UCD to 6.1.0beta at Sep 19.
 	* lib/break.c:

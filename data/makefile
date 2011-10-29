@@ -3,8 +3,10 @@
 UNICODE_VERSIONS = 5.1.0 5.2.0 6.0.0
 CURRENT_UNICODE_VERSION = 6.0.0
 
+UNICODE_VERSION ?= $(CURRENT_UNICODE_VERSION)
+
 WGET = wget
-UCD_BASE = http://www.unicode.org/Public/$(UNICODE_VERSION)/ucd/
+UCD_BASE = ftp://www.unicode.org/Public/`echo $(UNICODE_VERSION)|sed -e 's/[^.0-9].*//g'`/ucd/
 UNICODEDATA = UnicodeData-$(UNICODE_VERSION).txt
 LINEBREAK = LineBreak-$(UNICODE_VERSION).txt
 EASTASIANWIDTH = EastAsianWidth-$(UNICODE_VERSION).txt
@@ -19,14 +21,10 @@ DATA_C = ../lib/$(UNICODE_VERSION).c
 CONSTANTS_H = ../include/sombok_constants.h
 CONFIGURE_IN = ../configure.ac
 
-all:
-	$(MAKE) $(CONSTANTS_H)
-	$(MAKE) $(CONFIGURE_IN)
-	for v in $(UNICODE_VERSIONS); do \
-	    if [ -e UnicodeData-$$v.txt ]; then \
-		$(MAKE) data UNICODE_VERSION=$$v || exit 1; \
-	    fi \
-	done
+all: $(CONSTANTS_H) $(CONFIGURE_IN)
+	if [ -e UnicodeData-$(UNICODE_VERSION).txt ]; then \
+	    $(MAKE) data || exit 1; \
+	fi
 
 data: $(DATA_C)
 
@@ -51,11 +49,11 @@ custom:
 	done
 
 unicodedata-data:
-	$(WGET) -O $(UNICODEDATA) $(UCD_BASE)UnicodeData.txt
-	$(WGET) -O $(LINEBREAK) $(UCD_BASE)LineBreak.txt
-	$(WGET) -O $(EASTASIANWIDTH) $(UCD_BASE)EastAsianWidth.txt
-	$(WGET) -O $(GRAPHEMEBREAK) $(UCD_BASE)auxiliary/GraphemeBreakProperty.txt
-	$(WGET) -O $(SCRIPTS) $(UCD_BASE)Scripts.txt
+	$(WGET) -O $(UNICODEDATA) $(UCD_BASE)UnicodeData\*.txt
+	$(WGET) -O $(LINEBREAK) $(UCD_BASE)LineBreak\*.txt
+	$(WGET) -O $(EASTASIANWIDTH) $(UCD_BASE)EastAsianWidth\*.txt
+	$(WGET) -O $(GRAPHEMEBREAK) $(UCD_BASE)auxiliary/GraphemeBreakProperty\*.txt
+	$(WGET) -O $(SCRIPTS) $(UCD_BASE)Scripts\*.txt
 
 unicodedata:
 	for v in $(UNICODE_VERSIONS); do \

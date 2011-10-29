@@ -1,7 +1,10 @@
 #! perl
 
+use version;
+
 my @cat = split(',', shift @ARGV) or die;
 my $version = shift @ARGV or die;
+my $vernum = version->new($version)->numify;
 
 my %SA = ();
 foreach my $ext ('custom', 'txt') {
@@ -48,6 +51,11 @@ while (<RULES>) {
     } elsif (/Treat any remaining CM as i. i. were AL/) {
         next;
     }
+
+    # 6.1.0beta: aggregate AL & HL
+    s/\bAL *\| *HL\b/AL/g;
+    s/[(] *AL *[)]/AL/g;
+    next if /\bHL\b/; # Skip HL rules
 
     my ($left, $break, $right) = split(/\s*(!|SP\*\s*×|×|÷)\s*/, $_);
     $left = &class2re($left);
@@ -152,6 +160,7 @@ foreach my $b (@LBCLASSES) {
 ### Build property map
 
 my @PROPS = ();
+my @RESERVED = ();
 foreach my $cat (@cat) {
 
 my %PROP_EXCEPTIONS = ();
@@ -176,6 +185,15 @@ foreach my $n (1, 0) {
     open DATA, '<', $data[$n] or die $!;
     while (<DATA>) {
 	chomp $_;
+
+	my $reserved;
+	# 6.1.0: reserved or noncharacter
+	if ($data eq 'GraphemeBreakProperty' and /; *Control *# *Cn\b/) {
+	    $reserved = 1;
+	} else {
+	    $reserved = 0;
+	}
+
 	s/\s*\#.*//;
 	next unless /\S/;
 
@@ -185,7 +203,10 @@ foreach my $n (1, 0) {
 	($start, $end) = split /\.\./, $char;
 	$end ||= $start;
 	foreach my $c (hex("0x$start") .. hex("0x$end")) {
-	    if ($n) {
+	    if ($reserved) {
+		$RESERVED[$c] = 1;
+		next;
+	    } elsif ($n) {
 		if ($prop =~ /^\@([\w:]+)/) {
 		    next;
 		}
@@ -242,15 +263,17 @@ foreach my $n (1, 0) {
 		    }
 		}
 		# check unallocated high planes.
-		elsif (0x20000 <= $c) {
+		elsif (0x20000 <= $c and $c <= 0x10FFFF) {
 		    if ($cat eq 'lb' and $p ne 'XX' or
 			$cat eq 'ea' and $p ne 'N' or
-			$cat eq 'gb' and $p ne 'Other' or
+			$cat eq 'gb' and $p ne 'Control' or
 			$cat eq 'sc' and $p ne 'Unknown') {
 			die sprintf 'U+%04X have %s property %s', $c, $cat, $p;
 		    } else {
 			next;
 		    }
+		} elsif (0x10FFFF < $c) {
+		    die sprintf 'U+%04X is out of Unicode range', $c;
 		}
 		$PROPS[$c] ||= {};
 		$PROPS[$c]->{$cat} = $p;
@@ -270,14 +293,11 @@ for (my $c = 0; $c <= $#PROPS; $c++) {
 
     # reduce trivial values.
     delete $PROPS[$c]->{'lb'} if $PROPS[$c]->{'lb'} =~ /^(AL|SG|XX)$/;
-    #delete $PROPS[$c]->{'ea'} if $PROPS[$c]->{'ea'} eq 'N';
-    #delete $PROPS[$c]->{'gb'} if $PROPS[$c]->{'gb'} eq 'Other';
-    #delete $PROPS[$c]->{'sc'} if $PROPS[$c]->{'sc'} eq 'Unknown';
 
     unless (scalar keys %{$PROPS[$c]}) {
 	delete $PROPS[$c];
 	next;
-    } else {
+    } elsif (! $RESERVED[$c]) {
 	$PROPS[$c]->{'gb'} = 'Other' unless $PROPS[$c]->{'gb'};
     }
 
@@ -348,6 +368,9 @@ for (my $idx = 0; $idx < 0x20000; $idx += BLKLEN) {
 		 0xF0000 <= $c and $c <= 0xFFFFD or
 		 0x100000 <= $c and $c <= 0x10FFFD) {
 	    %blk = ('ea' => 'A');
+	# other reserved or noncharacters.
+	} elsif ($RESERVED[$c]) {
+	    %blk = ('gb' => 'Control');
 	} elsif ($PROPS[$c]) {
 	    foreach my $prop (@cat) {
 		$blk{$prop} = $PROPS[$c]->{$prop};
@@ -400,8 +423,13 @@ foreach my $k (sort keys %indexedclasses) {
     my $output = '';
     my $line = '    ';
     my @propvals = @{$indexedclasses{$k}->{$version}};
-    push @propvals, qw(SG AI SA XX)
-	if uc($k) eq 'LB';
+    if (uc($k) eq 'LB') {
+	if (6.001000 <= $vernum) {
+	    push @propvals, qw(SG AI SA HL XX);
+	} else {
+	    push @propvals, qw(SG AI SA XX);
+	}
+    }
     foreach my $v (@propvals) {
 	if (76 < 4 + length($line) + length($v)) {
 	    $output .= "$line\n";
@@ -496,6 +524,10 @@ printf STDERR "======== Version %s ========\n%d characters (in BMP and SMP), %d 
     $version, scalar(grep $_, @PROPS) +
     0x4DBF - 0x3400 + 1 + 0x9FFF - 0x4E00 + 1 + 0xFAFF - 0xF900 + 1 +
     0xF8FF - 0xE000 + 1, scalar(@C_ARY);
+die "Too many entriesi to work with unsigned 16-bit short integer: ".scalar(@C_ARY)."\n"
+    if (1 << 16) / 4 <= scalar(@C_ARY);
+warn "Too many entries to work with signed 16-bit pointer: ".scalar(@C_ARY)."\n"
+    if (1 << 15) / 4 <= scalar(@C_ARY);
 
 ############################################################################
 

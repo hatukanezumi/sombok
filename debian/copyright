@@ -1,39 +1,30 @@
-This work was packaged for Debian by:
+Format: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=174
+Upstream-Name: sombok
+Upstream-Contact: Hatuka*nezumi - IKEDA Soji <hatuka@nezumi.nu>
+Source: http://sourceforge.net/projects/linefold/files
 
-    Hatuka*nezumi - IKEDA Soji <hatuka@nezumi.nu>
+Files: *
+Copyright: 2011, Hatuka*nezumi - IKEDA Soji <hatuka@nezumi.nu>
+License: GPL-2+
 
-It was downloaded from:
+Files: debian/*
+Copyright: 2011, Emmanuel Bouthenot <kolter@debian.org>
+           2011, Hatuka*nezumi - IKEDA Soji <hatuka@nezumi.nu>
+License: GPL-2+
 
-    http://sourceforge.net/projects/linefold/files
-
-Upstream Author(s):
-
-    Hatuka*nezumi - IKEDA Soji <hatuka@nezumi.nu>
-
-Copyright:
-
-    Copyright (C) 2011 Hatuka*nezumi - IKEDA Soji
-
-License:
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 2 of the License, or
-    (at your option) any later version.
-
-    This package is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program. If not, see <http://www.gnu.org/licenses/>.
-
-On Debian systems, the complete text of the GNU General
-Public License version 2 can be found in "/usr/share/common-licenses/GPL-2".
-
-The Debian packaging is:
-
-    Copyright (C) 2011 Hatuka*nezumi - IKEDA Soji <hatuka@nezumi.nu>
-
-and is licensed under the GPL version 2, see above.
+License: GPL-2+
+ This program is free software: you can redistribute it and/or modify it
+ under the terms of the GNU General Public License as published by the
+ Free Software Foundation, either version 2 of the License, or (at your
+ option) any later version.
+ .
+ This package is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License along
+ with this program. If not, see <http://www.gnu.org/licenses/>.
+ .
+ On Debian systems, the complete text of the GNU General
+ Public License version 2 can be found in "/usr/share/common-licenses/GPL-2".

@@ -23,9 +23,6 @@
  *
  *@{*/
 
-extern propval_t *linebreak_rules[];
-extern size_t linebreak_rulessiz;
-
 /** Constructor
  *
  * Creates new linebreak object.
@@ -484,28 +481,6 @@ void linebreak_reset(linebreak_t * lbobj)
     lbobj->bufcols = 0.0;
     lbobj->state = LINEBREAK_STATE_NONE;
     lbobj->errnum = 0;
-}
-
-/** Get breaking rule between two classes
- *
- * From given two line breaking classes, get breaking rule determined by
- * internal data.
- * @param[in] a_idx line breaking class.
- * @param[in] b_idx line breaking class.
- * @return line breaking action: MANDATORY, DIRECT, INDIRECT or PROHIBITED.
- * If action was not determined, returns DIRECT.
- */
-propval_t linebreak_lbrule(propval_t b_idx, propval_t a_idx)
-{
-    propval_t result = PROP_UNKNOWN;
-
-    if (b_idx < 0 || linebreak_rulessiz <= b_idx ||
-	a_idx < 0 || linebreak_rulessiz <= a_idx);
-    else
-	result = linebreak_rules[b_idx][a_idx];
-    if (result == PROP_UNKNOWN)
-	return LINEBREAK_ACTION_DIRECT;
-    return result;
 }
 
 /** Get Line Breaking Class

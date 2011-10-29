@@ -1,7 +1,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(sombok, 2.0.5, hatuka@nezumi.nu)
+AC_INIT(sombok, 2.0.6, hatuka@nezumi.nu)
 DEFAULT_UNICODE_VERSION="6.0.0"
 LPATH="$PATH:/usr/local/bin"
 
@@ -198,7 +198,12 @@ if test "x$docdir" = "x"
 then
   docdir="$datadir/doc/$PACKAGE_NAME-$PACKAGE_VERSION"
 fi
+if test "x$htmldir" = "x"
+then
+  htmldir="$docdir/html"
+fi
 AC_SUBST(docdir)
+AC_SUBST(htmldir)
 
 AC_CONFIG_FILES(Makefile include/sombok.h sombok.pc sombok.spec doc/doxyfile)
 AC_OUTPUT

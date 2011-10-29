@@ -73,9 +73,10 @@ void linebreak_southeastasian_flagbreak(gcstring_t * gcstr)
     for (i = 0, j = 0; j < len && th_wbrk(buf + j, &brk, 1) == 1; j += brk) {
 	/* check if external module is broken. */
 	assert(0 <= brk);
-	assert(brk != 0);
 	assert(brk < len);
 
+	if (brk == 0) /* This should not cause but is caused by older libthai */
+	    break;
 	for (; i < gcstr->gclen && gcstr->gcstr[i].idx <= j + brk; i++) {
 	    /* check if external module broke temp buffer. */
 	    assert(buf[i] == (wchar_t) (gcstr->str[i]));

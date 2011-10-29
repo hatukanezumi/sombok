@@ -1,3 +1,28 @@
+2.0.6  2011-11-XX
+	Backport from 2.1.0beta; Unicode data version 6.0.0.
+	* data/Rule-6.1.0beta.txt:
+	  - Removed LB25 entries since they are handled by hardcoded
+	    preprocessing.
+	* debian/*:
+	  - Updated Debian packaging info by which in Debian sid packaged by
+	    Emmanuel Bouthenot.
+	* lib/break.c:
+	  - Implemented strict LB25 rule.  See also UAX#14 8.2 Example 7.
+	  - Moved linebreak_lbrule() from linebreak.c to break.c.
+	  - For compatibility, linebreak_lbrule() gives results by simplified
+	    rules LB1, LB25 and emulates LB9, LB10.
+	* src/sombok.c:
+	  - Fix SF.net bug #3400519(1): removed ESTRPIPE which is specific to
+	    Linux etc.  Reported by Yusuke Muraoka (jbking@sf.net).
+	* tests/01break.t:
+	  - Added Hebrew (he) test.
+	* config.guess:
+	* config.sub:
+	  - Updated.
+	* COPYING:
+	  - Fix CPAN RT#71657: Updated street address of FSF.  Reported by
+	    Xavier Bachelot.
+
 2.0.5  2011-04-23
 	* No new features.
 	* New versioning scheme. Suggested by Emmanuel Bouthenot.

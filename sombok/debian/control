@@ -1,30 +1,33 @@
-Source: libsombok
+Source: sombok
 Priority: optional
-Maintainer: <Maintainer>
-Build-Depends: libthai-dev (>= 0.1.9~), pkg-config, debhelper (>= 7.0.50~), autotools-dev, doxygen
-Standards-Version: 3.9.1
+Maintainer: Emmanuel Bouthenot <kolter@debian.org>
+Build-Depends: libthai-dev (>= 0.1.9), pkg-config, debhelper (>= 8.0.0),
+ autotools-dev, doxygen
+Standards-Version: 3.9.2
 Section: libs
 Homepage: http://sourceforge.net/projects/linefold/
+Vcs-Git: git://anonscm.debian.org/users/kolter/sombok.git
+Vcs-Browser: http://anonscm.debian.org/gitweb/?p=users/kolter/sombok.git
 
 Package: libsombok-dev
 Section: libdevel
 Architecture: any
-Depends: libsombok3 (= ${binary:Version})
-Description: Unicode Text Segmentation Package
- Sombok library package performs Line Breaking Algorithm described in 
- Unicode Standards Annex #14 (UAX #14).  East_Asian_Width informative 
- properties defined by Annex #11 (UAX #11) may be concerned to determin 
- breaking positions.  This package also implements ``default'' Grapheme 
- Cluster segmentation described in Annex #29 (UAX #29).
+Depends: libc6-dev, ${misc:Depends}, libsombok3 (= ${binary:Version}), libjs-jquery
+Description: Unicode Text Segmentation library (development files)
+ Sombok library performs Line Breaking Algorithm described in Unicode
+ Standards Annex #14 (UAX #14). East_Asian_Width informative properties
+ defined by Annex #11 (UAX #11) may be concerned to determin breaking
+ positions. This library also implements “default” Grapheme Cluster
+ segmentation described in Annex #29 (UAX #29).
+ .
+ This package contains the development files.
 
 Package: libsombok3
-Section: libs
 Architecture: any
 Depends: libthai0 (>= 0.1.9~), ${shlibs:Depends}, ${misc:Depends}
-Description: Unicode Text Segmentation Package
- Sombok library package performs Line Breaking Algorithm described in
- Unicode Standards Annex #14 (UAX #14).  East_Asian_Width informative
- properties defined by Annex #11 (UAX #11) may be concerned to determin
- breaking positions.  This package also implements ``default'' Grapheme
- Cluster segmentation described in Annex #29 (UAX #29).
-
+Description: Unicode Text Segmentation library
+ Sombok library performs Line Breaking Algorithm described in Unicode
+ Standards Annex #14 (UAX #14). East_Asian_Width informative properties
+ defined by Annex #11 (UAX #11) may be concerned to determin breaking
+ positions. This library also implements “default” Grapheme Cluster
+ segmentation described in Annex #29 (UAX #29).

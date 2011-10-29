@@ -332,12 +332,12 @@ gcstring_t *format_SHELL(linebreak_t * lbobj, linebreak_state_t state,
     write(ifd, buf, len);
     close(ifd);
     if ((len = read(ofd, buf, BUFSIZ)) == -1) {
-	lbobj->errnum = errno ? errno : ESTRPIPE;
+	lbobj->errnum = errno;
 	close(ofd);
 	return NULL;
     }
-    if (close(ofd) < 0) {
-	lbobj->errnum = errno ? errno : ESTRPIPE;
+    if (close(ofd) == -1) {
+	lbobj->errnum = errno;
 	return NULL;
     }
 

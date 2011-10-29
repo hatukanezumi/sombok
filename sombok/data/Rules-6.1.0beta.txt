@@ -1,6 +1,6 @@
 #### Rules for Unicode Line Breaking Algorithm.
-#### Based on Unicode Standard Annex #14 (UAX#14), Revision 25 (2010-03-15)
-#### by Asmus Freytag and Andy Heninger. http://www.unicode.org/reports/tr14/tr14-25.html
+#### Based on Unicode Standard Annex #14 (UAX#14), Revision 27 (2010-09-01)
+#### by Asmus Freytag and Andy Heninger. http://www.unicode.org/reports/tr14/tr14-27.html
 
 ### 1 Non-tailorable Line Breaking Rules
 
@@ -109,8 +109,11 @@ CB ÷
 × NS
 BB ×
 
+# LB21a
+HL (HY | BA) ×
+
 # LB22
-AL × IN
+(AL | HL) × IN
 ID × IN
 IN × IN
 NU × IN
@@ -119,13 +122,13 @@ NU × IN
 
 # LB23
 ID × PO
-AL × NU
-NU × AL
+(AL | HL) × NU
+NU × (AL | HL)
 
 # LB24
 PR × ID
-PR × AL
-PO × AL
+PR × (AL | HL)
+PO × (AL | HL)
 
 # LB25
 #CL × PO
@@ -158,14 +161,14 @@ PR × (JL | JV | JT | H2 | H3)
 ## Finally, join alphabetic letters into words and break everything else. 
 
 # LB28
-AL × AL
+(AL | HL) × (AL | HL)
 
 # LB29
-IS × AL
+IS × (AL | HL)
 
 # LB30 
-(AL | NU) × OP
-CP × (AL | NU)
+(AL | HL | NU) × OP
+CP × (AL | HL | NU)
 
 # LB31
 ALL ÷

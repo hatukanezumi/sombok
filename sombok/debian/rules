@@ -1,12 +1,14 @@
 #!/usr/bin/make -f
-# -*- makefile -*-
 
-# Uncomment this to turn on verbose mode.
-#export DH_VERBOSE=1
+override_dh_clean:
+	rm -rf doc/html
+	dh_clean
+
+# removing JQuery embedded copy
+override_dh_install:
+	rm -f debian/libsombok-dev/usr/share/doc/libsombok-dev/html/jquery.js
+	dh_install
 
 %:
-	dh $@ 
-
-override_dh_auto_configure:
-	dh_auto_configure -- docdir=/usr/share/doc/libsombok-dev
+	dh $@ --with=autotools-dev
 

@@ -18,6 +18,9 @@
 #include "sombok_constants.h"
 #include "sombok.h"
 
+extern propval_t *linebreak_rules[];
+extern size_t linebreak_rulessiz;
+
 /**
  * @defgroup linebreak_break break
  * @brief Perform line breaking algorithm
@@ -247,6 +250,100 @@ gcstring_t *_urgent_break(linebreak_t * lbobj, gcstring_t * str)
 	return NULL;						\
     }
 
+/** @fn propval_t linebreak_lbrule(propval_t b_idx, propval_t a_idx)
+ *
+ * Get breaking rule between two classes
+ *
+ * From given two line breaking classes, get breaking rule determined by
+ * internal data.
+ * @param[in] a_idx line breaking class.
+ * @param[in] b_idx line breaking class.
+ * @return line breaking action: MANDATORY, DIRECT, INDIRECT or PROHIBITED.
+ * If action was not determined, returns DIRECT.
+ *
+ * @note This method gives just approximate description of line breaking
+ * behavior.  Especially, it won't give meaningful value related to class AI.  
+ *
+ */
+static
+propval_t _lbruleinfo(propval_t b_idx, propval_t a_idx)
+{
+    propval_t result = PROP_UNKNOWN;
+
+    if (b_idx < 0 || linebreak_rulessiz <= b_idx ||
+	a_idx < 0 || linebreak_rulessiz <= a_idx);
+    else
+	result = linebreak_rules[b_idx][a_idx];
+    if (result == PROP_UNKNOWN)
+	return LINEBREAK_ACTION_DIRECT;
+    return result;
+}
+
+propval_t linebreak_lbrule(propval_t b_idx, propval_t a_idx)
+{
+    /* Resolve before-side class. */
+
+    switch (b_idx) {
+    /* LB1: Resolve SA, SG, XX to AL; AI cannot be resolved. */
+    case LB_SA:
+    case LB_SG:
+    case LB_XX:
+    /* LB10: Resolve CM to AL. */
+    case LB_CM:
+	b_idx = LB_AL;
+    }
+
+    /* Resolve after-side class. */
+
+    switch (a_idx) {
+    /* LB1 */
+    case LB_SA:
+    case LB_SG:
+    case LB_XX:
+        a_idx = LB_AL;
+        break;
+
+    /* LB9, LB10 */
+    case LB_CM:
+	/* LB9: Treat X CM as if it were X, with some exceptions. */
+	switch (b_idx) {
+	case LB_BK:
+	case LB_CR:
+	case LB_LF:
+	case LB_NL:
+	case LB_SP:
+	case LB_ZW:
+	    break;
+
+	default:
+	    return LINEBREAK_ACTION_PROHIBITED;
+	}
+
+	/* XXX Legacy-CM rule cannot be applied. */
+
+	/* LB10: Treat any remaining combining mark as AL. */
+	a_idx = LB_AL;
+	if (b_idx == LB_CM)
+	    b_idx = LB_AL;
+	break;
+    }
+
+    /* LB25, simplified:
+     * (CL|CP|NU) × (PO|PR)
+     * (PO|PR) × (OP|NU)
+     * (HY|IS|NU|SY) × NU
+     */
+    if (((b_idx == LB_CL || b_idx == LB_CP || b_idx == LB_NU) &&
+	 (a_idx == LB_PO || a_idx == LB_PR)) ||
+	((b_idx == LB_PO || b_idx == LB_PR) &&
+	 (a_idx == LB_OP || a_idx == LB_NU)) ||
+	((b_idx == LB_HY || b_idx == LB_IS || b_idx == LB_NU ||
+	  b_idx == LB_SY) && a_idx == LB_NU))
+	return LINEBREAK_ACTION_PROHIBITED;
+
+    return _lbruleinfo(b_idx, a_idx);
+}
+
 /** @fn gcstring_t** linebreak_break_partial(linebreak_t *lbobj, unistr_t *input)
  *
  * Perform line breaking algorithm with incremental inputs.
@@ -270,7 +367,7 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
     gcstring_t *s = NULL, *t = NULL, *beforeFrg = NULL, *fmt = NULL,
 	*broken = NULL;
     unistr_t unistr;
-    size_t i;
+    size_t i, j;
     gcstring_t empty = { NULL, 0, NULL, 0, 0, lbobj };
 
     /***
@@ -309,6 +406,15 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
     if (str == NULL)
 	return NULL;
 
+    /* South East Asian complex breaking. */
+    errno = 0;
+    linebreak_southeastasian_flagbreak(str);
+    if (errno) {
+	lbobj->errnum = errno;
+	gcstring_DESTROY(str);
+	return NULL;
+    }
+
     /* Legacy-CM: Treat SP CM+ as if it were ID.  cf. [UAX #14] 9.1. */
     if (lbobj->options & LINEBREAK_OPTION_LEGACY_CM)
 	for (i = 1; i < str->gclen; i++)
@@ -324,13 +430,138 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 		i--;
 	    }
 
-    /* South East Asian complex breaking. */
-    errno = 0;
-    linebreak_southeastasian_flagbreak(str);
-    if (errno) {
-	lbobj->errnum = errno;
-	gcstring_DESTROY(str);
-	return NULL;
+    /* LB25: not break in (PR|PO)? (OP|HY)? NU (NU|SY|IS)* (CL|CP)? (PR|PO)? */
+    if (str != NULL && str->gclen) {
+        size_t st, et;
+        for (i = 0, j = 0; i < str->len; i++) {
+	    st = et = (size_t)-1;
+
+	    /* (PR|PO)? */
+	    switch (linebreak_lbclass(lbobj, str->str[i])) {
+	    case LB_PR:
+	    case LB_PO:
+		if (st == (size_t)-1)
+		    st = i;
+	    LB25_PRPO_PREFIX:
+		i++;
+		/* CM* */
+		while (i < str->len &&
+		       linebreak_lbclass(lbobj, str->str[i]) == LB_CM)
+		    i++;
+		if (str->len <= i)
+		    goto LB25_BREAK;
+	    }
+
+	    /* (OP|HY)? */
+	    switch (linebreak_lbclass(lbobj, str->str[i])) {
+	    case LB_OP:
+	    case LB_HY:
+		if (st == (size_t)-1)
+		    st = i;
+	    LB25_OPHY_PREFIX:
+		i++;
+		/* CM* */
+		while (i < str->len &&
+		       linebreak_lbclass(lbobj, str->str[i]) == LB_CM)
+		    i++;
+		if (str->len <= i) {
+		    if (eot)
+			goto LB25_BREAK;
+		    else
+			goto LB25_FOUND; /* save possible partial sequence. */
+		}
+	    }
+
+	    /* NU (NU|SY|IS)* */
+	    switch (linebreak_lbclass(lbobj, str->str[i])) {
+	    case LB_NU:
+		if (st == (size_t)-1)
+		    st = i;
+		i++;
+		/* (NU|SY|IS|CM)* */
+		while (i < str->len)
+		    switch (linebreak_lbclass(lbobj, str->str[i])) {
+		    case LB_NU:
+		    case LB_SY:
+		    case LB_IS:
+		    case LB_CM:
+		        i++;
+			break;
+
+		    case LB_CL:
+		    case LB_CP:
+		        goto LB25_CLCP_SUFFIX;
+
+		    case LB_PR:
+		    case LB_PO:
+		        goto LB25_PRPO_SUFFIX;
+
+		    default:
+		        goto LB25_FOUND;
+		    }
+		if (str->len <= i)
+		    goto LB25_FOUND;
+		break;
+
+	    case LB_PR:
+	    case LB_PO:
+		st = i;
+		goto LB25_PRPO_PREFIX;
+
+	    case LB_OP:
+	    case LB_HY:
+		st = i;
+		goto LB25_OPHY_PREFIX;
+
+	    default:
+		continue;
+	    }
+
+            /* (CL|CP)? */
+	    switch (linebreak_lbclass(lbobj, str->str[i])) {
+	    case LB_CL:
+	    case LB_CP:
+	    LB25_CLCP_SUFFIX:
+		i++;
+		/* CM* */
+		while (i < str->len &&
+		       linebreak_lbclass(lbobj, str->str[i]) == LB_CM)
+		    i++;
+		if (str->len <= i)
+		    goto LB25_FOUND;
+	    }
+
+            /* (PR|PO)? */
+	    switch (linebreak_lbclass(lbobj, str->str[i])) {
+	    case LB_PR:
+	    case LB_PO:
+	    LB25_PRPO_SUFFIX:
+		et = i;
+		i++;
+		/* CM* */
+		while (i < str->len &&
+		       linebreak_lbclass(lbobj, str->str[i]) == LB_CM)
+		    i++;
+		if (str->len <= i)
+		    goto LB25_FOUND;
+	    }
+
+	  LB25_FOUND:
+	    for (st++; st < i; st++) {
+		while (str->gcstr[j].idx < st)
+		    j++;
+		if (str->gcstr[j].idx == st && ! str->gcstr[j].flag)
+		    str->gcstr[j].flag = LINEBREAK_FLAG_PROHIBIT_BEFORE;
+	    }
+	    /* match may be overwrapped */
+	    if (et != (size_t)-1) {
+		i = st = et;
+		et = (size_t)-1;
+		goto LB25_PRPO_PREFIX;
+	    }
+	}
+      LB25_BREAK:
+	;
     }
 
     /***
@@ -556,7 +787,7 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 		    break;
 		}
 
-		action = linebreak_lbrule(blbc, albc);
+		action = _lbruleinfo(blbc, albc);
 	    }
 
 	    /* Check prohibited break. */
@@ -1011,3 +1242,4 @@ gcstring_t **linebreak_break(linebreak_t * lbobj, unistr_t * input)
 
     return ret;
 }
+

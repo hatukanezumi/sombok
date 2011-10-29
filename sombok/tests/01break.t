@@ -2,9 +2,9 @@
 
 . tests/lb.sh
 
-plan 10
+plan 11
 
-for lang in ar el fr ja ja-a ko ru vi vi-decomp zh; do
+for lang in ar el fr he ja ja-a ko ru vi vi-decomp zh; do
     dotest $lang $lang
 done
 

@@ -1,5 +1,12 @@
+2.1.0beta 201X-XX-XX
+	* Bump up minor version.
+	* data/Rules-6.0.0.txt:
+	  - Backport - removed LB25 entries.
+	* lib/break.c:
+	  - _break_partial(): Fix: LB25 preprocessing can miss partial input.
+
 2.0.6beta2  2011-10-26
-	* data/Rule-6.1.0beta.txt:
+	* data/Rules-6.1.0beta.txt:
 	  - Removed LB25 entries since they are handled by hardcoded
 	    preprocessing.
 	* debian/*:

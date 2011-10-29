@@ -439,7 +439,6 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 		i--;
 	    }
 
-#ifdef LB_HL
     /* LB21a (as of 6.1.0): HL (HY | BA) × [^ CB] */
     if (str != NULL && str->gclen) {
 	for (i = 0, j = 0; i < str->len; i++) {
@@ -492,7 +491,6 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 		str->gcstr[j].flag = LINEBREAK_FLAG_PROHIBIT_BEFORE;
 	}
     }
-#endif /* LB_HL */
 
     /* LB25: not break in (PR|PO)? (OP|HY)? NU (NU|SY|IS)* (CL|CP)? (PR|PO)? */
     if (str != NULL && str->gclen) {
@@ -528,8 +526,12 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 		while (i < str->len &&
 		       linebreak_lbclass(lbobj, str->str[i]) == LB_CM)
 		    i++;
-		if (str->len <= i)
-		    goto LB25_BREAK;
+		if (str->len <= i) {
+		    if (eot)
+			goto LB25_BREAK;
+		    else
+			goto LB25_FOUND; /* save possible partial sequence. */
+		}
 	    }
 
 	    /* NU (NU|SY|IS)* */
@@ -548,10 +550,12 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 		        i++;
 			break;
 
+		    /* (CL|CP) */
 		    case LB_CL:
 		    case LB_CP:
 		        goto LB25_CLCP_SUFFIX;
 
+		    /* (PR|PO) */
 		    case LB_PR:
 		    case LB_PO:
 		        goto LB25_PRPO_SUFFIX;
@@ -810,7 +814,7 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 		case LB_CM:
 		    blbc = LB_AL;
 		    break;
-		/* LB21a (as of 6.1.0): Treat HL as AL. */
+		/* (As of 6.1.0): Treat HL as AL. */
 		case LB_HL:
 		    blbc = LB_AL;
 		    break;
@@ -838,7 +842,7 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 		case LB_CM:
 		    albc = LB_AL;
 		    break;
-		/* LB21a (as of 6.1.0): Treat HL as AL. */
+		/* (As of 6.1.0): Treat HL as AL. */
 		case LB_HL:
 		    albc = LB_AL;
 		    break;

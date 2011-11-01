@@ -1,6 +1,6 @@
-2.0.6  2011-11-XX
+2.0.6  2011-11-01
 	Backport from 2.1.0beta; Unicode data version 6.0.0.
-	* data/Rule-6.1.0beta.txt:
+	* data/Rule-6.0.0.txt:
 	  - Removed LB25 entries since they are handled by hardcoded
 	    preprocessing.
 	* debian/*:

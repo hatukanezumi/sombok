@@ -1,9 +1,23 @@
-2.1.0beta 201X-XX-XX
+2.1.0beta  2011-12-28
 	* Bump up minor version.
+	* Update UCD to 6.1.0beta at Dec 15 2011.
+	* config.sub:
+	* config.guess:
+	  - Updated.
 	* data/Rules-6.0.0.txt:
 	  - Backport - removed LB25 entries.
 	* lib/break.c:
 	  - _break_partial(): Fix: LB25 preprocessing can miss partial input.
+	* lib/charprop.c:
+	* lib/lineBreak.c:
+	* include/sombok.h.in:
+	  - New option LINEBREAK_OPTION_NONSTARTER_LOOSE to control strictness
+	    of line breaking behavior.  If it is set, a newly introduced class
+	    CJ will be treated as ID, otherwise NS.
+	* t/02hangul.t:
+	  - Unicode 6.1.0beta changed general category of hangul bangjeom
+	    (U+302E and U+302F) from Mn to Mc.
+	* [Note] ``Compact array'' became smaller than 8192 entries again.
 
 2.0.6beta2  2011-10-26
 	* data/Rules-6.1.0beta.txt:

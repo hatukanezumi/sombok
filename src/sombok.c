@@ -416,7 +416,13 @@ int main(int argc, char **argv)
 		lbobj->options |= LINEBREAK_OPTION_LEGACY_CM;
 	    else if (strcmp(argv[i] + 2, "no-legacy-cm") == 0)
 		lbobj->options &= ~LINEBREAK_OPTION_LEGACY_CM;
-	    else if (strcmp(argv[i] + 2, "format-func") == 0) {
+	    else if (strcmp(argv[i] + 2, "nonstarter") == 0) {
+		i++;
+		if (strcasecmp(argv[i], "LOOSE") == 0)
+		    lbobj->options |= LINEBREAK_OPTION_NONSTARTER_LOOSE;
+		else
+		    lbobj->options &= ~LINEBREAK_OPTION_NONSTARTER_LOOSE;
+	    } else if (strcmp(argv[i] + 2, "format-func") == 0) {
 		i++;
 		if (strcasecmp(argv[i], "NONE") == 0)
 		    linebreak_set_format(lbobj, NULL, NULL);

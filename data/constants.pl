@@ -10,7 +10,7 @@ foreach my $attr (@attr) {
     my $datafile;
 
     if ($attr eq 'lb') {
-	$OMIT = qr{AI|HL|SA|SG|XX|...};
+	$OMIT = qr{AI|CJ|HL|SA|SG|XX|...};
 	@classes = qw{BK CR LF NL SP
 	    OP CL QU GL NS EX SY IS PR PO NU AL ID IN HY BA BB B2 CB ZW CM WJ
 	    H2 H3 JL JV JT

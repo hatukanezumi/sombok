@@ -44,9 +44,12 @@ static propval_t PROPENT_RESERVED[] = { LB_AL, EA_N, GB_Control, SC_Unknown };
  *
  * * map, mapsiz: custom property map overriding built-in map.
  *
- * * options: if LINEBREAK_OPTION_EASTASIAN_CONTEXT bit is set,
+ * * options:
+ * - if LINEBREAK_OPTION_EASTASIAN_CONTEXT bit is set,
  *   LB_AI and EA_A are resolved to LB_ID and EA_F. Otherwise, LB_AL and EA_N,
  *   respectively.
+ * - if LINEBREAK_OPTION_NONSTARTER_LOOSE bit is set,
+ *   LB_CJ is resolved to LB_ID.  Otherwise it is resolved to LB_NS.
  *
  * @param[in] obj linebreak object.
  * @param[in] c Unicode character.
@@ -162,9 +165,14 @@ void linebreak_charprop(linebreak_t * obj, unichar_t c,
     /*
      * Resolve context-dependent property values.
      */
-    if (lbcptr && lbc == LB_AI)
-	lbc = (obj->options & LINEBREAK_OPTION_EASTASIAN_CONTEXT) ?
-	    LB_ID : LB_AL;
+    if (lbcptr) {
+	if (lbc == LB_AI)
+	    lbc = (obj->options & LINEBREAK_OPTION_EASTASIAN_CONTEXT) ?
+		  LB_ID : LB_AL;
+	else if (lbc == LB_CJ)
+	    lbc = (obj->options & LINEBREAK_OPTION_NONSTARTER_LOOSE) ?
+		  LB_ID : LB_NS;
+    }
     if (eawptr && eaw == EA_A)
 	eaw = (obj->options & LINEBREAK_OPTION_EASTASIAN_CONTEXT) ?
 	    EA_F : EA_N;

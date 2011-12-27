@@ -494,7 +494,7 @@ void linebreak_reset(linebreak_t * lbobj)
  * If action was not determined, returns DIRECT.
  *
  * @note This method gives just approximate description of line breaking
- * behavior.  Class AI will be resolved to approppriate class.
+ * behavior.  Class AI and CJ will be resolved to approppriate classes.
  * See also linebreak_lbrule().
  *
  * @note This method was introduced by Sombok 2.0.6. 
@@ -506,9 +506,16 @@ propval_t linebreak_get_lbrule(linebreak_t * obj, propval_t b_idx,
     if (b_idx == LB_AI)
 	b_idx = (obj->options & LINEBREAK_OPTION_EASTASIAN_CONTEXT) ?
 		LB_ID : LB_AL;
+    else if (b_idx == LB_CJ)
+	b_idx = (obj->options & LINEBREAK_OPTION_NONSTARTER_LOOSE) ?
+		LB_ID : LB_NS;
     if (a_idx == LB_AI)
 	a_idx = (obj->options & LINEBREAK_OPTION_EASTASIAN_CONTEXT) ?
 		LB_ID : LB_AL;
+    else if (a_idx == LB_CJ)
+	a_idx = (obj->options & LINEBREAK_OPTION_NONSTARTER_LOOSE) ?
+		LB_ID : LB_NS;
+
     return linebreak_lbrule(b_idx, a_idx);
 }
 

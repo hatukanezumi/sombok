@@ -262,7 +262,8 @@ gcstring_t *_urgent_break(linebreak_t * lbobj, gcstring_t * str)
  * If action was not determined, returns DIRECT.
  *
  * @note This method gives just approximate description of line breaking
- * behavior.  Especially, it won't give meaningful value related to class AI.  
+ * behavior.  Especially, it won't give meaningful value related to classes
+ * AI and CJ.
  * See also linebreak_get_lbrule().
  *
  */
@@ -285,7 +286,7 @@ propval_t linebreak_lbrule(propval_t b_idx, propval_t a_idx)
     /* Resolve before-side class. */
 
     switch (b_idx) {
-    /* LB1: Resolve SA, SG, XX to AL; AI cannot be resolved. */
+    /* LB1: Resolve SA, SG, XX to AL; AI and CJ cannot be resolved. */
     case LB_SA:
     case LB_SG:
     case LB_XX:
@@ -687,7 +688,6 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 	 ***/
 	int action = 0;
 	propval_t lbc;
-	/* gcstring_t *beforeFrg, *fmt; */
 	double newcols;
 
 	/* Go ahead reading input. */
@@ -761,7 +761,6 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 		break; /* while (!gcstring_eos(str)) */
 
 	    /* shift buffers. */
-	    /* XXX bBeg += bLen + bSpc; */
 	    bLen = str->pos - bBeg;
 	    bSpc = 0;
 	    bCM = aCM;
@@ -779,7 +778,7 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 	    (lbc != LB_CR || eot || !gcstring_eos(str))) {
 	    /* CR at end of input may be part of CR LF therefore not be eop. */
 	    action = LINEBREAK_ACTION_MANDATORY;
-	/* LB11 - LB31: Tailorable rules (except LB11, LB12).
+	/* LB11, LB12 and tailorable rules LB13 - LB31.
 	 * Or urgent breaking. */
 	} else if (bBeg + bLen + bSpc < str->pos) {
 	    if (str->gcstr[bBeg + bLen + bSpc].flag &
@@ -806,7 +805,7 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 		    blbc = str->gcstr[btail].lbc;
 		switch (blbc) {
 		/* LB1: SA is resolved to AL
-		 * (AI, SG and XX are already resolved). */
+		 * (AI, CJ, SG and XX are already resolved). */
 		case LB_SA:
 		    blbc = LB_AL;
 		    break;
@@ -834,7 +833,7 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 		albc = str->gcstr[bBeg + bLen + bSpc].lbc;
 		switch (albc) {
 		/* LB1: SA is resolved to AL
-		 * (AI, SG and XX are already resolved). */
+		 * (AI, CJ, SG and XX are already resolved). */
 		case LB_SA:
 		    albc = LB_AL;
 		    break;

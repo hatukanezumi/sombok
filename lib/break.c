@@ -1,7 +1,7 @@
 /*
  * Break.c - an implementation of Unicode line breaking algorithm.
  * 
- * Copyright (C) 2009-2011 by Hatuka*nezumi - IKEDA Soji.
+ * Copyright (C) 2009-2012 by Hatuka*nezumi - IKEDA Soji.
  *
  * This file is part of the Sombok Package.  This program is free
  * software; you can redistribute it and/or modify it under the terms

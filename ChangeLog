@@ -17,7 +17,6 @@
 	    controls if virama characters behave as consonant joiner.
 	* lib/utf8.c:
 	  - NEW: sombok_decode_utf8(), sombok_encode_utf8().
-	* [Note] ``Compact array'' has grown bigger than 8191 entries.
 
 2.1.0beta  2012-01-01
 	* Bump up minor version.

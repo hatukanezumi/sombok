@@ -1,11 +1,52 @@
 #! perl
 
+# Custom properties
+#
+# EAW: Z - Nonspacing
+# GCB: Virama - Virama, consonant joiner
+# GCB: OtherLetter - Letter, now limited to Brahmic scripts.
+
 use version;
 
 my @cat = split(',', shift @ARGV) or die;
 my $version = shift @ARGV or die;
 my $vernum = version->new($version)->numify;
 
+# Find Brahmic scripts
+my %GC_Letter = ();
+my %Virama = ();
+my %Brahmic_Script = ();
+if (6.001000 <= $vernum) {
+    open my $ucd, '<', "UnicodeData-$version.txt" or die $!;
+    while (<$ucd>) {
+	chomp $_;
+	s/\s*#.*$//;
+	next unless /\S/;
+	my ($code, $name, $gc, $ccc) = split /;/;
+	$code = hex("0x$code");
+	$Virama{$code} = 1 if $ccc+0 == 9;
+	$GC_Letter{$code} = 1 if $gc =~ /^L/;
+    }
+    close $ucd;    
+    open my $scr, '<', "Scripts-$version.txt" or die $!;
+    while (<$scr>) {
+        s/\s*\#.*//;
+        next unless /\S/;
+
+        my ($char, $prop) = split /\s*;\s*/, $_;
+	chomp $prop;
+        next unless $prop =~ /^(\@[\w:]+|\w+)$/;
+        my ($start, $end) = ();
+        ($start, $end) = split /\.\./, $char;
+        $end ||= $start;
+	foreach my $c (hex("0x$start") .. hex("0x$end")) {
+	    $Brahmic_Script{$prop} = 1 if $Virama{$c};
+	}
+    }
+    close $scr;
+}
+
+# Find SA classes
 my %SA = ();
 foreach my $ext ('custom', 'txt') {
     open LB, '<', "LineBreak-$version.$ext" or next;
@@ -29,6 +70,7 @@ use constant INDIRECT_PROHIBITED => -2;
 
 require "LBCLASSES";
 my @LBCLASSES = @{$indexedclasses{'lb'}->{$version}};
+my %SCRIPTS = map { $_ => 1 } @{$indexedclasses{'sc'}->{$version}};
 
 my %ACTIONS = ('!' => MANDATORY,
 	       'SP*×' => INDIRECT_PROHIBITED,
@@ -288,6 +330,24 @@ foreach my $n (1, 0) {
 for (my $c = 0; $c <= $#PROPS; $c++) {
     next unless $PROPS[$c];
 
+    if (6.001000 <= $vernum) {
+	# Custom GCB Virama
+	if ($Virama{$c}) {
+	    if ($PROPS[$c]->{'gb'} =~ /^(Extend|SpacingMark)$/) {
+		$PROPS[$c]->{'gb'} = 'Virama';
+	    } else {
+		die sprintf "U+%04X is virama and %s", $c, $PROPS[$c]->{'gb'};
+	    }
+	} elsif ($GC_Letter{$c} and $Brahmic_Script{$PROPS[$c]->{'sc'}}) {
+	    if ($PROPS[$c]->{'gb'}) {
+		warn sprintf "U+%04X: GB=%s; won't assign OtherLetter.\n",
+			     $c, $PROPS[$c]->{'gb'};
+	    } else {
+		$PROPS[$c]->{'gb'} = 'OtherLetter';
+	    }
+	}
+    }
+
     # limit scripts to SA characters.
     delete $PROPS[$c]->{'sc'} if !$SA{$c};
 
@@ -344,6 +404,25 @@ for (my $c = 0; $c <= $#PROPS; $c++) {
 
 =cut
 
+    if ($PROPS[$c]->{'gb'} eq 'Virama' and
+	$PROPS[$c]->{'lb'} !~ /^(CM|SA)$/) {
+	warn sprintf '!CM: U+%04X: lb => %s, ea => %s, gb => %s, sc => %s'."\n",
+	$c,
+	$PROPS[$c]->{'lb'} || '-',
+	$PROPS[$c]->{'ea'} || '-',
+	$PROPS[$c]->{'gb'} || '-',
+	$PROPS[$c]->{'sc'} || '-';
+    }
+
+    if ($PROPS[$c]->{'gb'} eq 'OtherLetter' and
+	$PROPS[$c]->{'lb'} eq 'CM') {
+	warn sprintf 'CM: U+%04X: lb => %s, ea => %s, gb => %s, sc => %s'."\n",
+	$c,
+	$PROPS[$c]->{'lb'} || '-',
+	$PROPS[$c]->{'ea'} || '-',
+	$PROPS[$c]->{'gb'} || '-',
+	$PROPS[$c]->{'sc'} || '-';
+    }
 }
 
 

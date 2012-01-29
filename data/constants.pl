@@ -1,5 +1,7 @@
 #! perl
 
+use version;
+
 my $CONSTANTS_H = '';
 my $LBCLASSES = '';
 
@@ -37,6 +39,21 @@ foreach my $attr (@attr) {
     my %classes = map { ($_ => '') } @classes;
 
     foreach my $version (@versions) {
+	my $vernum = version->new($version)->numify;
+
+	my %Virama = ();
+	if (6.001000 <= $vernum) {
+	    open my $ucd, '<', "UnicodeData-$version.txt" or die $!;
+	    while (<$ucd>) {
+		chomp $_;
+		s/\s*#.*$//;
+		next unless /\S/;
+		my ($code, $name, $gc, $ccc) = split /;/;
+		$code = hex("0x$code");
+		$Virama{$code} = 1 if $ccc+0 == 9;
+	    }
+	    close $ucd;
+	}
 
 	my %SA = ();
 	foreach my $ext ('custom', 'txt') {
@@ -92,10 +109,26 @@ foreach my $attr (@attr) {
 
 		next unless $c =~ /^\w+$/;
 		foreach my $chr (($beg..$end)) {
-		    next if $attr eq 'sc' and !$SA{$chr}; # limit to SA
-		    unless (defined $classes{$c}) {
-			push @classes, $c;
-			$classes{$c} = $version;
+		    # limit to SA
+		    next if $attr eq 'sc' and !$SA{$chr};
+
+		    # Extended GCB property value for virama (consonant joiner)
+		    my $ec;
+		    if ($attr eq 'gb' and $Virama{$chr}) {
+			if ($c eq 'Extend' or $c eq 'SpacingMark') {
+			    $ec = ['Virama', 'OtherLetter'];
+			} else {
+			    die sprintf "%04X is virama and %s", $chr, $c;
+			}
+		    } else {
+			$ec = [$c];
+		    }
+
+		    foreach my $c (@$ec) {
+			unless (defined $classes{$c}) {
+			    push @classes, $c;
+			    $classes{$c} = $version;
+			}
 		    }
 		}
 	    }

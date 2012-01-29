@@ -74,13 +74,13 @@ libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libsombok_la_LIBADD =
 am__libsombok_la_SOURCES_DIST = lib/break.c lib/charprop.c \
-	lib/gcstring.c lib/linebreak.c lib/utils.c \
+	lib/gcstring.c lib/linebreak.c lib/utf8.c lib/utils.c \
 	lib/southeastasian.c lib/@UNICODE_VERSION@.c src/mymalloc.c
 @MALLOC_DEBUG_TRUE@am__objects_1 = libsombok_la-mymalloc.lo
 am_libsombok_la_OBJECTS = libsombok_la-break.lo \
 	libsombok_la-charprop.lo libsombok_la-gcstring.lo \
-	libsombok_la-linebreak.lo libsombok_la-utils.lo \
-	libsombok_la-southeastasian.lo \
+	libsombok_la-linebreak.lo libsombok_la-utf8.lo \
+	libsombok_la-utils.lo libsombok_la-southeastasian.lo \
 	libsombok_la-@UNICODE_VERSION@.lo $(am__objects_1)
 libsombok_la_OBJECTS = $(am_libsombok_la_OBJECTS)
 am__sombok_SOURCES_DIST = src/sombok.c src/strerror.c src/strcasecmp.c
@@ -244,7 +244,7 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 lib_LTLIBRARIES = libsombok.la
 libsombok_la_SOURCES = lib/break.c lib/charprop.c lib/gcstring.c \
-	lib/linebreak.c lib/utils.c lib/southeastasian.c \
+	lib/linebreak.c lib/utf8.c lib/utils.c lib/southeastasian.c \
 	lib/@UNICODE_VERSION@.c $(am__append_1)
 libsombok_la_CFLAGS = -I. -Iinclude @LIBTHAI_CFLAGS@
 libsombok_la_LDFLAGS = -version-info 4:3:1 @LIBTHAI_LIBS@
@@ -383,6 +383,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsombok_la-linebreak.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsombok_la-mymalloc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsombok_la-southeastasian.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsombok_la-utf8.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsombok_la-utils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sombok-sombok.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sombok-strcasecmp.Po@am__quote@
@@ -436,6 +437,13 @@ libsombok_la-linebreak.lo: lib/linebreak.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lib/linebreak.c' object='libsombok_la-linebreak.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsombok_la_CFLAGS) $(CFLAGS) -c -o libsombok_la-linebreak.lo `test -f 'lib/linebreak.c' || echo '$(srcdir)/'`lib/linebreak.c
+
+libsombok_la-utf8.lo: lib/utf8.c
+@am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsombok_la_CFLAGS) $(CFLAGS) -MT libsombok_la-utf8.lo -MD -MP -MF "$(DEPDIR)/libsombok_la-utf8.Tpo" -c -o libsombok_la-utf8.lo `test -f 'lib/utf8.c' || echo '$(srcdir)/'`lib/utf8.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libsombok_la-utf8.Tpo" "$(DEPDIR)/libsombok_la-utf8.Plo"; else rm -f "$(DEPDIR)/libsombok_la-utf8.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='lib/utf8.c' object='libsombok_la-utf8.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsombok_la_CFLAGS) $(CFLAGS) -c -o libsombok_la-utf8.lo `test -f 'lib/utf8.c' || echo '$(srcdir)/'`lib/utf8.c
 
 libsombok_la-utils.lo: lib/utils.c
 @am__fastdepCC_TRUE@	if $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libsombok_la_CFLAGS) $(CFLAGS) -MT libsombok_la-utils.lo -MD -MP -MF "$(DEPDIR)/libsombok_la-utils.Tpo" -c -o libsombok_la-utils.lo `test -f 'lib/utils.c' || echo '$(srcdir)/'`lib/utils.c; \

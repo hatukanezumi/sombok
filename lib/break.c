@@ -867,6 +867,7 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 		/* When conjunction is expected to exceed charmax,
 		 * try urgent breaking. */
 		if (urgEnd < bBeg + bLen + bSpc &&
+		    0 < lbobj->charmax &&
 		    lbobj->charmax < str->gcstr[str->pos - 1].idx +
 		    str->gcstr[str->pos - 1].len - str->gcstr[bBeg].idx) {
 		    size_t charmax, chars;
@@ -902,7 +903,7 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 		    str->pos = 0;
 		    bBeg = bLen = bCM = bSpc = aCM = 0;
 		    continue; /* while (1) */
-		} /* if (lbobj->charmax < ...) */
+		} /* if (urgEnd < ...) */
 
 		/* Otherwise, fragments may be conjuncted safely. Read more. */
 		bLen = str->pos - bBeg;
@@ -1311,6 +1312,35 @@ gcstring_t **linebreak_break(linebreak_t * lbobj, unistr_t * input)
 	free(appe);
     }
 
+    return ret;
+}
+
+/** Perform line breaking algorithm on UTF-8 text
+ *
+ * This function will consume constant size of heap.
+ *
+ * @param[in] lbobj linebreak object.
+ * @param[in] input UTF-8 string, must not be NULL.
+ * @param[in] len length of UTF-8 string.
+ * @param[in] check check input.  See sombok_decode_utf8().
+ * @return array of broken grapheme cluster strings terminated by NULL.
+ * If internal error occurred, lbobj->errnum is set then NULL is returned.
+ */
+gcstring_t **linebreak_break_from_utf8(linebreak_t * lbobj,
+				       char * input, size_t len, int check)
+{
+    unistr_t unistr = { NULL, 0 };
+    gcstring_t **ret;
+
+    if (input == NULL) {
+	lbobj->errnum = EINVAL;
+	return NULL;
+    }
+    if (sombok_decode_utf8(&unistr, 0, input, len, check) == NULL)
+	return NULL;
+
+    ret = linebreak_break(lbobj, &unistr);
+    free(unistr.str);
     return ret;
 }
 

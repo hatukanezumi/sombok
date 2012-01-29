@@ -50,11 +50,15 @@ Extract tarball then run as follows.
 
 ``./configure --help'' will show available options.
 
-Language binding
-================
+Language bindings
+=================
 
 Perl
     Unicode-LineBreak: http://search.cpan.org/dist/Unicode-LineBreak/
+
+Python
+    textseg: https://linefold.svn.sf.net/svnroot/linefold/trunk/pytextseg
+             (Under Development)
 
 Author
 ======

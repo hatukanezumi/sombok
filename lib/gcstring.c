@@ -52,7 +52,8 @@ void _gcinfo(linebreak_t *obj, unistr_t *str, size_t pos,
     else if (scr == SC_Thai)
 	glbc = lbc;
 #endif /* USE_LIBTHAI */
-    else if (gcb == GB_Extend || gcb == GB_SpacingMark)
+    else if (gcb == GB_Extend || gcb == GB_SpacingMark
+	     || gcb == GB_Virama)
 	glbc = LB_CM;
     else
 	glbc = LB_AL;
@@ -114,11 +115,15 @@ void _gcinfo(linebreak_t *obj, unistr_t *str, size_t pos,
 		/* SA in g. extender is resolved to CM so it is ignored. */
 		continue; /* while (pos < str->len) */
 	    }
+	    else if (ngcb == GB_Virama) {
+		ecol += eaw2col(eaw);
+		/* virama is CM so it is ignored. */
+	    }
 	    /* GB9b */
 	    else if (gcb == GB_Prepend) {
 		/* Here, next char shall grapheme base (or additional prepend
 		 * character), since its GCB property is neither Control,
-		 * Extend nor SpacingMark. */
+		 * Extend, SpacingMark nor Virama. */
 		if (lbc != LB_SA)
 		    elbc = lbc;
 #ifdef USE_LIBTHAI
@@ -129,6 +134,21 @@ void _gcinfo(linebreak_t *obj, unistr_t *str, size_t pos,
 		    elbc = LB_AL; /* ...or resolved to AL. */
 		pcol += gcol;
 		gcol = eaw2col(eaw);
+	    }
+	    /* Virama rule: \p{ccc:Virama} × \p{gc:Letter} */
+	    else if (gcb == GB_Virama && ngcb == GB_OtherLetter &&
+		     obj->options & LINEBREAK_OPTION_VIRAMA_AS_JOINER) {
+		/* OtherLetter is not grapheme extender. */
+		gcol += ecol + eaw2col(eaw);
+		ecol = 0;
+		if (lbc != LB_SA)
+		    elbc = lbc;
+#ifdef USE_LIBTHAI
+		else if (scr == SC_Thai)
+		    elbc = lbc; /* SA char in g. base is not resolved... */
+#endif /* USE_LIBTHAI */
+		else
+		    elbc = LB_AL; /* ...or resolved to AL. */
 	    }
 	    /* GB10 */
 	    else
@@ -160,6 +180,15 @@ void _gcinfo(linebreak_t *obj, unistr_t *str, size_t pos,
  * @param[in] lbobj linebreak object.
  * @return New grapheme cluster string sharing str buffer with unistr.
  * If error occurred, errno is set then NULL is returned.
+ *
+ * option bits of lbobj:
+ * - if LINEBREAK_OPTION_EASTASIAN_CONTEXT bit is set,
+ *   LB_AI and EA_A are resolved to LB_ID and EA_F. Otherwise, LB_AL and EA_N,
+ *   respectively.
+ * - if LINEBREAK_OPTION_NONSTARTER_LOOSE bit is set,
+ *   LB_CJ is resolved to LB_ID.  Otherwise it is resolved to LB_NS.
+ * - if LINEBREAK_OPTION_VIRAMA_AS_JOINER bit is set,
+ *   virama and other letter are not broken.
  */
 gcstring_t *gcstring_new(unistr_t *unistr, linebreak_t *lbobj)
 {
@@ -238,6 +267,32 @@ gcstring_t *gcstring_newcopy(unistr_t *str, linebreak_t *lbobj)
 	memcpy(unistr.str, str->str, sizeof(unichar_t) * str->len);
 	unistr.len = str->len;
     }
+    return gcstring_new(&unistr, lbobj);
+}
+
+/** Constructor from UTF-8 string
+ *
+ * Create new grapheme cluster string from UTF-8 string.
+ * @param[in] str buffer of UTF-8 string, must not be NULL.
+ * @param[in] len length of UTF-8 string.
+ * @param[in] check check input.  See sombok_decode_utf8().
+ * @param[in] lbobj linebreak object.
+ * @return New grapheme cluster string.
+ * If error occurred, errno is set then NULL is returned.
+ * Source string buffer would not be modified.
+ */
+gcstring_t *gcstring_new_from_utf8(char *str, size_t len, int check,
+				   linebreak_t *lbobj)
+{
+    unistr_t unistr = {NULL, 0};
+
+    if (str == NULL) {
+	errno = EINVAL;
+	return NULL;
+    }
+    if (sombok_decode_utf8(&unistr, 0, str, len, check) == NULL)
+	return NULL;
+
     return gcstring_new(&unistr, lbobj);
 }
 

@@ -214,6 +214,7 @@ typedef struct linebreak_t {
 #define LINEBREAK_OPTION_BREAK_INDENT (8)
 #define LINEBREAK_OPTION_COMPLEX_BREAKING (16)
 #define LINEBREAK_OPTION_NONSTARTER_LOOSE (32)
+#define LINEBREAK_OPTION_VIRAMA_AS_JOINER (64)
 
 /** @ingroup linebreak
  * state argument for format callback. */
@@ -251,6 +252,12 @@ typedef enum {
 #define LINEBREAK_ELONG (-2)
 #define LINEBREAK_EEXTN (-3)
 
+/** @ingroup utf8
+ * check specs. */
+#define SOMBOK_UTF8_CHECK_NONE (0)
+#define SOMBOK_UTF8_CHECK_MALFORMED (1)
+#define SOMBOK_UTF8_CHECK_SURROGATE (2)
+#define SOMBOK_UTF8_CHECK_NONUNICODE (3)
 
 /***
  *** Public functions, global variables and macros.
@@ -261,6 +268,7 @@ extern void linebreak_charprop(linebreak_t *, unichar_t,
 			       propval_t *);
 
 extern gcstring_t *gcstring_new(unistr_t *, linebreak_t *);
+extern gcstring_t *gcstring_new_from_utf8(char *, size_t, int, linebreak_t *);
 extern gcstring_t *gcstring_newcopy(unistr_t *, linebreak_t *);
 extern gcstring_t *gcstring_copy(gcstring_t *);
 extern void gcstring_destroy(gcstring_t *);
@@ -303,6 +311,8 @@ extern propval_t linebreak_lbclass(linebreak_t *, unichar_t);
 
 extern gcstring_t **linebreak_break(linebreak_t *, unistr_t *);
 extern gcstring_t **linebreak_break_fast(linebreak_t *, unistr_t *);
+extern gcstring_t **linebreak_break_from_utf8(linebreak_t *, char *, size_t,
+					      int);
 extern gcstring_t **linebreak_break_partial(linebreak_t *, unistr_t *);
 extern propval_t linebreak_lbrule(propval_t, propval_t);
 
@@ -311,6 +321,10 @@ extern const char *linebreak_propvals_EA[];
 extern const char *linebreak_propvals_LB[];
 extern const char *linebreak_southeastasian_supported;
 extern void linebreak_southeastasian_flagbreak(gcstring_t *);
+
+extern unistr_t *sombok_decode_utf8(unistr_t *, size_t, const char *, size_t,
+				    int);
+extern char *sombok_encode_utf8(char *, size_t *, size_t, unistr_t *);
 
 /***
  *** Built-in callbacks for linebreak_t.

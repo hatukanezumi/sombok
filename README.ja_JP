@@ -57,6 +57,10 @@ $Id$
 Perl
     Unicode-LineBreak: http://search.cpan.org/dist/Unicode-LineBreak/
 
+Python
+    textseg: https://linefold.svn.sf.net/svnroot/linefold/trunk/pytextseg
+             (開発中)
+
 著者
 ====
 

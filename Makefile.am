@@ -1,6 +1,6 @@
 lib_LTLIBRARIES = libsombok.la
 libsombok_la_SOURCES = lib/break.c lib/charprop.c lib/gcstring.c \
-	lib/linebreak.c lib/utils.c \
+	lib/linebreak.c lib/utf8.c lib/utils.c \
 	lib/southeastasian.c lib/@UNICODE_VERSION@.c
 if MALLOC_DEBUG
 libsombok_la_SOURCES += src/mymalloc.c

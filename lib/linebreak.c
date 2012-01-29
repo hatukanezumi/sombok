@@ -536,8 +536,8 @@ propval_t linebreak_lbclass(linebreak_t * obj, unichar_t c)
 #ifdef USE_LIBTHAI
 	if (scr != SC_Thai)
 #endif /* USE_LIBTHAI */
-	    lbc = (gcb == GB_Extend
-		   || gcb == GB_SpacingMark) ? LB_CM : LB_AL;
+	    lbc = (gcb == GB_Extend || gcb == GB_SpacingMark
+		   || gcb == GB_Virama) ? LB_CM : LB_AL;
     }
     return lbc;
 }

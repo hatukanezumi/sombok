@@ -1,3 +1,24 @@
+2.1.0beta2  2012-01-29
+	* data/constants.pl:
+	* data/data.pl:
+	  - NEW: added custom Grapheme_Cluster_Break property values 
+	    "Virama" and "OtherLetter".  Former means characters having 
+	    canonical combining class 9 (Virama) (they are either Extend or
+	    SpacingMark).  Latter means characters having general category
+	    L? and Grapheme_Cluster_Break Other.  They are currently limited 
+	    to Brahmic scripts.
+	* lib/break.c:
+	  - NEW: linebreak_break_from_utf8().
+	  - Chg: charmax may be 0 (unlimited).  NOTE: this feature has not been
+	    tested enough.
+	* lib/gcstring.c:
+	  - NEW: gcstring_new_from_utf8().
+	  - NEW: LINEBREAK_OPTION_VIRAMA_AS_JOINER option of linebreak object
+	    controls if virama characters behave as consonant joiner.
+	* lib/utf8.c:
+	  - NEW: sombok_decode_utf8(), sombok_encode_utf8().
+	* [Note] ``Compact array'' has grown bigger than 8191 entries.
+
 2.1.0beta  2012-01-01
 	* Bump up minor version.
 	* Update UCD to 6.1.0beta at Dec 15 2011.

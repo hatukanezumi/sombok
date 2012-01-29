@@ -10,6 +10,7 @@ OPTIONS="\
 --newline \\n \
 --sizing-func UAX11 \
 --urgent-func NONE \
+--virama-as-joiner \
 "
 
 plan () {

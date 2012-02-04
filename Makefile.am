@@ -6,7 +6,7 @@ if MALLOC_DEBUG
 libsombok_la_SOURCES += src/mymalloc.c
 endif
 libsombok_la_CFLAGS = -I. -Iinclude @LIBTHAI_CFLAGS@
-libsombok_la_LDFLAGS = -version-info 4:3:1 @LIBTHAI_LIBS@
+libsombok_la_LDFLAGS = -version-info 4:4:1 @LIBTHAI_LIBS@
 
 include_HEADERS = include/sombok_constants.h
 nodist_include_HEADERS = include/sombok.h

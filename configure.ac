@@ -1,8 +1,8 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(sombok, 2.1.0beta2, hatuka@nezumi.nu)
-DEFAULT_UNICODE_VERSION="6.1.0beta"
+AC_INIT(sombok, 2.1.0, hatuka@nezumi.nu)
+DEFAULT_UNICODE_VERSION="6.1.0"
 LPATH="$PATH:/usr/local/bin"
 
 AM_INIT_AUTOMAKE

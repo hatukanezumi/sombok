@@ -1,4 +1,5 @@
-2.1.0  201X-XX-XX
+2.1.0  2011-02-04
+	- Supports Unicode 6.1.0.
 
 2.0.5  2011-04-23
 	- Bug Fix: Infinite loop occurs when prep_func generated very long

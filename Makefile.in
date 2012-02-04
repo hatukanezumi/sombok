@@ -247,7 +247,7 @@ libsombok_la_SOURCES = lib/break.c lib/charprop.c lib/gcstring.c \
 	lib/linebreak.c lib/utf8.c lib/utils.c lib/southeastasian.c \
 	lib/@UNICODE_VERSION@.c $(am__append_1)
 libsombok_la_CFLAGS = -I. -Iinclude @LIBTHAI_CFLAGS@
-libsombok_la_LDFLAGS = -version-info 4:3:1 @LIBTHAI_LIBS@
+libsombok_la_LDFLAGS = -version-info 4:4:1 @LIBTHAI_LIBS@
 include_HEADERS = include/sombok_constants.h
 nodist_include_HEADERS = include/sombok.h
 noinst_HEADERS = src/mymalloc.h

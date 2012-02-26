@@ -26,7 +26,7 @@
 #include <string.h>
 #ifdef HAVE_STRINGS_H
 #    include <strings.h>
-#endif /* HAVE_STRINGS_H */
+#endif				/* HAVE_STRINGS_H */
 
 #define SOMBOK_VERSION "@PACKAGE_VERSION@"
 
@@ -115,6 +115,32 @@ typedef struct {
     struct linebreak_t *lbobj;
 } gcstring_t;
 
+/** @ingroup linebreak
+ * state argument for format callback. */
+typedef enum {
+    LINEBREAK_STATE_NONE = 0,
+    LINEBREAK_STATE_SOT, LINEBREAK_STATE_SOP, LINEBREAK_STATE_SOL,
+    LINEBREAK_STATE_LINE,
+    LINEBREAK_STATE_EOL, LINEBREAK_STATE_EOP, LINEBREAK_STATE_EOT,
+    LINEBREAK_STATE_MAX
+} linebreak_state_t;
+
+typedef void
+    (*linebreak_ref_func_t) (void *, int, int);
+typedef gcstring_t *
+    (*linebreak_format_func_t) (struct linebreak_t *, linebreak_state_t,
+				gcstring_t *);
+typedef double
+    (*linebreak_sizing_func_t) (struct linebreak_t *, double,
+				gcstring_t *, gcstring_t *, gcstring_t *);
+typedef gcstring_t *
+    (*linebreak_urgent_func_t) (struct linebreak_t *, gcstring_t *);
+typedef gcstring_t *
+    (*linebreak_prep_func_t) (struct linebreak_t *, void *, unistr_t *,
+			      unistr_t *);
+typedef gcstring_t *
+    (*linebreak_obs_prep_func_t) (struct linebreak_t *, unistr_t *);
+
 /** LineBreak object.
  * @ingroup linebreak */
 typedef struct linebreak_t {
@@ -158,14 +184,14 @@ typedef struct linebreak_t {
     /** User-defined private data. */
     void *stash;
     /** Format callback function.  See utils.c. */
-    gcstring_t *(*format_func)();
+    linebreak_format_func_t format_func;
     /** Sizing callback function.  See utils.c. */
-    double (*sizing_func)();
+    linebreak_sizing_func_t sizing_func;
     /** Urgent breaking callback function.  See utils.c. */
-    gcstring_t *(*urgent_func)();
+    linebreak_urgent_func_t urgent_func;
     /** Preprocessing callback function.  See utils.c.
      * @deprecated Use prep_func instead. */
-    gcstring_t *(*user_func)();
+    linebreak_obs_prep_func_t user_func;
     /** Reference Count function.
      * This may be called with 3 arguments: ref_func(data, type, action).
      * data is a (pointer to) external object assinged to stash, format_data,
@@ -173,7 +199,7 @@ typedef struct linebreak_t {
      * according to action being negative or positive, this function should
      * decrement or increment reference count of object, respectively.
      */
-    void (*ref_func)(void *, int, int);
+    linebreak_ref_func_t ref_func;
     /** Number of last error.
      * may be a value of errno defined in <errno.h> or LINEBREAK_ELONG below.
      */
@@ -183,7 +209,7 @@ typedef struct linebreak_t {
     /** @name public members addendum on release 2011.1.
      *@{*/
     /** Array of preprocessing callback functions.  See utils.c. */
-    gcstring_t *(**prep_func)();    
+    linebreak_prep_func_t * prep_func;
     /** Data argument of each preprocessing callback functions. See utils.c. */
     void **prep_data;
     /*@}*/
@@ -216,15 +242,6 @@ typedef struct linebreak_t {
 #define LINEBREAK_OPTION_NONSTARTER_LOOSE (32)
 #define LINEBREAK_OPTION_VIRAMA_AS_JOINER (64)
 
-/** @ingroup linebreak
- * state argument for format callback. */
-typedef enum {
-    LINEBREAK_STATE_NONE = 0,
-    LINEBREAK_STATE_SOT, LINEBREAK_STATE_SOP, LINEBREAK_STATE_SOL,
-    LINEBREAK_STATE_LINE,
-    LINEBREAK_STATE_EOL, LINEBREAK_STATE_EOP, LINEBREAK_STATE_EOT,
-    LINEBREAK_STATE_MAX
-} linebreak_state_t;
 /** @ingroup linebreak
  * internal states. */
 #define LINEBREAK_STATE_SOT_FORMAT (-LINEBREAK_STATE_SOT)
@@ -268,7 +285,8 @@ extern void linebreak_charprop(linebreak_t *, unichar_t,
 			       propval_t *);
 
 extern gcstring_t *gcstring_new(unistr_t *, linebreak_t *);
-extern gcstring_t *gcstring_new_from_utf8(char *, size_t, int, linebreak_t *);
+extern gcstring_t *gcstring_new_from_utf8(char *, size_t, int,
+					  linebreak_t *);
 extern gcstring_t *gcstring_newcopy(unistr_t *, linebreak_t *);
 extern gcstring_t *gcstring_copy(gcstring_t *);
 extern void gcstring_destroy(gcstring_t *);
@@ -287,18 +305,23 @@ extern gcstring_t *gcstring_replace(gcstring_t *, int, int, gcstring_t *);
 #define gcstring_getpos(gcstr) \
   ((gcstr)->pos)
 
-extern linebreak_t *linebreak_new();
+extern linebreak_t *linebreak_new(linebreak_ref_func_t);
 extern linebreak_t *linebreak_copy(linebreak_t *);
 extern linebreak_t *linebreak_incref(linebreak_t *);
 extern void linebreak_destroy(linebreak_t *);
 
 extern void linebreak_set_newline(linebreak_t *, unistr_t *);
 extern void linebreak_set_stash(linebreak_t *, void *);
-extern void linebreak_set_format(linebreak_t *, gcstring_t *(*)(), void *);
-extern void linebreak_add_prep(linebreak_t *, gcstring_t *(*)(), void *);
-extern void linebreak_set_sizing(linebreak_t *, double (*)(), void *);
-extern void linebreak_set_urgent(linebreak_t *, gcstring_t *(*)(), void *);
-extern void linebreak_set_user(linebreak_t *, gcstring_t *(*)(), void *);
+extern void linebreak_set_format(linebreak_t *, linebreak_format_func_t,
+				 void *);
+extern void linebreak_add_prep(linebreak_t *, linebreak_prep_func_t,
+			       void *);
+extern void linebreak_set_sizing(linebreak_t *, linebreak_sizing_func_t,
+				 void *);
+extern void linebreak_set_urgent(linebreak_t *, linebreak_urgent_func_t,
+				 void *);
+extern void linebreak_set_user(linebreak_t *, linebreak_obs_prep_func_t,
+			       void *);
 extern void linebreak_reset(linebreak_t *);
 extern void linebreak_update_lbclass(linebreak_t *, unichar_t, propval_t);
 extern void linebreak_clear_lbclass(linebreak_t *);
@@ -311,8 +334,8 @@ extern propval_t linebreak_lbclass(linebreak_t *, unichar_t);
 
 extern gcstring_t **linebreak_break(linebreak_t *, unistr_t *);
 extern gcstring_t **linebreak_break_fast(linebreak_t *, unistr_t *);
-extern gcstring_t **linebreak_break_from_utf8(linebreak_t *, char *, size_t,
-					      int);
+extern gcstring_t **linebreak_break_from_utf8(linebreak_t *, char *,
+					      size_t, int);
 extern gcstring_t **linebreak_break_partial(linebreak_t *, unistr_t *);
 extern propval_t linebreak_lbrule(propval_t, propval_t);
 
@@ -322,30 +345,31 @@ extern const char *linebreak_propvals_LB[];
 extern const char *linebreak_southeastasian_supported;
 extern void linebreak_southeastasian_flagbreak(gcstring_t *);
 
-extern unistr_t *sombok_decode_utf8(unistr_t *, size_t, const char *, size_t,
-				    int);
+extern unistr_t *sombok_decode_utf8(unistr_t *, size_t, const char *,
+				    size_t, int);
 extern char *sombok_encode_utf8(char *, size_t *, size_t, unistr_t *);
 
 /***
  *** Built-in callbacks for linebreak_t.
  ***/
-extern gcstring_t *linebreak_format_SIMPLE(linebreak_t *, linebreak_state_t,
+extern gcstring_t *linebreak_format_SIMPLE(linebreak_t *,
+					   linebreak_state_t,
 					   gcstring_t *);
-extern gcstring_t *linebreak_format_NEWLINE(linebreak_t *, linebreak_state_t,
+extern gcstring_t *linebreak_format_NEWLINE(linebreak_t *,
+					    linebreak_state_t,
 					    gcstring_t *);
 extern gcstring_t *linebreak_format_TRIM(linebreak_t *, linebreak_state_t,
 					 gcstring_t *);
-extern gcstring_t *linebreak_prep_URIBREAK(linebreak_t *, void *, unistr_t *,
-					   unistr_t *);
+extern gcstring_t *linebreak_prep_URIBREAK(linebreak_t *, void *,
+					   unistr_t *, unistr_t *);
 extern double linebreak_sizing_UAX11(linebreak_t *, double, gcstring_t *,
 				     gcstring_t *, gcstring_t *);
 extern gcstring_t *linebreak_urgent_ABORT(linebreak_t *, gcstring_t *);
 extern gcstring_t *linebreak_urgent_FORCE(linebreak_t *, gcstring_t *);
 
 #define _SOMBOK_H_
-#endif /* _SOMBOK_H_ */
+#endif				/* _SOMBOK_H_ */
 
 #ifdef MALLOC_DEBUG
 #include "src/mymalloc.h"
-#endif /* MALLOC_DEBUG */
-
+#endif				/* MALLOC_DEBUG */

@@ -23,6 +23,8 @@
  *@{*/
 
 #define eaw2col(e) (((e) == EA_F || (e) == EA_W)? 2: (((e) == EA_Z)? 0: 1))
+#define IS_EXTENDER(g) \
+    ((g) == GB_Extend || (g) == GB_SpacingMark || (g) == GB_Virama)
 
 static
 void _gcinfo(linebreak_t *obj, unistr_t *str, size_t pos,
@@ -52,8 +54,7 @@ void _gcinfo(linebreak_t *obj, unistr_t *str, size_t pos,
     else if (scr == SC_Thai)
 	glbc = lbc;
 #endif /* USE_LIBTHAI */
-    else if (gcb == GB_Extend || gcb == GB_SpacingMark
-	     || gcb == GB_Virama)
+    else if (IS_EXTENDER(gcb))
 	glbc = LB_CM;
     else
 	glbc = LB_AL;
@@ -77,15 +78,23 @@ void _gcinfo(linebreak_t *obj, unistr_t *str, size_t pos,
 	break; /* switch (gcb) */
 
     default:
-	if (lbc == LB_SP) /* Special case. */
-	    break;
-
 	pcol = 0;
 	ecol = 0;
 	while (pos < str->len) { /* GB2 */
 	    linebreak_charprop(obj, str->str[pos], &lbc, &eaw, &ngcb, &scr);
+
+	    /* Legacy-CM: Treat SP CM+ as if it were ID.  cf. [UAX #14] 9.1. */
+	    if (glbc == LB_SP) {
+		if ((obj->options & LINEBREAK_OPTION_LEGACY_CM) &&
+		    IS_EXTENDER(ngcb) && (lbc == LB_CM || lbc == LB_SA)) {
+		    glbc = LB_ID;
+		    ecol += eaw2col(eaw);
+		} else
+		    /* prevent degenerate case. */
+		    break; /* while (pos < str->len) */
+	    }
 	    /* GB5 */
-	    if (ngcb == GB_Control || ngcb == GB_CR || ngcb == GB_LF)
+	    else if (ngcb == GB_Control || ngcb == GB_CR || ngcb == GB_LF)
 		break; /* while (pos < str->len) */
 	    /* GB6 - GB8 */
 	    /*
@@ -97,27 +106,17 @@ void _gcinfo(linebreak_t *obj, unistr_t *str, size_t pos,
 		       ngcb == GB_LVT)) ||
 		     ((gcb == GB_LV || gcb == GB_V) &&
 		      (ngcb == GB_V || ngcb == GB_T)) ||
-		     ((gcb == GB_LVT || gcb == GB_T) && ngcb == GB_T))
+		     ((gcb == GB_LVT || gcb == GB_T) && ngcb == GB_T)) {
 		gcol = 2;
-	    /* GB9, GB9a */
-	    /*
-	     * Some morbid sequences such as <L Extend V T> are allowed
-	       according to UAX #14 LB9.
-	     */
-	    else if (ngcb == GB_Extend || ngcb == GB_SpacingMark) {
-		ecol += eaw2col(eaw);
-		pos++;
-		glen++;
-		if (lbc == LB_CM)
-		    ; /* CM in grapheme extender is ignored. */
-		else if (lbc != LB_SA)
-		    elbc = lbc;
-		/* SA in g. extender is resolved to CM so it is ignored. */
-		continue; /* while (pos < str->len) */
+		elbc = lbc;
 	    }
-	    else if (ngcb == GB_Virama) {
+	    /* GB9, GB9a */
+	    else if (IS_EXTENDER(ngcb)) {
 		ecol += eaw2col(eaw);
-		/* virama is CM so it is ignored. */
+		/* CM in grapheme extender is ignored.  Virama is CM. */
+		/* SA in g. ext. is resolved to CM so it is ignored. */
+		if (lbc != LB_CM && lbc != LB_SA)
+		    elbc = lbc;
 	    }
 	    /* GB9b */
 	    else if (gcb == GB_Prepend) {

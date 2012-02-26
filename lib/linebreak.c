@@ -32,7 +32,7 @@
  * @return New linebreak object.
  * If error occurred, errno is set then NULL is returned.
  */
-linebreak_t *linebreak_new(void (*ref_func) ())
+linebreak_t *linebreak_new(linebreak_ref_func_t ref_func)
 {
     linebreak_t *obj;
     if ((obj = malloc(sizeof(linebreak_t))) == NULL)
@@ -41,7 +41,7 @@ linebreak_t *linebreak_new(void (*ref_func) ())
 
 #ifdef USE_LIBTHAI
     obj->options = LINEBREAK_OPTION_COMPLEX_BREAKING;
-#endif /* USE_LIBTHAI */
+#endif				/* USE_LIBTHAI */
     obj->ref_func = ref_func;
     obj->refcount = 1UL;
     return obj;
@@ -313,7 +313,7 @@ void linebreak_set_stash(linebreak_t * lbobj, void *stash)
  * Reference count of format_data member will be handled appropriately.
  */
 void linebreak_set_format(linebreak_t * lbobj,
-			  gcstring_t * (*format_func) (),
+			  linebreak_format_func_t format_func,
 			  void *format_data)
 {
     if (lbobj->ref_func != NULL) {
@@ -337,8 +337,8 @@ void linebreak_set_format(linebreak_t * lbobj,
  * Reference count of prep_data item will be handled appropriately.
  * if prep_func was NULL, all data are cleared.
  */
-void linebreak_add_prep(linebreak_t * lbobj, gcstring_t * (*prep_func) (),
-			void *prep_data)
+void linebreak_add_prep(linebreak_t * lbobj,
+			linebreak_prep_func_t prep_func, void *prep_data)
 {
     size_t i;
     gcstring_t *(**p) ();
@@ -395,7 +395,8 @@ void linebreak_add_prep(linebreak_t * lbobj, gcstring_t * (*prep_func) (),
  * New sizing callback is set.
  * Reference count of sizing_data member will be handled appropriately.
  */
-void linebreak_set_sizing(linebreak_t * lbobj, double (*sizing_func) (),
+void linebreak_set_sizing(linebreak_t * lbobj,
+			  linebreak_sizing_func_t sizing_func,
 			  void *sizing_data)
 {
     if (lbobj->ref_func != NULL) {
@@ -419,7 +420,7 @@ void linebreak_set_sizing(linebreak_t * lbobj, double (*sizing_func) (),
  * Reference count of urgent_data member will be handled appropriately.
  */
 void linebreak_set_urgent(linebreak_t * lbobj,
-			  gcstring_t * (*urgent_func) (),
+			  linebreak_urgent_func_t urgent_func,
 			  void *urgent_data)
 {
     if (lbobj->ref_func != NULL) {
@@ -443,7 +444,8 @@ void linebreak_set_urgent(linebreak_t * lbobj,
  * New preprocessing callback is set.
  * Reference count of user_data member will be handled appropriately.
  */
-void linebreak_set_user(linebreak_t * lbobj, gcstring_t * (*user_func) (),
+void linebreak_set_user(linebreak_t * lbobj,
+			linebreak_obs_prep_func_t user_func,
 			void *user_data)
 {
     if (lbobj->ref_func != NULL) {
@@ -505,16 +507,16 @@ propval_t linebreak_get_lbrule(linebreak_t * obj, propval_t b_idx,
 {
     if (b_idx == LB_AI)
 	b_idx = (obj->options & LINEBREAK_OPTION_EASTASIAN_CONTEXT) ?
-		LB_ID : LB_AL;
+	    LB_ID : LB_AL;
     else if (b_idx == LB_CJ)
 	b_idx = (obj->options & LINEBREAK_OPTION_NONSTARTER_LOOSE) ?
-		LB_ID : LB_NS;
+	    LB_ID : LB_NS;
     if (a_idx == LB_AI)
 	a_idx = (obj->options & LINEBREAK_OPTION_EASTASIAN_CONTEXT) ?
-		LB_ID : LB_AL;
+	    LB_ID : LB_AL;
     else if (a_idx == LB_CJ)
 	a_idx = (obj->options & LINEBREAK_OPTION_NONSTARTER_LOOSE) ?
-		LB_ID : LB_NS;
+	    LB_ID : LB_NS;
 
     return linebreak_lbrule(b_idx, a_idx);
 }
@@ -535,7 +537,7 @@ propval_t linebreak_lbclass(linebreak_t * obj, unichar_t c)
     if (lbc == LB_SA) {
 #ifdef USE_LIBTHAI
 	if (scr != SC_Thai)
-#endif /* USE_LIBTHAI */
+#endif				/* USE_LIBTHAI */
 	    lbc = (gcb == GB_Extend || gcb == GB_SpacingMark
 		   || gcb == GB_Virama) ? LB_CM : LB_AL;
     }

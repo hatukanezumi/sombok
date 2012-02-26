@@ -425,21 +425,6 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 	return NULL;
     }
 
-    /* Legacy-CM: Treat SP CM+ as if it were ID.  cf. [UAX #14] 9.1. */
-    if (lbobj->options & LINEBREAK_OPTION_LEGACY_CM)
-	for (i = 1; i < str->gclen; i++)
-	    if (str->gcstr[i].lbc == LB_CM &&
-		str->gcstr[i - 1].lbc == LB_SP) {
-		str->gcstr[i - 1].len += str->gcstr[i].len;
-		str->gcstr[i - 1].lbc = LB_ID;
-		str->gcstr[i - 1].elbc = str->gcstr[i].elbc;
-		if (str->gclen - i - 1)
-		    memmove(str->gcstr + i, str->gcstr + i + 1,
-			    sizeof(gcchar_t) * (str->gclen - i - 1));
-		str->gclen--;
-		i--;
-	    }
-
     /* LB21a (as of 6.1.0): HL (HY | BA) × [^ CB] */
     if (str != NULL && str->gclen) {
 	for (i = 0, j = 0; i < str->len; i++) {
@@ -817,16 +802,14 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 		case LB_HL:
 		    blbc = LB_AL;
 		    break;
-		/* LB27: Treat hangul syllable as if it were ID (or AL). */
+		/* Optionally, treat hangul syllable as if it were AL. */
 		case LB_H2:
 		case LB_H3:
 		case LB_JL:
 		case LB_JV:
 		case LB_JT:
-		    blbc =
-			(lbobj->
-			 options & LINEBREAK_OPTION_HANGUL_AS_AL) ? LB_AL :
-			LB_ID;
+		    if (lbobj->options & LINEBREAK_OPTION_HANGUL_AS_AL)
+			blbc = LB_AL;
 		    break;
 		}
 
@@ -845,16 +828,14 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 		case LB_HL:
 		    albc = LB_AL;
 		    break;
-		/* LB27: Treat hangul syllable as if it were ID (or AL). */
+		/* Optionally, treat hangul syllable as if it were AL. */
 		case LB_H2:
 		case LB_H3:
 		case LB_JL:
 		case LB_JV:
 		case LB_JT:
-		    albc =
-			(lbobj->
-			 options & LINEBREAK_OPTION_HANGUL_AS_AL) ? LB_AL :
-			LB_ID;
+		    if (lbobj->options & LINEBREAK_OPTION_HANGUL_AS_AL)
+			albc = LB_AL;
 		    break;
 		}
 

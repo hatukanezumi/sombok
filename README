@@ -57,8 +57,7 @@ Perl
     Unicode-LineBreak: http://search.cpan.org/dist/Unicode-LineBreak/
 
 Python
-    textseg: http://linefold.svn.sf.net/svnroot/linefold/trunk/pytextseg
-             (Under Development)
+    pytextseg: http://pypi.python.org/pypi/pytextseg/
 
 Author
 ======

@@ -1,7 +1,26 @@
+2.1.1  2012-02-25
+	* config.guess:
+	* config.sub:
+	  - updated.
+	* data/Rules-6.1.0.txt:
+	  - Correct revision date of UAX#14.
+	* include/sombok.h.in:
+	* lib/linebreak.c:
+	  - Specify strict prototypes of callback members of linebreak_t.
+	* lib/break.c:
+	* lib/gcstring.c:
+	  - Chg: Now Legacy-CM rule is applied during grapheme cluster 
+	    breaking.  If this rule is disabled, SPACE and succeeding 
+	    combining mark are not conjoined.
+	  - Chg: Morbid hangul syllable block (e.g. <L Extend V T>) no 
+	    longer does not form single grapheme cluster.
+
 2.1.0  2012-02-04
 	* Release 2.1.0.
 	* Makefile.am:
 	  - increase -version-info from 4.3.1 to 4.4.1.
+	* tests/01break.t:
+	  - Added Sanskrit (sa) case.
 
 2.1.0beta2  2012-01-29
 	* data/constants.pl:

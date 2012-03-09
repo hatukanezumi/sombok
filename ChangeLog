@@ -1,3 +1,9 @@
+2.1.x  2012-XX-XX
+	* configure.ac:
+	  - Move variable version informations to files: UNICODE and VERSION.
+	* lib/linebreak.c:
+	  - Specify strict prototypes for some more functions.
+
 2.1.1  2012-02-25
 	* config.guess:
 	* config.sub:

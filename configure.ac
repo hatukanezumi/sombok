@@ -1,8 +1,8 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.59)
-AC_INIT(sombok, 2.1.1, hatuka@nezumi.nu)
-DEFAULT_UNICODE_VERSION="6.1.0"
+AC_INIT(sombok, m4_esyscmd([cat VERSION | tr -d '\n']), hatuka@nezumi.nu)
+DEFAULT_UNICODE_VERSION="m4_esyscmd([cat UNICODE | tr -d '\n'])"
 LPATH="$PATH:/usr/local/bin"
 
 AM_INIT_AUTOMAKE

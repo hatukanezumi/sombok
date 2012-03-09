@@ -11,8 +11,6 @@ be useful, but WITHOUT ANY WARRANTY; without even the implied warranty
 of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 COPYING file for more details.
 
-$Id$
-
 これはなにか
 ============
 
@@ -41,14 +39,14 @@ $Id$
 インストール
 ============
 
-配布物を展開し、次のように実行します。
+配布物を展開し、次のように実行します::
 
   $ ./configure [オプション……]
   $ make
   $ make check
   # make install
 
-``./configure --help'' を実行すれば、どんなオプションが使えるかわかりま
+``./configure --help`` を実行すれば、どんなオプションが使えるかわかりま
 す。
 
 言語バインディング
@@ -65,4 +63,3 @@ Python
 
 Hatuka*nezumi - IKEDA Soji <hatuka(at)nezumi.nu>.
 
-$$

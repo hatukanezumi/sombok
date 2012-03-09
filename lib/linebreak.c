@@ -152,7 +152,7 @@ linebreak_t *linebreak_copy(linebreak_t * obj)
 	size_t i;
 	for (i = 0; obj->prep_func[i] != NULL; i++);
 	if ((newobj->prep_func =
-	     malloc(sizeof(gcstring_t * (*)()) * (i + 1)))
+	     malloc(sizeof(linebreak_prep_func_t) * (i + 1)))
 	    == NULL) {
 	    free(newobj->map);
 	    free(newobj->newline.str);
@@ -163,7 +163,7 @@ linebreak_t *linebreak_copy(linebreak_t * obj)
 	    return NULL;
 	}
 	memcpy(newobj->prep_func, obj->prep_func,
-	       sizeof(gcstring_t * (*)()) * (i + 1));
+	       sizeof(linebreak_prep_func_t) * (i + 1));
 	if ((newobj->prep_data = malloc(sizeof(void *) * (i + 1))) == NULL) {
 	    free(newobj->map);
 	    free(newobj->newline.str);
@@ -341,7 +341,7 @@ void linebreak_add_prep(linebreak_t * lbobj,
 			linebreak_prep_func_t prep_func, void *prep_data)
 {
     size_t i;
-    gcstring_t *(**p) ();
+    linebreak_prep_func_t * p;
     void **q;
 
     if (prep_func == NULL) {
@@ -364,7 +364,7 @@ void linebreak_add_prep(linebreak_t * lbobj,
 	for (i = 0; lbobj->prep_func[i] != NULL; i++);
 
     if ((p =
-	 realloc(lbobj->prep_func, sizeof(gcstring_t * (*)()) * (i + 2)))
+	 realloc(lbobj->prep_func, sizeof(linebreak_prep_func_t) * (i + 2)))
 	== NULL) {
 	lbobj->errnum = errno;
 	return;

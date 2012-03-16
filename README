@@ -39,7 +39,7 @@ Prerequisites
 Install
 =======
 
-Extract tarball then run as follows::
+Extract tarball then run as follows:
 
   $ ./configure [options...]
   $ make

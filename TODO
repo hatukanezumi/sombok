@@ -1,0 +1,5 @@
+ToDo on next major release:
+
+- offset or length arguments of gcstring_setpos(), gcstring_shrink(),
+  gcstring_substr() and gcstring_replace() would be ssize_t, not int.
+

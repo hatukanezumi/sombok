@@ -39,7 +39,7 @@ COPYING file for more details.
 インストール
 ============
 
-配布物を展開し、次のように実行します::
+配布物を展開し、次のように実行します。
 
   $ ./configure [オプション……]
   $ make

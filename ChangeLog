@@ -3,6 +3,9 @@
 	  - Move variable version informations to files: UNICODE and VERSION.
 	* lib/linebreak.c:
 	  - Specify strict prototypes for some more functions.
+	  - linebreak_get_lbrule(): Concern LEGACY_CM and HANGUL_AS_AL
+	    options. 
+	* Added TODO.
 
 2.1.1  2012-02-25
 	* config.guess:

@@ -539,6 +539,8 @@ gcchar_t *gcstring_next(gcstring_t *gcstr)
  * @param[in] pos New position.
  * @return none.
  * If pos is out of range of string, position won't be updated.
+ *
+ * @todo On next major release, pos would be ssize_t, not int.
  */
 void gcstring_setpos(gcstring_t *gcstr, int pos)
 {
@@ -557,6 +559,8 @@ void gcstring_setpos(gcstring_t *gcstr, int pos)
  * @param[in] length New length.
  * @return none.
  * If gcstr was NULL, do nothing.
+ *
+ * @todo On next major release, length would be ssize_t, not int.
  */
 void gcstring_shrink(gcstring_t *gcstr, int length)
 {
@@ -590,6 +594,8 @@ void gcstring_shrink(gcstring_t *gcstr, int length)
  * @param[in] length Length of substring.
  * @return (newly allocated) substring.
  * If error occurred, errno is set to non-zero then NULL is returned.
+ *
+ * @todo On next major release, offset and length would be ssize_t, not int.
  */
 gcstring_t *gcstring_substr(gcstring_t *gcstr, int offset, int length)
 {
@@ -666,6 +672,8 @@ gcstring_t *gcstring_substr(gcstring_t *gcstr, int offset, int length)
  * @param[in] replacement If this was not NULL, modify grapheme cluster string by replacing substring with it.
  * @return modified gcstr itself (not a copy of it).
  * If error occurred, errno is set to non-zero then NULL is returned.
+ *
+ * @todo On next major release, offset and length would be ssize_t, not int.
  */
 gcstring_t *gcstring_replace(gcstring_t *gcstr, int offset, int length,
 			     gcstring_t *replacement)

@@ -1,4 +1,7 @@
-2.1.x  2012-XX-XX
+2.1.2  2012-XX-XX
+	* License Change:
+	  - From now on, sombok is distributed under dual license of
+	    GPL *and* Artistic License.
 	* configure.ac:
 	  - Move variable version informations to files: UNICODE and VERSION.
 	* lib/linebreak.c:

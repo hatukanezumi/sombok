@@ -48,7 +48,7 @@ DIST_COMMON = README $(am__configure_deps) $(include_HEADERS) \
 	$(srcdir)/sombok.spec.in $(top_srcdir)/configure \
 	$(top_srcdir)/doc/doxyfile.in \
 	$(top_srcdir)/include/sombok.h.in AUTHORS COPYING ChangeLog \
-	INSTALL NEWS compile config.guess config.sub depcomp \
+	INSTALL NEWS TODO compile config.guess config.sub depcomp \
 	install-sh ltmain.sh missing
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -265,7 +265,7 @@ EXTRA_DIST = sombok.spec debian/* \
 	tests/lb.sh $(TESTS) test-data/* \
 	data/makefile data/constants.pl data/custom.pl data/data.pl \
 	data/*.custom data/Rules-*.txt data/LBCLASSES \
-	ChangeLog.REL1 README.ja_JP
+	ARTISTIC ChangeLog.REL1 README.ja_JP UNICODE VERSION
 
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am

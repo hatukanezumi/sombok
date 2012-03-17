@@ -45,4 +45,4 @@ EXTRA_DIST = sombok.spec debian/* \
 	tests/lb.sh $(TESTS) test-data/* \
 	data/makefile data/constants.pl data/custom.pl data/data.pl \
 	data/*.custom data/Rules-*.txt data/LBCLASSES \
-	ChangeLog.REL1 README.ja_JP
+	ARTISTIC ChangeLog.REL1 README.ja_JP UNICODE VERSION

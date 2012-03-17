@@ -1,18 +1,13 @@
 /*
- * Break.c - an implementation of Unicode line breaking algorithm.
+ * break.c - an implementation of Unicode line breaking algorithm.
  * 
  * Copyright (C) 2009-2012 by Hatuka*nezumi - IKEDA Soji.
  *
  * This file is part of the Sombok Package.  This program is free
- * software; you can redistribute it and/or modify it under the terms
- * of the GNU General Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your option)
- * any later version.  This program is distributed in the hope that
- * it will be useful, but WITHOUT ANY WARRANTY; without even the
- * implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
- * PURPOSE.  See the COPYING file for more details.
+ * software; you can redistribute it and/or modify it under the terms of
+ * either the GNU General Public License or the Artistic License, as
+ * specified in the README file.
  *
- * $id$
  */
 
 #include "sombok_constants.h"

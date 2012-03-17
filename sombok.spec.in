@@ -2,7 +2,7 @@ Name: sombok
 Version: @VERSION@
 Release: 1%{?dist}
 Epoch: 0
-License: GPLv2+
+License: Artistic or GPLv2+
 Group: System Environment/Libraries
 Summary(ja): ユニコード テキスト分節パッケージ
 Summary: Unicode Text Segmentation Package
@@ -77,12 +77,12 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-, root, root)
-%doc README* AUTHORS COPYING ChangeLog* NEWS
+%doc README* AUTHORS ARTISTIC COPYING ChangeLog* NEWS TODO
 %{_libdir}/lib*.so.*
 
 %files devel
 %defattr(-, root, root)
-%doc README* AUTHORS COPYING ChangeLog* doc/html NEWS
+%doc README* AUTHORS ARTISTIC COPYING ChangeLog* doc/html NEWS TODO
 %{_includedir}/*
 %{_libdir}/lib*.a
 %{_libdir}/lib*.so

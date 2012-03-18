@@ -7,7 +7,7 @@ LPATH="$PATH:/usr/local/bin"
 
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADER([config.h])
-AC_CONFIG_MACRO_DIR([m4])
+dnl AC_CONFIG_MACRO_DIR([m4])
 
 # Checks for programs.
 AC_PROG_MAKE_SET
@@ -18,10 +18,10 @@ AC_PROG_CC
 AM_PROG_CC_C_O
 
 # Checks for libraries.
-#AM_ICONV
+dnl AM_ICONV
 
 # Checks for header files.
-#AC_HEADER_STDC
+dnl AC_HEADER_STDC
 AC_CHECK_HEADERS([errno.h stdlib.h stddef.h string.h wchar.h strings.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
@@ -29,7 +29,7 @@ AC_C_CONST
 AC_TYPE_SIZE_T
 
 # Checks for library functions.
-#AC_FUNC_MALLOC
+dnl AC_FUNC_MALLOC
 AC_CHECK_FUNCS([strerror])
 AM_CONDITIONAL(HAVE_STRERROR, [test "$ac_cv_func_strerror" = "yes"])
 AC_CHECK_FUNCS([strcasecmp])

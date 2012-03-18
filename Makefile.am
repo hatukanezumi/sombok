@@ -41,7 +41,7 @@ stamp-html: doc/doxyfile $(include_HEADERS) $(nodist_include_HEADERS) \
 endif
 
 EXTRA_DIST = sombok.spec debian/* \
-	m4/* lib/5.1.0.c lib/5.2.0.c lib/6.0.0.c \
+	lib/5.1.0.c lib/5.2.0.c lib/6.0.0.c \
 	tests/lb.sh $(TESTS) test-data/* \
 	data/makefile data/constants.pl data/custom.pl data/data.pl \
 	data/*.custom data/Rules-*.txt data/LBCLASSES \

@@ -1,7 +1,7 @@
 /*
  * southeastasian.c - interfaces for South East Asian complex breaking.
  * 
- * Copyright (C) 2009-2011 by Hatuka*nezumi - IKEDA Soji.
+ * Copyright (C) 2009-2012 by Hatuka*nezumi - IKEDA Soji.
  *
  * This file is part of the Sombok Package.  This program is free
  * software; you can redistribute it and/or modify it under the terms of
@@ -88,20 +88,14 @@ void linebreak_southeastasian_flagbreak(gcstring_t * gcstr)
 						      1])
 			 != LB_SA)
 		    /* bogus breaking by libthai on non-SA grapheme extender
-		     * (e.g. SA CM). */
+		     * (e.g. CM SA). */
 		    ;
-		else
-		    gcstr->gcstr[i].flag =
-			(gcstr->gcstr[i].idx == j + brk) ?
-			LINEBREAK_FLAG_ALLOW_BEFORE :
-			LINEBREAK_FLAG_PROHIBIT_BEFORE;
+		else if (gcstr->gcstr[i].idx == j + brk)
+		    gcstr->gcstr[i].flag = LINEBREAK_FLAG_ALLOW_BEFORE;
 	    } else
 		sa = 0;
 	}
     }
-    for (; i < gcstr->gclen && gcstr->gcstr[i].lbc == LB_SA; i++)
-	if (!gcstr->gcstr[i].flag)
-	    gcstr->gcstr[i].flag = LINEBREAK_FLAG_PROHIBIT_BEFORE;
 
     free(buf);
 #endif /* USE_LIBTHAI */

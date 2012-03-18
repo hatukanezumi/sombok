@@ -2,7 +2,7 @@
 
 . tests/lb.sh
 
-if [ `./sombok --sea-support` = "none" ]; then
+if [ "`./sombok --sea-support`" = "none" ]; then
     echo "SA word segmentation not supported."
     exit 77
 fi

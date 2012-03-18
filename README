@@ -6,13 +6,16 @@ Sombok is Copyright (C) 2009-2012, by Hatuka*nezumi - IKEDA Soji.
 
 It is free software; you can redistribute it and/or modify it under the 
 terms of either:
+
 a) the GNU General Public License as published by the Free Software 
    Foundation; either version 2, or (at your option) any later version, 
    or
+
 b) the "Artistic License".
 
 ----
-See the COPYING and ARTISTIC files for more details.
+
+See the COPYING and the ARTISTIC files for more details.
 
 What is this
 ============
@@ -20,7 +23,7 @@ What is this
 Sombok library package performs Line Breaking Algorithm described in 
 Unicode Standards Annex #14 (UAX #14).  East_Asian_Width informative 
 properties defined by Annex #11 (UAX #11) may be concerned to determin 
-breaking positions.  This package also implements ``default'' Grapheme 
+breaking positions.  This package also implements "default" Grapheme 
 Cluster segmentation described in Annex #29 (UAX #29).
 
 Getting Sombok
@@ -36,7 +39,9 @@ Prerequisites
 
 * Optionally, libthai package need to be installed to support Thai 
   word segmentation:
+
     http://linux.thai.net/projects/libthai
+
   In this case pkg-config is also required.
 
 Install
@@ -44,10 +49,13 @@ Install
 
 Extract tarball then run as follows:
 
-  $ ./configure [options...]
-  $ make
-  $ make check
-  # make install
+  ./configure [options...]
+
+  make
+
+  make check
+
+  make install
 
 ``./configure --help`` will show available options.
 

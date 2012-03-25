@@ -1,13 +1,19 @@
-2.1.2  2012-XX-XX
+2.2  2012-XX-XX
 	* License Change:
 	  - From now on, sombok is distributed under dual license of
 	    GPL *and* Artistic License.
 	* configure.ac:
 	  - Move variable version informations to files: UNICODE and VERSION.
+	* lib/gcstring.c:
+	  - New: gcstring_lbclass(), gcstring_lbclass_ext().
 	* lib/linebreak.c:
 	  - Specify strict prototypes for some more functions.
 	  - linebreak_get_lbrule(): Concern LEGACY_CM and HANGUL_AS_AL
 	    options. 
+	  - Obsoleted: linebreak_lbclass(), linebreak_lbclass_ext(),
+	    linebreak_eawidth().
+	* Makefile.am:
+	  - increase -version-info from 4.4.1 to 4.5.1.
 	* Added TODO.
 
 2.1.1  2012-02-25

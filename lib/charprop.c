@@ -33,6 +33,80 @@ static propval_t PROPENT_PRIVATE[] = { LB_AL, EA_A, GB_Other, SC_Unknown };
 /* Reserved or noncharacter - XX */
 static propval_t PROPENT_RESERVED[] = { LB_AL, EA_N, GB_Control, SC_Unknown };
 
+static void
+_search_props(linebreak_t *obj, unichar_t c, propval_t *lbcptr,
+	      propval_t *eawptr, propval_t *gcbptr)
+{
+    mapent_t *top, *bot, *cur;
+
+    if (obj->map == NULL || obj->mapsiz == 0)
+	return;
+
+    top = obj->map;
+    bot = obj->map + obj->mapsiz - 1;
+    while (top <= bot) {
+	cur = top + (bot - top) / 2;
+	if (c < cur->beg)
+	    bot = cur - 1;
+	else if (cur->end < c)
+	    top = cur + 1;
+	else {
+	    if (lbcptr)
+		*lbcptr = cur->lbc;
+	    if (eawptr)
+		*eawptr = cur->eaw;
+
+	    /* Complement unknown Grapheme_Cluster_Break property. */
+	    if (gcbptr == NULL)
+		break;
+	    if (cur->gcb != PROP_UNKNOWN) {
+		*gcbptr = cur->gcb;
+		break;
+	    }
+	    switch (cur->lbc) {
+	    case PROP_UNKNOWN:
+		*gcbptr = PROP_UNKNOWN;
+		break;
+	    case LB_CR:
+		*gcbptr = GB_CR;
+		break;
+	    case LB_LF:
+		*gcbptr = GB_LF;
+		break;
+	    case LB_BK:
+	    case LB_NL:
+	    case LB_WJ:
+	    case LB_ZW:
+		*gcbptr = GB_Control;
+		break;
+	    case LB_CM:
+		*gcbptr = GB_Extend;
+		break;
+	    case LB_H2:
+		*gcbptr = GB_LV;
+		break;
+	    case LB_H3:
+		*gcbptr = GB_LVT;
+		break;
+	    case LB_JL:
+		*gcbptr = GB_L;
+		break;
+	    case LB_JV:
+		*gcbptr = GB_V;
+		break;
+	    case LB_JT:
+		*gcbptr = GB_T;
+		break;
+	    default:
+		*gcbptr = GB_Other;
+		break;
+	    }
+	    break;
+	}
+    }
+
+}
+
 /** Search for character properties.
  * 
  * Configuration parameters of linebreak object:
@@ -58,68 +132,13 @@ void linebreak_charprop(linebreak_t * obj, unichar_t c,
 			propval_t * lbcptr, propval_t * eawptr,
 			propval_t * gcbptr, propval_t * scrptr)
 {
-    mapent_t *top, *bot, *cur;
     propval_t lbc = PROP_UNKNOWN, eaw = PROP_UNKNOWN, gcb = PROP_UNKNOWN,
 	scr = PROP_UNKNOWN, *ent;
 
     /*
      * First, search custom map using binary search.
      */
-    if (obj->map && obj->mapsiz) {
-	top = obj->map;
-	bot = obj->map + obj->mapsiz - 1;
-	while (top <= bot) {
-	    cur = top + (bot - top) / 2;
-	    if (c < cur->beg)
-		bot = cur - 1;
-	    else if (cur->end < c)
-		top = cur + 1;
-	    else {
-		lbc = cur->lbc;
-		eaw = cur->eaw;
-		gcb = cur->gcb;
-		/* Complement unknown Grapheme_Cluster_Break property. */
-		if (lbc != PROP_UNKNOWN && gcb == PROP_UNKNOWN) {
-		    switch (lbc) {
-		    case LB_CR:
-			gcb = GB_CR;
-			break;
-		    case LB_LF:
-			gcb = GB_LF;
-			break;
-		    case LB_BK:
-		    case LB_NL:
-		    case LB_WJ:
-		    case LB_ZW:
-			gcb = GB_Control;
-			break;
-		    case LB_CM:
-			gcb = GB_Extend;
-			break;
-		    case LB_H2:
-			gcb = GB_LV;
-			break;
-		    case LB_H3:
-			gcb = GB_LVT;
-			break;
-		    case LB_JL:
-			gcb = GB_L;
-			break;
-		    case LB_JV:
-			gcb = GB_V;
-			break;
-		    case LB_JT:
-			gcb = GB_T;
-			break;
-		    default:
-			gcb = GB_Other;
-			break;
-		    }
-		}
-		break;
-	    }
-	}
-    }
+    _search_props(obj, c, &lbc, &eaw, &gcb);
 
     /*
      * Otherwise, search built-in ``compact array''.
@@ -181,6 +200,35 @@ void linebreak_charprop(linebreak_t * obj, unichar_t c,
     if (scrptr)
 	*scrptr = scr;
 }
+
+/** Find property from custom line breaking class map.
+ * @ingroup linebreak
+ * @param[in] obj linebreak object.
+ * @param[in] c Unicode character.
+ * @return property value.  If not found, PROP_UNKNOWN.
+ */
+propval_t
+linebreak_search_lbclass(linebreak_t * obj, unichar_t c)
+{
+    propval_t p = PROP_UNKNOWN;
+    _search_props(obj, c, &p, NULL, NULL);
+    return p;
+}
+
+/** Find property from custom East_Asian_Width map.
+ * @ingroup linebreak
+ * @param[in] obj linebreak object.
+ * @param[in] c Unicode character.
+ * @return property value.  If not found, PROP_UNKNOWN.
+ */
+propval_t
+linebreak_search_eawidth(linebreak_t * obj, unichar_t c)
+{
+    propval_t p = PROP_UNKNOWN;
+    _search_props(obj, c, NULL, &p, NULL);
+    return p;
+}
+
 
 #define SET_PROP(pos, prop)			\
      if (idx == 0)				\

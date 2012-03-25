@@ -718,3 +718,44 @@ gcstring_t *gcstring_replace(gcstring_t *gcstr, int offset, int length,
     return gcstr;
 }
 
+/** Get Line Breaking Class of grapheme base
+ *
+ * Get UAX #14 line breaking class of grapheme base.
+ * @param[in] gcstr grapheme cluster string, must not be NULL.
+ * @param[in] pos position.
+ * @return line breaking class property value.
+ *
+ * @note Introduced by sombok 2.2.
+ */
+propval_t gcstring_lbclass(gcstring_t * gcstr, int pos)
+{
+    if (pos < 0)
+	pos += gcstr->gclen;
+    if (pos < 0 || gcstr->gclen == 0 || gcstr->gclen <= pos)
+	return PROP_UNKNOWN;
+    return gcstr->gcstr[pos].lbc;
+}
+
+/** Get Line Breaking Class of grapheme extender
+ *
+ * Get UAX #14 line breaking class of grapheme extender.
+ * If it is CM, get one of grapheme base.
+ * @param[in] gcstr grapheme cluster string, must not be NULL.
+ * @param[in] pos position.
+ * @return line breaking class property value.
+ *
+ * @note Introduced by sombok 2.2.
+ */
+propval_t gcstring_lbclass_ext(gcstring_t * gcstr, int pos)
+{
+    propval_t lbc;
+
+    if (pos < 0)
+	pos += gcstr->gclen;
+    if (pos < 0 || gcstr->gclen == 0 || gcstr->gclen <= pos)
+	return PROP_UNKNOWN;
+    if ((lbc = gcstr->gcstr[pos].elbc) == PROP_UNKNOWN)
+	lbc = gcstr->gcstr[pos].lbc;
+    return lbc;
+}
+

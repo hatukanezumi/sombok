@@ -300,6 +300,9 @@ extern gcstring_t *gcstring_replace(gcstring_t *, int, int, gcstring_t *);
 #define gcstring_getpos(gcstr) \
   ((gcstr)->pos)
 
+extern propval_t gcstring_lbclass(gcstring_t *, int);
+extern propval_t gcstring_lbclass_ext(gcstring_t *, int);
+
 extern linebreak_t *linebreak_new(linebreak_ref_func_t);
 extern linebreak_t *linebreak_copy(linebreak_t *);
 extern linebreak_t *linebreak_incref(linebreak_t *);
@@ -322,17 +325,19 @@ extern void linebreak_update_lbclass(linebreak_t *, unichar_t, propval_t);
 extern void linebreak_clear_lbclass(linebreak_t *);
 extern void linebreak_update_eawidth(linebreak_t *, unichar_t, propval_t);
 extern void linebreak_clear_eawidth(linebreak_t *);
+extern propval_t linebreak_search_lbclass(linebreak_t *, unichar_t);
+extern propval_t linebreak_search_eawidth(linebreak_t *, unichar_t);
 
-extern propval_t linebreak_eawidth(linebreak_t *, unichar_t);
+extern propval_t linebreak_eawidth(linebreak_t *, unichar_t); /* obs. */
 extern propval_t linebreak_get_lbrule(linebreak_t *, propval_t, propval_t);
-extern propval_t linebreak_lbclass(linebreak_t *, unichar_t);
+extern propval_t linebreak_lbclass(linebreak_t *, unichar_t); /* obs. */
 
 extern gcstring_t **linebreak_break(linebreak_t *, unistr_t *);
 extern gcstring_t **linebreak_break_fast(linebreak_t *, unistr_t *);
 extern gcstring_t **linebreak_break_from_utf8(linebreak_t *, char *,
 					      size_t, int);
 extern gcstring_t **linebreak_break_partial(linebreak_t *, unistr_t *);
-extern propval_t linebreak_lbrule(propval_t, propval_t);
+extern propval_t linebreak_lbrule(propval_t, propval_t); /* obs. */
 
 extern const char *linebreak_unicode_version;
 extern const char *linebreak_propvals_EA[];

@@ -545,6 +545,7 @@ propval_t linebreak_get_lbrule(linebreak_t * obj, propval_t blbc,
 }
 
 /** Get Line Breaking Class
+ * @deprecated Use gcstring_lbclass() or gcstring_lbclass_ext() instead.
  *
  * Get UAX #14 line breaking class of Unicode character.
  * Classes XX and SG will be resolved to AL.
@@ -568,6 +569,7 @@ propval_t linebreak_lbclass(linebreak_t * obj, unichar_t c)
 }
 
 /** Get East_Asian_Width Property
+ * @deprecated Use gcstring_columns() instead.
  *
  * Get UAX #11 East_Asian_Width property value of Unicode character.
  * Class A will be resolved to appropriate property F or N.

@@ -1,9 +1,15 @@
-2.2  2012-XX-XX
+2.2.0beta  2012-03-30
 	* License Change:
 	  - From now on, sombok is distributed under dual license of
 	    GPL *and* Artistic License.
 	* configure.ac:
 	  - Move variable version informations to files: UNICODE and VERSION.
+	* lib/break.c:
+	  - New: linebreak_free_result(): to free result of 
+	    linebreak_break*() so that implementation mismatches of malloc
+	    functions are hidden.
+	* lib/charprop.c:
+	  - New: linebreak_merge_lbclass(), linebreak_merge_eawidth().
 	* lib/gcstring.c:
 	  - New: gcstring_lbclass(), gcstring_lbclass_ext().
 	* lib/linebreak.c:

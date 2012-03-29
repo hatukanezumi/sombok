@@ -373,7 +373,7 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
     gcstring_t *s = NULL, *t = NULL, *beforeFrg = NULL, *fmt = NULL,
 	*broken = NULL;
     unistr_t unistr;
-    size_t i, j;
+    size_t i;
     gcstring_t empty = { NULL, 0, NULL, 0, 0, lbobj };
 
     /***
@@ -1315,5 +1315,17 @@ gcstring_t **linebreak_break_from_utf8(linebreak_t * lbobj,
     ret = linebreak_break(lbobj, &unistr);
     free(unistr.str);
     return ret;
+}
+
+void linebreak_free_result(gcstring_t **result, int deep)
+{
+    size_t i;
+
+    if (result == NULL)
+	return;
+    if (deep)
+	for (i = 0; result[i] != NULL; i++)
+	    gcstring_destroy(result[i]);
+    free(result);
 }
 

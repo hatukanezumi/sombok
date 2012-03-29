@@ -83,15 +83,17 @@ void linebreak_southeastasian_flagbreak(gcstring_t * gcstr)
 		else if (gcstr->gcstr[i].flag)
 		    /* already flagged by _prep(). */
 		    ;
-		else if (linebreak_lbclass(gcstr->lbobj,
-					   gcstr->str[gcstr->gcstr[i].idx -
-						      1])
-			 != LB_SA)
+		else if (gcstr->gcstr[i].idx == j + brk) {
+		    propval_t p = PROP_UNKNOWN;
+
+		    linebreak_charprop(gcstr->lbobj,
+			gcstr->str[gcstr->gcstr[i].idx - 1],
+			&p, NULL, NULL, NULL);
 		    /* bogus breaking by libthai on non-SA grapheme extender
 		     * (e.g. CM SA). */
-		    ;
-		else if (gcstr->gcstr[i].idx == j + brk)
-		    gcstr->gcstr[i].flag = LINEBREAK_FLAG_ALLOW_BEFORE;
+		    if (p == LB_SA)
+			gcstr->gcstr[i].flag = LINEBREAK_FLAG_ALLOW_BEFORE;
+		}
 	    } else
 		sa = 0;
 	}

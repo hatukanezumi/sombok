@@ -10,6 +10,7 @@
  *
  */
 
+#include <assert.h>
 #include "sombok_constants.h"
 #include "sombok.h"
 
@@ -34,8 +35,8 @@ static propval_t PROPENT_PRIVATE[] = { LB_AL, EA_A, GB_Other, SC_Unknown };
 static propval_t PROPENT_RESERVED[] = { LB_AL, EA_N, GB_Control, SC_Unknown };
 
 static void
-_search_props(linebreak_t *obj, unichar_t c, propval_t *lbcptr,
-	      propval_t *eawptr, propval_t *gcbptr)
+_search_props(linebreak_t * obj, unichar_t c, propval_t * lbcptr,
+	      propval_t * eawptr, propval_t * gcbptr)
 {
     mapent_t *top, *bot, *cur;
 
@@ -128,9 +129,10 @@ _search_props(linebreak_t *obj, unichar_t c, propval_t *lbcptr,
  * @param[out] scrptr Script (limited to several scripts).
  * @return none.
  */
-void linebreak_charprop(linebreak_t * obj, unichar_t c,
-			propval_t * lbcptr, propval_t * eawptr,
-			propval_t * gcbptr, propval_t * scrptr)
+void
+linebreak_charprop(linebreak_t * obj, unichar_t c,
+		   propval_t * lbcptr, propval_t * eawptr,
+		   propval_t * gcbptr, propval_t * scrptr)
 {
     propval_t lbc = PROP_UNKNOWN, eaw = PROP_UNKNOWN, gcb = PROP_UNKNOWN,
 	scr = PROP_UNKNOWN, *ent;
@@ -182,10 +184,10 @@ void linebreak_charprop(linebreak_t * obj, unichar_t c,
     if (lbcptr) {
 	if (lbc == LB_AI)
 	    lbc = (obj->options & LINEBREAK_OPTION_EASTASIAN_CONTEXT) ?
-		  LB_ID : LB_AL;
+		LB_ID : LB_AL;
 	else if (lbc == LB_CJ)
 	    lbc = (obj->options & LINEBREAK_OPTION_NONSTARTER_LOOSE) ?
-		  LB_ID : LB_NS;
+		LB_ID : LB_NS;
     }
     if (eawptr && eaw == EA_A)
 	eaw = (obj->options & LINEBREAK_OPTION_EASTASIAN_CONTEXT) ?
@@ -207,8 +209,7 @@ void linebreak_charprop(linebreak_t * obj, unichar_t c,
  * @param[in] c Unicode character.
  * @return property value.  If not found, PROP_UNKNOWN.
  */
-propval_t
-linebreak_search_lbclass(linebreak_t * obj, unichar_t c)
+propval_t linebreak_search_lbclass(linebreak_t * obj, unichar_t c)
 {
     propval_t p = PROP_UNKNOWN;
     _search_props(obj, c, &p, NULL, NULL);
@@ -221,8 +222,7 @@ linebreak_search_lbclass(linebreak_t * obj, unichar_t c)
  * @param[in] c Unicode character.
  * @return property value.  If not found, PROP_UNKNOWN.
  */
-propval_t
-linebreak_search_eawidth(linebreak_t * obj, unichar_t c)
+propval_t linebreak_search_eawidth(linebreak_t * obj, unichar_t c)
 {
     propval_t p = PROP_UNKNOWN;
     _search_props(obj, c, NULL, &p, NULL);
@@ -230,54 +230,82 @@ linebreak_search_eawidth(linebreak_t * obj, unichar_t c)
 }
 
 
-#define SET_PROP(pos, prop)			\
-     if (idx == 0)				\
-	  (pos)->lbc = (prop);			\
-     else if (idx == 1)				\
-	  (pos)->eaw = (prop);			\
-     else if (idx == 2)				\
-	  (pos)->gcb = (prop);			\
-     else if (idx == 3)				\
-	  (pos)->scr = (prop);			\
-     else {					\
-	  obj->errnum = EINVAL;			\
-	  return;				\
-     }
-#define INSERT_CUR(new)						\
-    if ((m = realloc(map, sizeof(mapent_t) * (mapsiz + 1))) == NULL) {	\
-	obj->errnum = errno ? errno : ENOMEM;				\
-	return;								\
-    }									\
-    cur = m + (cur - map);						\
-    map = m;								\
-    memmove(cur + 1, cur, sizeof(mapent_t) * (mapsiz - (cur - map)));	\
-    if (cur != (new))							\
-	memcpy(cur, (new), sizeof(mapent_t));				\
-    mapsiz++;
-#define DELETE_CUR							\
-    if (cur - map < mapsiz - 1)						\
-	memmove(cur, cur + 1,						\
-		sizeof(mapent_t) * (mapsiz - (cur - map) - 1));		\
-    mapsiz--;
-#define MAP_EQ(x, y)					\
-    ((x)->lbc == (y)->lbc && (x)->eaw == (y)->eaw &&	\
+#define SET_PROP(pos, prop) \
+    do { \
+	if (idx == 0) \
+	    (pos)->lbc = (prop); \
+	else if (idx == 1) \
+	    (pos)->eaw = (prop); \
+	else if (idx == 2) \
+	    (pos)->gcb = (prop); \
+	else if (idx == 3) \
+	    (pos)->scr = (prop); \
+	else { \
+	    obj->errnum = EINVAL; \
+	    return; \
+	} \
+    } while (0)
+
+#define INSERT_CUR(new) \
+    do { \
+	mapent_t *m; \
+	if ((m = realloc(map, sizeof(mapent_t) * (mapsiz + 1))) \
+	    == NULL) { \
+	    obj->errnum = errno ? errno : ENOMEM; \
+	    return; \
+	} \
+	cur = m + (cur - map); \
+	map = m; \
+	if (cur - map < mapsiz) \
+	    memmove(cur + 1, cur, \
+		    sizeof(mapent_t) * (mapsiz - (cur - map))); \
+	if ((new) != cur) \
+	    memcpy(cur, (new), sizeof(mapent_t)); \
+	mapsiz++; \
+    } while (0)
+
+#define DELETE_CUR \
+    do { \
+	if (cur - map < mapsiz - 1) \
+	    memmove(cur, cur + 1, \
+		    sizeof(mapent_t) * (mapsiz - (cur - map) - 1)); \
+	mapsiz--; \
+    } while (0)
+
+#define MAP_EQ(x, y) \
+    ((x)->lbc == (y)->lbc && (x)->eaw == (y)->eaw && \
      (x)->gcb == (y)->gcb && (x)->scr == (y)->scr)
 
-static
-void _add_prop(linebreak_t * obj, unichar_t c, propval_t p, int idx)
+static void
+_add_prop(linebreak_t * obj, unichar_t beg, unichar_t end,
+	  propval_t p, int idx)
 {
-    mapent_t *map, *top, *bot, *cur = NULL, *m, newmap = { c, c,
+    mapent_t *map, *top, *bot, *cur = NULL;
+    mapent_t newmap = { beg, end,
 	PROP_UNKNOWN, PROP_UNKNOWN, PROP_UNKNOWN, PROP_UNKNOWN
     };
     size_t mapsiz;
+    unichar_t beg_cont = (unichar_t) (-1), end_cont = (unichar_t) (-1);
+#if 0
+    unichar_t b = beg, e = end;
+#endif
 
+    /* assert(beg <= end); */
+    /* assert(0 <= idx && idx < 4); */
+    if (p == PROP_UNKNOWN) {
+	obj->errnum = EINVAL;
+	return;
+    }
+
+    SET_PROP(&newmap, p);
+
+    /* no maps */
     if (obj->map == NULL || obj->mapsiz == 0) {
 	if (obj->map == NULL &&
 	    (obj->map = malloc(sizeof(mapent_t))) == NULL) {
 	    obj->errnum = errno ? errno : ENOMEM;
 	    return;
 	}
-	SET_PROP(&newmap, p);
 	memcpy(obj->map, &newmap, sizeof(mapent_t));
 	obj->mapsiz = 1;
 	return;
@@ -286,91 +314,130 @@ void _add_prop(linebreak_t * obj, unichar_t c, propval_t p, int idx)
     map = obj->map;
     mapsiz = obj->mapsiz;
 
+    /* first, seek map */
     top = map;
     bot = map + mapsiz - 1;
     while (top <= bot) {
 	cur = top + (bot - top) / 2;
-	if (c < cur->beg)
+	if (beg < cur->beg)
 	    bot = cur - 1;
-	else if (cur->end < c)
+	else if (cur->end < beg)
 	    top = cur + 1;
 	else
 	    break;
     }
 
-    if (c < cur->beg) {
-	SET_PROP(&newmap, p);
+    while (1) {
+	if (cur < map + mapsiz && cur->end < beg)
+	    cur++;
 
-	if (c + 1 == cur->beg && MAP_EQ(cur, &newmap))
-	    cur->beg = c;
-	else if (map < cur) {
-	    if ((cur - 1)->end + 1 == c && MAP_EQ(cur - 1, &newmap))
-		(cur - 1)->end = c;
-	    else {
+	if (map + mapsiz <= cur) {	/* at tail of map */
+	    cur = map + mapsiz;
+	    if ((cur - 1)->end + 1 == beg && MAP_EQ((cur - 1), &newmap))
+		(cur - 1)->end = end;
+	    else
 		INSERT_CUR(&newmap);
-		cur++;
+	    break;
+	}
+
+	if (beg < cur->beg) {	/* in gap of existing map */
+	    if (cur->beg <= end) {
+		beg_cont = cur->beg;
+		end_cont = end;
+		end = newmap.end = cur->beg - 1;
 	    }
-	} else {
-	    INSERT_CUR(&newmap);
-	    cur++;
-	}
-    } else if (cur->beg <= c && c <= cur->end) {
-	newmap.lbc = cur->lbc;
-	newmap.eaw = cur->eaw;
-	newmap.gcb = cur->gcb;
-	newmap.scr = cur->scr;
-	SET_PROP(&newmap, p);
 
-	if (MAP_EQ(cur, &newmap))
-	    /* noop */ ;
-	else if (c == cur->beg && c == cur->end) {
-	    SET_PROP(cur, p);
-	} else if (c == cur->beg) {
-	    cur->beg = c + 1;
-	    INSERT_CUR(&newmap);
-	} else if (c == cur->end && cur < map + mapsiz - 1) {
-	    cur->end = c - 1;
-	    cur++;
-	    INSERT_CUR(&newmap);
-	    cur++;
-	} else if (c == cur->end) {
-	    cur->end = c - 1;
-	    cur++;
-	    INSERT_CUR(&newmap);
-	} else {
-	    INSERT_CUR(cur);
-	    cur->end = c - 1;
-	    (cur + 1)->beg = c + 1;
-	    cur++;
-	    INSERT_CUR(&newmap);
-	}
-    } else if (cur->end < c) {
-	SET_PROP(&newmap, p);
+	    if (end + 1 == cur->beg && MAP_EQ(cur, &newmap))
+		cur->beg = beg;
+	    else
+		INSERT_CUR(&newmap);
+	} else {		/* otherwise */
+	    if (cur->end < end) {
+		beg_cont = cur->end + 1;
+		end_cont = end;
+		end = newmap.end = cur->end;
+	    }
 
-	if (cur->end + 1 == c && MAP_EQ(cur, &newmap))
-	    cur->end = c;
-	else if (cur < map + mapsiz - 1) {
-	    if (c + 1 == (cur + 1)->beg && MAP_EQ(&newmap, cur + 1))
-		(cur + 1)->beg = c;
-	    else {
+	    newmap.lbc = cur->lbc;
+	    newmap.eaw = cur->eaw;
+	    newmap.gcb = cur->gcb;
+	    newmap.scr = cur->scr;
+	    SET_PROP(&newmap, p);
+
+	    if (MAP_EQ(cur, &newmap))
+		/* noop */ ;
+	    else if (beg == cur->beg && end == cur->end) {
+		SET_PROP(cur, p);
+		if (cur + 1 < map + mapsiz &&
+		    cur->end + 1 == (cur + 1)->beg &&
+		    MAP_EQ(cur, cur + 1)) {
+		    (cur + 1)->beg = cur->beg;
+		    DELETE_CUR;
+		}
+	    } else if (beg == cur->beg) {
+		cur->beg = end + 1;
+		INSERT_CUR(&newmap);
+	    } else if (end == cur->end) {
+		cur->end = beg - 1;
 		cur++;
 		INSERT_CUR(&newmap);
 		cur++;
+	    } else {
+		INSERT_CUR(cur);
+		cur->end = beg - 1;
+		(cur + 1)->beg = end + 1;
+		cur++;
+		INSERT_CUR(&newmap);
 	    }
-	} else {
-	    cur++;
-	    INSERT_CUR(&newmap);
 	}
-    }
 
-    if (map < cur && (cur - 1)->end + 1 == cur->beg &&
-	MAP_EQ(cur - 1, cur)) {
-	(cur - 1)->end = cur->end;
-	DELETE_CUR;
-    }
+	if (0 < cur - map && cur - map < mapsiz &&
+	    (cur - 1)->end + 1 == cur->beg && MAP_EQ(cur - 1, cur)) {
+	    (cur - 1)->end = cur->end;
+	    DELETE_CUR;
+	    cur--;
+	}
+
+	if (beg_cont == (unichar_t) (-1))
+	    break;		/* while (1) */
+
+	beg = newmap.beg = beg_cont;
+	end = newmap.end = end_cont;
+	beg_cont = (unichar_t) (-1);
+	newmap.lbc = newmap.eaw = newmap.gcb = newmap.scr = PROP_UNKNOWN;
+	SET_PROP(&newmap, p);
+    }				/* while (1) */
 
     obj->map = map;
     obj->mapsiz = mapsiz;
+
+#if 0
+    {
+	size_t i;
+	mapent_t null_map =
+	    { 0, 0, PROP_UNKNOWN, PROP_UNKNOWN, PROP_UNKNOWN,
+	    PROP_UNKNOWN
+	};
+	unichar_t c;
+
+	for (i = 0; i < mapsiz; i++) {
+	    assert(!MAP_EQ(map + i, &null_map));
+	    assert(map[i].beg <= map[i].end);
+	    if (i == 0)
+		continue;
+	    assert(map[i - 1].end < map[i].beg);
+	    if (MAP_EQ(map + i - 1, map + i)) {
+		assert(map[i - 1].end < map[i].beg);
+		assert(map[i - 1].end + 1 < map[i].beg);
+	    }
+	}
+	for (c = b; c <= e; c++)
+	    if (idx == 0)
+		assert(linebreak_search_lbclass(obj, c) == p);
+	    else
+		assert(linebreak_search_eawidth(obj, c) == p);
+    }
+#endif
 }
 
 /** Update custom line breaking class map.
@@ -383,7 +450,7 @@ void _add_prop(linebreak_t * obj, unichar_t c, propval_t p, int idx)
  */
 void linebreak_update_lbclass(linebreak_t * obj, unichar_t c, propval_t p)
 {
-    _add_prop(obj, c, p, 0);
+    _add_prop(obj, c, c, p, 0);
 }
 
 /** Update custom East_Asian_Width propety map.
@@ -396,16 +463,62 @@ void linebreak_update_lbclass(linebreak_t * obj, unichar_t c, propval_t p)
  */
 void linebreak_update_eawidth(linebreak_t * obj, unichar_t c, propval_t p)
 {
-    _add_prop(obj, c, p, 1);
+    _add_prop(obj, c, c, p, 1);
 }
 
-static
-const mapent_t nullmap = { 0, 0,
-    PROP_UNKNOWN, PROP_UNKNOWN, PROP_UNKNOWN, PROP_UNKNOWN
-};
+/** Update custom line breaking class map by another map.
+ * @ingroup linebreak
+ * @param[in] obj destination linebreak object.
+ * @param[in] diff source linebreak object.
+ * @returns none.
+ * custom map will be updated.
+ */
+void linebreak_merge_lbclass(linebreak_t * obj, linebreak_t * diff)
+{
+    size_t i;
 
-static
-void _clear_prop(linebreak_t * obj, int idx)
+    if (obj == diff)
+	return;
+    if (diff->map == NULL || diff->mapsiz == 0)
+	return;
+    for (i = 0; i < diff->mapsiz; i++)
+	if (diff->map[i].lbc != PROP_UNKNOWN) {
+	    _add_prop(obj, diff->map[i].beg, diff->map[i].end,
+		      diff->map[i].lbc, 0);
+	    if (obj->errnum)
+		return;
+	}
+}
+
+/** Update custom East_Asian_Width map by another map.
+ * @ingroup linebreak
+ * @param[in] obj destination linebreak object.
+ * @param[in] diff source linebreak object.
+ * @returns none.
+ * custom map will be updated.
+ */
+void linebreak_merge_eawidth(linebreak_t * obj, linebreak_t * diff)
+{
+    size_t i;
+
+    if (obj == diff)
+	return;
+    if (diff->map == NULL || diff->mapsiz == 0)
+	return;
+    for (i = 0; i < diff->mapsiz; i++)
+	if (diff->map[i].eaw != PROP_UNKNOWN) {
+	    _add_prop(obj, diff->map[i].beg, diff->map[i].end,
+		      diff->map[i].eaw, 1);
+	    if (obj->errnum)
+		return;
+	}
+}
+
+static const mapent_t
+    nullmap =
+    { 0, 0, PROP_UNKNOWN, PROP_UNKNOWN, PROP_UNKNOWN, PROP_UNKNOWN };
+
+static void _clear_prop(linebreak_t * obj, int idx)
 {
     mapent_t *map = obj->map, *cur;
     size_t mapsiz = obj->mapsiz, i;

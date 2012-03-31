@@ -65,6 +65,7 @@
 #define GB_Other ((propval_t)11)
 #define GB_Virama ((propval_t)12)
 #define GB_OtherLetter ((propval_t)13)
+#define GB_ZWJ ((propval_t)14)
 
 #define SC_Common ((propval_t)0)
 #define SC_Inherited ((propval_t)1)

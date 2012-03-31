@@ -42,6 +42,7 @@ foreach my $attr (@attr) {
 	my $vernum = version->new($version)->numify;
 
 	my %Virama = ();
+	my %ZWJ = ();
 	if (6.001000 <= $vernum) {
 	    open my $ucd, '<', "UnicodeData-$version.txt" or die $!;
 	    while (<$ucd>) {
@@ -53,6 +54,8 @@ foreach my $attr (@attr) {
 		$Virama{$code} = 1 if $ccc+0 == 9;
 	    }
 	    close $ucd;
+
+	    %ZWJ = (0x200C => 1, 0x200D => 1);
 	}
 
 	my %SA = ();
@@ -122,6 +125,10 @@ foreach my $attr (@attr) {
 			}
 		    } else {
 			$ec = [$c];
+		    }
+		    # Extended GCB property value for ZWJ/ZWNJ
+		    if ($attr eq 'gb' and $ZWJ{$chr}) {
+			push @{$ec}, 'ZWJ';
 		    }
 
 		    foreach my $c (@$ec) {

@@ -12,7 +12,7 @@ const char *linebreak_propvals_EA[] = {
 };
 const char *linebreak_propvals_GB[] = {
     "CR", "LF", "Control", "Extend", "Prepend", "SpacingMark", "L", "V", 
-    "T", "LV", "LVT", "Other", "Virama", "OtherLetter", NULL
+    "T", "LV", "LVT", "Other", "Virama", "OtherLetter", "ZWJ", NULL
 };
 const char *linebreak_propvals_LB[] = {
     "BK", "CR", "LF", "NL", "SP", "OP", "CL", "QU", "GL", "NS", "EX", "SY", 
@@ -2477,8 +2477,8 @@ propval_t linebreak_prop_array[] = {
     LB_BA, EA_N, GB_Other, SC_Unknown, LB_BA, EA_N, GB_Other, SC_Unknown,
     LB_GL, EA_N, GB_Other, SC_Unknown, LB_BA, EA_N, GB_Other, SC_Unknown,
     LB_BA, EA_N, GB_Other, SC_Unknown, LB_BA, EA_N, GB_Other, SC_Unknown,
-    LB_ZW, EA_Z, GB_Control, SC_Unknown, LB_CM, EA_Z, GB_Extend, SC_Unknown,
-    LB_CM, EA_Z, GB_Extend, SC_Unknown, LB_CM, EA_Z, GB_Control, SC_Unknown,
+    LB_ZW, EA_Z, GB_Control, SC_Unknown, LB_CM, EA_Z, GB_ZWJ, SC_Unknown,
+    LB_CM, EA_Z, GB_ZWJ, SC_Unknown, LB_CM, EA_Z, GB_Control, SC_Unknown,
     LB_CM, EA_Z, GB_Control, SC_Unknown, LB_BA, EA_A, GB_Other, SC_Unknown,
     LB_GL, EA_N, GB_Other, SC_Unknown, LB_BA, EA_N, GB_Other, SC_Unknown,
     LB_BA, EA_A, GB_Other, SC_Unknown, LB_B2, EA_A, GB_Other, SC_Unknown,

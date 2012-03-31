@@ -14,7 +14,9 @@ my $vernum = version->new($version)->numify;
 
 # Find Brahmic scripts
 my %GC_Letter = ();
+my $GC_Modifier = ();
 my %Virama = ();
+my %ZWJ = ();
 my %Brahmic_Script = ();
 if (6.001000 <= $vernum) {
     open my $ucd, '<', "UnicodeData-$version.txt" or die $!;
@@ -26,8 +28,12 @@ if (6.001000 <= $vernum) {
 	$code = hex("0x$code");
 	$Virama{$code} = 1 if $ccc+0 == 9;
 	$GC_Letter{$code} = 1 if $gc =~ /^L/;
+	$GC_Modifier{$code} = 1 if $gc =~ /^M/;
     }
     close $ucd;    
+
+    %ZWJ = (0x200C => 1, 0x200D => 1);
+
     open my $scr, '<', "Scripts-$version.txt" or die $!;
     while (<$scr>) {
         s/\s*\#.*//;
@@ -346,6 +352,14 @@ for (my $c = 0; $c <= $#PROPS; $c++) {
 		$PROPS[$c]->{'gb'} = 'OtherLetter';
 	    }
 	}
+	# Custom GCB ZWJ (ZERO WIDTH JOINER and ZERO WIDTH NON-JOINER)
+	elsif ($ZWJ{$c}) {
+	    if ($PROPS[$c]->{'gb'} eq 'Extend') {
+		$PROPS[$c]->{'gb'} = 'ZWJ';
+	    } else {
+		die sprintf "U+%04X is included in zero width joiners and %s", $c, $PROPS[$c]->{'gb'};
+	    }
+	}
     }
 
     # limit scripts to SA characters.
@@ -417,6 +431,18 @@ for (my $c = 0; $c <= $#PROPS; $c++) {
     if ($PROPS[$c]->{'gb'} eq 'OtherLetter' and
 	$PROPS[$c]->{'lb'} eq 'CM') {
 	warn sprintf 'CM: U+%04X: lb => %s, ea => %s, gb => %s, sc => %s'."\n",
+	$c,
+	$PROPS[$c]->{'lb'} || '-',
+	$PROPS[$c]->{'ea'} || '-',
+	$PROPS[$c]->{'gb'} || '-',
+	$PROPS[$c]->{'sc'} || '-';
+    }
+
+    # check for Legacy-CM.
+    if ($PROPS[$c]->{'lb'} eq 'CM' and
+	$PROPS[$c]->{'gb'} !~ 'Control|ZWJ' and
+	! $GC_Modifier{$c}) {
+	warn sprintf '!M: U+%04X: lb => %s, ea => %s, gb => %s, sc => %s'."\n",
 	$c,
 	$PROPS[$c]->{'lb'} || '-',
 	$PROPS[$c]->{'ea'} || '-',

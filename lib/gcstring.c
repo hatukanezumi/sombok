@@ -17,14 +17,18 @@
  * @brief Grapheme cluster string
  *@{*/
 
-#define eaw2col(e) (((e) == EA_F || (e) == EA_W)? 2: (((e) == EA_Z)? 0: 1))
+#define eaw2col(o, e) \
+    ((e) == EA_A ? \
+     (((o)->options & LINEBREAK_OPTION_EASTASIAN_CONTEXT) ? 2 : 1) : \
+     (((e) == EA_F || (e) == EA_W)? 2: (((e) == EA_Z)? 0: 1)))
 #define IS_EXTENDER(g) \
-    ((g) == GB_Extend || (g) == GB_SpacingMark || (g) == GB_Virama)
+    ((g) == GB_Extend || (g) == GB_SpacingMark || (g) == GB_Virama || \
+     (g) == GB_ZWJ)
 
 static
-void _gcinfo(linebreak_t *obj, unistr_t *str, size_t pos,
-	     size_t *glenptr, size_t *gcolptr, propval_t *glbcptr,
-	     propval_t *elbcptr)
+void _gcinfo(linebreak_t * obj, unistr_t * str, size_t pos,
+	     size_t * glenptr, size_t * gcolptr, propval_t * glbcptr,
+	     propval_t * elbcptr)
 {
     propval_t glbc = PROP_UNKNOWN, elbc = PROP_UNKNOWN;
     size_t glen, gcol, pcol, ecol;
@@ -41,56 +45,59 @@ void _gcinfo(linebreak_t *obj, unistr_t *str, size_t pos,
     linebreak_charprop(obj, str->str[pos], &lbc, &eaw, &gcb, &scr);
     pos++;
     glen = 1;
-    gcol = eaw2col(eaw);
+    gcol = eaw2col(obj, eaw);
 
     if (lbc != LB_SA)
 	glbc = lbc;
 #ifdef USE_LIBTHAI
     else if (scr == SC_Thai)
 	glbc = lbc;
-#endif /* USE_LIBTHAI */
+#endif				/* USE_LIBTHAI */
     else if (IS_EXTENDER(gcb))
 	glbc = LB_CM;
     else
 	glbc = LB_AL;
 
     switch (gcb) {
-    case GB_LF: /* GB5 */
-	break; /* switch (gcb) */
+    case GB_LF:		/* GB5 */
+	break;			/* switch (gcb) */
 
-    case GB_CR: /* GB3, GB4, GB5 */
+    case GB_CR:		/* GB3, GB4, GB5 */
 	if (pos < str->len) {
 	    linebreak_charprop(obj, str->str[pos], NULL, &eaw, &gcb, NULL);
 	    if (gcb == GB_LF) {
 		pos++;
 		glen++;
-		gcol += eaw2col(eaw);
+		gcol += eaw2col(obj, eaw);
 	    }
 	}
-	break; /* switch (gcb) */
+	break;			/* switch (gcb) */
 
-    case GB_Control: /* GB4 */
-	break; /* switch (gcb) */
+    case GB_Control:		/* GB4 */
+	break;			/* switch (gcb) */
 
     default:
 	pcol = 0;
 	ecol = 0;
-	while (pos < str->len) { /* GB2 */
-	    linebreak_charprop(obj, str->str[pos], &lbc, &eaw, &ngcb, &scr);
+	while (pos < str->len) {	/* GB2 */
+	    linebreak_charprop(obj, str->str[pos], &lbc, &eaw, &ngcb,
+			       &scr);
 
 	    /* Legacy-CM: Treat SP CM+ as if it were ID.  cf. [UAX #14] 9.1. */
+	    /* except ZWJ/ZWNJ that do not have general category M. */
 	    if (glbc == LB_SP) {
 		if ((obj->options & LINEBREAK_OPTION_LEGACY_CM) &&
-		    IS_EXTENDER(ngcb) && (lbc == LB_CM || lbc == LB_SA)) {
+		    IS_EXTENDER(ngcb) && ngcb != GB_ZWJ &&
+		    (lbc == LB_CM || lbc == LB_SA)) {
 		    glbc = LB_ID;
-		    ecol += eaw2col(eaw);
+		    ecol += eaw2col(obj, eaw);
 		} else
 		    /* prevent degenerate case. */
-		    break; /* while (pos < str->len) */
+		    break;	/* while (pos < str->len) */
 	    }
 	    /* GB5 */
 	    else if (ngcb == GB_Control || ngcb == GB_CR || ngcb == GB_LF)
-		break; /* while (pos < str->len) */
+		break;		/* while (pos < str->len) */
 	    /* GB6 - GB8 */
 	    /*
 	     * Assume hangul syllable block is always wide, while most of
@@ -107,7 +114,7 @@ void _gcinfo(linebreak_t *obj, unistr_t *str, size_t pos,
 	    }
 	    /* GB9, GB9a */
 	    else if (IS_EXTENDER(ngcb)) {
-		ecol += eaw2col(eaw);
+		ecol += eaw2col(obj, eaw);
 		/* CM in grapheme extender is ignored.  Virama is CM. */
 		/* SA in g. ext. is resolved to CM so it is ignored. */
 		if (lbc != LB_CM && lbc != LB_SA)
@@ -117,44 +124,44 @@ void _gcinfo(linebreak_t *obj, unistr_t *str, size_t pos,
 	    else if (gcb == GB_Prepend) {
 		/* Here, next char shall grapheme base (or additional prepend
 		 * character), since its GCB property is neither Control,
-		 * Extend, SpacingMark nor Virama. */
+		 * Extend, SpacingMark, Virama nor ZWJ/ZWNJ. */
 		if (lbc != LB_SA)
 		    elbc = lbc;
 #ifdef USE_LIBTHAI
 		else if (scr == SC_Thai)
-		    elbc = lbc; /* SA char in g. base is not resolved... */
-#endif /* USE_LIBTHAI */
+		    elbc = lbc;	/* SA char in g. base is not resolved... */
+#endif				/* USE_LIBTHAI */
 		else
-		    elbc = LB_AL; /* ...or resolved to AL. */
+		    elbc = LB_AL;	/* ...or resolved to AL. */
 		pcol += gcol;
-		gcol = eaw2col(eaw);
+		gcol = eaw2col(obj, eaw);
 	    }
 	    /* Virama rule: \p{ccc:Virama} × \p{gc:Letter} */
 	    else if (gcb == GB_Virama && ngcb == GB_OtherLetter &&
 		     obj->options & LINEBREAK_OPTION_VIRAMA_AS_JOINER) {
 		/* OtherLetter is not grapheme extender. */
-		gcol += ecol + eaw2col(eaw);
+		gcol += ecol + eaw2col(obj, eaw);
 		ecol = 0;
 		if (lbc != LB_SA)
 		    elbc = lbc;
 #ifdef USE_LIBTHAI
 		else if (scr == SC_Thai)
-		    elbc = lbc; /* SA char in g. base is not resolved... */
-#endif /* USE_LIBTHAI */
+		    elbc = lbc;	/* SA char in g. base is not resolved... */
+#endif				/* USE_LIBTHAI */
 		else
-		    elbc = LB_AL; /* ...or resolved to AL. */
+		    elbc = LB_AL;	/* ...or resolved to AL. */
 	    }
 	    /* GB10 */
 	    else
-		break; /* while (pos < str->len) */
+		break;		/* while (pos < str->len) */
 
 	    pos++;
 	    glen++;
 	    gcb = ngcb;
-	} /* while (pos < str->len) */
+	}			/* while (pos < str->len) */
 	gcol += pcol + ecol;
-	break; /* switch (gcb) */
-    } /* switch (gcb) */
+	break;			/* switch (gcb) */
+    }				/* switch (gcb) */
 
     *glenptr = glen;
     *gcolptr = gcol;
@@ -184,7 +191,7 @@ void _gcinfo(linebreak_t *obj, unistr_t *str, size_t pos,
  * - if LINEBREAK_OPTION_VIRAMA_AS_JOINER bit is set,
  *   virama and other letter are not broken.
  */
-gcstring_t *gcstring_new(unistr_t *unistr, linebreak_t *lbobj)
+gcstring_t *gcstring_new(unistr_t * unistr, linebreak_t * lbobj)
 {
     gcstring_t *gcstr;
     size_t len;
@@ -251,9 +258,9 @@ gcstring_t *gcstring_new(unistr_t *unistr, linebreak_t *lbobj)
  * @return New grapheme cluster string.
  * If error occurred, errno is set then NULL is returned.
  */
-gcstring_t *gcstring_newcopy(unistr_t *str, linebreak_t *lbobj)
+gcstring_t *gcstring_newcopy(unistr_t * str, linebreak_t * lbobj)
 {
-    unistr_t unistr = {NULL, 0};
+    unistr_t unistr = { NULL, 0 };
 
     if (str->str && str->len) {
 	if ((unistr.str = malloc(sizeof(unichar_t) * str->len)) == NULL)
@@ -276,9 +283,9 @@ gcstring_t *gcstring_newcopy(unistr_t *str, linebreak_t *lbobj)
  * Source string buffer would not be modified.
  */
 gcstring_t *gcstring_new_from_utf8(char *str, size_t len, int check,
-				   linebreak_t *lbobj)
+				   linebreak_t * lbobj)
 {
-    unistr_t unistr = {NULL, 0};
+    unistr_t unistr = { NULL, 0 };
 
     if (str == NULL) {
 	errno = EINVAL;
@@ -297,7 +304,7 @@ gcstring_t *gcstring_new_from_utf8(char *str, size_t len, int check,
  * @return none.
  * If gcstr was NULL, do nothing.
  */
-void gcstring_destroy(gcstring_t *gcstr)
+void gcstring_destroy(gcstring_t * gcstr)
 {
     if (gcstr == NULL)
 	return;
@@ -314,7 +321,7 @@ void gcstring_destroy(gcstring_t *gcstr)
  * @return deep copy of grapheme cluster string.
  * If error occurred, errno is set then NULL is returned.
  */
-gcstring_t *gcstring_copy(gcstring_t *gcstr)
+gcstring_t *gcstring_copy(gcstring_t * gcstr)
 {
     gcstring_t *new;
     unichar_t *newstr = NULL;
@@ -365,9 +372,9 @@ gcstring_t *gcstring_copy(gcstring_t *gcstr)
  * @return Modified grapheme cluster string gcstr itself (not a copy).
  * If error occurred, errno is set then NULL is returned.
  */
-gcstring_t *gcstring_append(gcstring_t *gcstr, gcstring_t *appe)
+gcstring_t *gcstring_append(gcstring_t * gcstr, gcstring_t * appe)
 {
-    unistr_t ustr = {NULL, 0};
+    unistr_t ustr = { NULL, 0 };
 
     if (gcstr == NULL)
 	return (errno = EINVAL), NULL;
@@ -418,7 +425,7 @@ gcstring_t *gcstring_append(gcstring_t *gcstr, gcstring_t *appe)
 	    gc->col = cstr->gcstr[i].col;
 	    gc->lbc = cstr->gcstr[i].lbc;
 	    gc->elbc = cstr->gcstr[i].elbc;
-	    if (aidx + alen == gc->idx) /* Restore flag if possible */
+	    if (aidx + alen == gc->idx)	/* Restore flag if possible */
 		gc->flag = bflag;
 	}
 	for (i = 1; i < appe->gclen; i++) {
@@ -438,7 +445,8 @@ gcstring_t *gcstring_append(gcstring_t *gcstr, gcstring_t *appe)
     } else if (appe->gclen) {
 	if ((gcstr->str = malloc(sizeof(unichar_t) * appe->len)) == NULL)
 	    return NULL;
-	if ((gcstr->gcstr = malloc(sizeof(gcchar_t) * appe->gclen)) == NULL) {
+	if ((gcstr->gcstr =
+	     malloc(sizeof(gcchar_t) * appe->gclen)) == NULL) {
 	    free(gcstr->str);
 	    return NULL;
 	}
@@ -460,12 +468,12 @@ gcstring_t *gcstring_append(gcstring_t *gcstr, gcstring_t *appe)
  * @param[in] b grapheme cluster string.
  * @return positive, zero or negative value when a is greater, equal to, lesser than b, respectively.
  */
-int gcstring_cmp(gcstring_t *a, gcstring_t *b)
+int gcstring_cmp(gcstring_t * a, gcstring_t * b)
 {
     size_t i;
 
     if (!a->len || !b->len)
-      return (a->len? 1: 0) - (b->len? 1: 0);
+	return (a->len ? 1 : 0) - (b->len ? 1 : 0);
     for (i = 0; i < a->len && i < b->len; i++)
 	if (a->str[i] != b->str[i])
 	    return a->str[i] - b->str[i];
@@ -478,7 +486,7 @@ int gcstring_cmp(gcstring_t *a, gcstring_t *b)
  * @param[in] gcstr grapheme cluster string. NULL may mean null string.
  * @return Number of columns.
  */
-size_t gcstring_columns(gcstring_t *gcstr)
+size_t gcstring_columns(gcstring_t * gcstr)
 {
     size_t col, i;
 
@@ -498,7 +506,7 @@ size_t gcstring_columns(gcstring_t *gcstr)
  * @return New grapheme cluster string.
  * If error occurred, errno is set then NULL is returned.
  */
-gcstring_t *gcstring_concat(gcstring_t *gcstr, gcstring_t *appe)
+gcstring_t *gcstring_concat(gcstring_t * gcstr, gcstring_t * appe)
 {
     gcstring_t *new;
     size_t pos;
@@ -520,7 +528,7 @@ gcstring_t *gcstring_concat(gcstring_t *gcstr, gcstring_t *appe)
  * @return Pointer to grapheme cluster.
  * If pointer was already at end of the string, NULL will be returned.
  */
-gcchar_t *gcstring_next(gcstring_t *gcstr)
+gcchar_t *gcstring_next(gcstring_t * gcstr)
 {
     if (gcstr->gclen <= gcstr->pos)
 	return NULL;
@@ -537,7 +545,7 @@ gcchar_t *gcstring_next(gcstring_t *gcstr)
  *
  * @todo On next major release, pos would be ssize_t, not int.
  */
-void gcstring_setpos(gcstring_t *gcstr, int pos)
+void gcstring_setpos(gcstring_t * gcstr, int pos)
 {
     if (pos < 0)
 	pos += gcstr->gclen;
@@ -557,7 +565,7 @@ void gcstring_setpos(gcstring_t *gcstr, int pos)
  *
  * @todo On next major release, length would be ssize_t, not int.
  */
-void gcstring_shrink(gcstring_t *gcstr, int length)
+void gcstring_shrink(gcstring_t * gcstr, int length)
 {
     if (gcstr == NULL)
 	return;
@@ -592,7 +600,7 @@ void gcstring_shrink(gcstring_t *gcstr, int length)
  *
  * @todo On next major release, offset and length would be ssize_t, not int.
  */
-gcstring_t *gcstring_substr(gcstring_t *gcstr, int offset, int length)
+gcstring_t *gcstring_substr(gcstring_t * gcstr, int offset, int length)
 {
     gcstring_t *new;
     size_t ulength, i;
@@ -610,7 +618,7 @@ gcstring_t *gcstring_substr(gcstring_t *gcstr, int offset, int length)
     if (length < 0)
 	length += gcstr->gclen - offset;
 
-    if (length < 0 || gcstr->gclen < offset) /* out of range */
+    if (length < 0 || gcstr->gclen < offset)	/* out of range */
 	return gcstring_new(NULL, gcstr->lbobj);
 
     if (gcstr->gclen == offset)
@@ -623,21 +631,20 @@ gcstring_t *gcstring_substr(gcstring_t *gcstr, int offset, int length)
     if (gcstr->gclen == offset)
 	ulength = 0;
     else if (gcstr->gclen <= offset + length)
-	ulength = gcstr->len - gcstr->gcstr[offset].idx;	
+	ulength = gcstr->len - gcstr->gcstr[offset].idx;
     else
-	ulength = gcstr->gcstr[offset + length].idx - gcstr->gcstr[offset].idx;
+	ulength =
+	    gcstr->gcstr[offset + length].idx - gcstr->gcstr[offset].idx;
 
     if ((new = gcstring_new(NULL, gcstr->lbobj)) == NULL)
-	return NULL; 
+	return NULL;
 
-    if (ulength == 0)
-	;
+    if (ulength == 0);
     else if ((new->str = malloc(sizeof(unichar_t) * ulength)) == NULL) {
 	gcstring_destroy(new);
 	return NULL;
     }
-    if (length == 0)
-	;
+    if (length == 0);
     else if ((new->gcstr = malloc(sizeof(gcchar_t) * length)) == NULL) {
 	free(new->str);
 	gcstring_destroy(new);
@@ -648,11 +655,12 @@ gcstring_t *gcstring_substr(gcstring_t *gcstr, int offset, int length)
 	       sizeof(unichar_t) * ulength);
     new->len = ulength;
     for (i = 0; i < length; i++) {
-	memcpy(new->gcstr + i, gcstr->gcstr + offset + i, sizeof(gcchar_t));
+	memcpy(new->gcstr + i, gcstr->gcstr + offset + i,
+	       sizeof(gcchar_t));
 	new->gcstr[i].idx -= gcstr->gcstr[offset].idx;
     }
     new->gclen = length;
- 
+
     return new;
 }
 
@@ -670,8 +678,8 @@ gcstring_t *gcstring_substr(gcstring_t *gcstr, int offset, int length)
  *
  * @todo On next major release, offset and length would be ssize_t, not int.
  */
-gcstring_t *gcstring_replace(gcstring_t *gcstr, int offset, int length,
-			     gcstring_t *replacement)
+gcstring_t *gcstring_replace(gcstring_t * gcstr, int offset, int length,
+			     gcstring_t * replacement)
 {
     gcstring_t *tail;
 
@@ -692,7 +700,7 @@ gcstring_t *gcstring_replace(gcstring_t *gcstr, int offset, int length,
     if (length < 0)
 	length += gcstr->gclen - offset;
 
-    if (length < 0 || gcstr->gclen < offset) /* out of range */
+    if (length < 0 || gcstr->gclen < offset)	/* out of range */
 	return (errno = EINVAL), NULL;
 
     if (gcstr->gclen == offset)
@@ -758,4 +766,3 @@ propval_t gcstring_lbclass_ext(gcstring_t * gcstr, int pos)
 	lbc = gcstr->gcstr[pos].lbc;
     return lbc;
 }
-

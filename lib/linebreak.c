@@ -336,7 +336,7 @@ void linebreak_add_prep(linebreak_t * lbobj,
 			linebreak_prep_func_t prep_func, void *prep_data)
 {
     size_t i;
-    linebreak_prep_func_t * p;
+    linebreak_prep_func_t *p;
     void **q;
 
     if (prep_func == NULL) {
@@ -359,7 +359,8 @@ void linebreak_add_prep(linebreak_t * lbobj,
 	for (i = 0; lbobj->prep_func[i] != NULL; i++);
 
     if ((p =
-	 realloc(lbobj->prep_func, sizeof(linebreak_prep_func_t) * (i + 2)))
+	 realloc(lbobj->prep_func,
+		 sizeof(linebreak_prep_func_t) * (i + 2)))
 	== NULL) {
 	lbobj->errnum = errno;
 	return;
@@ -496,6 +497,7 @@ void linebreak_reset(linebreak_t * lbobj)
  *
  * @note This method was introduced by Sombok 2.0.6. 
  * @note LEGACY_CM and HANGUL_AS_AL options are concerned as of Sombok 2.1.2.
+ * @note Only HANGUL_AS_AL is concerned as of Sombok 2.2.
  *
  */
 propval_t linebreak_get_lbrule(linebreak_t * obj, propval_t blbc,
@@ -509,13 +511,6 @@ propval_t linebreak_get_lbrule(linebreak_t * obj, propval_t blbc,
     case LB_CJ:
 	blbc = (obj->options & LINEBREAK_OPTION_NONSTARTER_LOOSE) ?
 	    LB_ID : LB_NS;
-	break;
-    /* Legacy-CM */
-    /* This rule follows SP* ÷ SP × CM, not SP × SP+ ÷ CM.
-     * But for simplicity treat it as indirect break. */
-    case LB_SP:
-	if (albc == LB_CM && obj->options & LINEBREAK_OPTION_LEGACY_CM)
-	    return LINEBREAK_ACTION_INDIRECT;
 	break;
     /* Optionally, treat hangul syllable as if it were AL. */
     case LB_H2:
@@ -558,7 +553,13 @@ propval_t linebreak_lbclass(linebreak_t * obj, unichar_t c)
     propval_t lbc, gcb, scr;
 
     linebreak_charprop(obj, c, &lbc, NULL, &gcb, &scr);
-    if (lbc == LB_SA) {
+    if (lbc == LB_AI)
+	lbc = (obj->options & LINEBREAK_OPTION_EASTASIAN_CONTEXT) ?
+	    LB_ID : LB_AL;
+    else if (lbc == LB_CJ)
+	lbc = (obj->options & LINEBREAK_OPTION_NONSTARTER_LOOSE) ?
+	    LB_ID : LB_NS;
+    else if (lbc == LB_SA) {
 #ifdef USE_LIBTHAI
 	if (scr != SC_Thai)
 #endif				/* USE_LIBTHAI */
@@ -582,5 +583,9 @@ propval_t linebreak_eawidth(linebreak_t * obj, unichar_t c)
     propval_t eaw;
 
     linebreak_charprop(obj, c, NULL, &eaw, NULL, NULL);
+    if (eaw == EA_A)
+	eaw = (obj->options & LINEBREAK_OPTION_EASTASIAN_CONTEXT) ?
+	    EA_F : EA_N;
+
     return eaw;
 }

@@ -1,0 +1,31 @@
+=================
+Installing Sombok
+=================
+
+Prerequisites
+=============
+
+* ANSI C compiler, for example GCC C Compiler, is required.
+
+* Optionally, libthai package need to be installed to support Thai 
+  word segmentation:
+
+    http://linux.thai.net/projects/libthai
+
+  In this case pkg-config is also required.
+
+Install
+=======
+
+Extract tarball then run as follows:
+
+  ./configure [options...]
+
+  make
+
+  make check
+
+  make install
+
+``./configure --help`` will show available options.
+

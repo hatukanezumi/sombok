@@ -114,13 +114,6 @@ _search_props(linebreak_t * obj, unichar_t c, propval_t * lbcptr,
  *
  * * map, mapsiz: custom property map overriding built-in map.
  *
- * * options:
- * - if LINEBREAK_OPTION_EASTASIAN_CONTEXT bit is set,
- *   LB_AI and EA_A are resolved to LB_ID and EA_F. Otherwise, LB_AL and EA_N,
- *   respectively.
- * - if LINEBREAK_OPTION_NONSTARTER_LOOSE bit is set,
- *   LB_CJ is resolved to LB_ID.  Otherwise it is resolved to LB_NS.
- *
  * @param[in] obj linebreak object.
  * @param[in] c Unicode character.
  * @param[out] lbcptr UAX #14 line breaking class.
@@ -128,6 +121,9 @@ _search_props(linebreak_t * obj, unichar_t c, propval_t * lbcptr,
  * @param[out] gcbptr UAX #29 Grapheme_Cluster_Break property value.
  * @param[out] scrptr Script (limited to several scripts).
  * @return none.
+ *
+ * @note As of 2.2.0, LINEBREAK_OPTION_EASTASIAN_CONTEXT and
+ * LINEBREAK_OPTION_NONSTARTER_LOOSE are not affect.
  */
 void
 linebreak_charprop(linebreak_t * obj, unichar_t c,
@@ -177,21 +173,6 @@ linebreak_charprop(linebreak_t * obj, unichar_t c,
 	if (scrptr)
 	    scr = ent[3];
     }
-
-    /*
-     * Resolve context-dependent property values.
-     */
-    if (lbcptr) {
-	if (lbc == LB_AI)
-	    lbc = (obj->options & LINEBREAK_OPTION_EASTASIAN_CONTEXT) ?
-		LB_ID : LB_AL;
-	else if (lbc == LB_CJ)
-	    lbc = (obj->options & LINEBREAK_OPTION_NONSTARTER_LOOSE) ?
-		LB_ID : LB_NS;
-    }
-    if (eawptr && eaw == EA_A)
-	eaw = (obj->options & LINEBREAK_OPTION_EASTASIAN_CONTEXT) ?
-	    EA_F : EA_N;
 
     if (lbcptr)
 	*lbcptr = lbc;

@@ -1,3 +1,11 @@
+2.2.0  2012-04-XX
+	* data/constants.pl:
+	* data/data.pl:
+	  - NEW: added custom Grapheme_Cluster_Break property value
+	    "ZWJ", U+200C ZERO WIDTH JOINER or U+200D ZERO WIDTH
+	    NON-JOINER.  They are lb:CM and gb:Extend but aren't gc:M
+	    so do not affect to Legacy-CM rule.
+
 2.2.0beta  2012-03-30
 	* License Change:
 	  - From now on, sombok is distributed under dual license of

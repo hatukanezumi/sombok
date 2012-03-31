@@ -32,33 +32,10 @@ See the COPYING and the ARTISTIC files for more details.
 ソンボクは次の場所で入手できます。
     http://sf.net/projects/linefold/
 
-要件
-====
-
-* ANSI C コンパイラ (たとえば GCC C Compiler) が要ります。
-
-* 必須ではありませんが、タイ語の単語分節に対応するには libthai パッケー
-  ジをインストールする必要があります。次の場所で入手できます。
-
-    http://linux.thai.net/projects/libthai
-
-  この場合、pkg-config も要ります。
-
 インストール
 ============
 
-配布物を展開し、次のように実行します。
-
-  ./configure [オプション……]
-
-  make
-
-  make check
-
-  make install
-
-``./configure --help`` を実行すれば、どんなオプションが使えるかわかりま
-す。
+INSTALL.ja_JP を参照。
 
 言語バインディング
 ==================

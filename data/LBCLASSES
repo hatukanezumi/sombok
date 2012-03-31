@@ -15,7 +15,7 @@
         '5.1.0' => [qw(CR LF Control Extend Prepend SpacingMark L V T LV LVT Other)],
         '5.2.0' => [qw(CR LF Control Extend Prepend SpacingMark L V T LV LVT Other)],
         '6.0.0' => [qw(CR LF Control Extend Prepend SpacingMark L V T LV LVT Other)],
-        '6.1.0' => [qw(CR LF Control Extend Prepend SpacingMark L V T LV LVT Other Virama OtherLetter)],
+        '6.1.0' => [qw(CR LF Control Extend Prepend SpacingMark L V T LV LVT Other Virama OtherLetter ZWJ)],
     },
     'sc' => {
         '5.1.0' => [qw(Common Inherited Unknown Han Hangul Thai Lao Myanmar Khmer Tai_Le New_Tai_Lue)],

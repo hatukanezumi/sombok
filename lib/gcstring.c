@@ -26,19 +26,17 @@
      (g) == GB_ZWJ)
 
 static
-void _gcinfo(linebreak_t * obj, unistr_t * str, size_t pos,
-	     size_t * glenptr, size_t * gcolptr, propval_t * glbcptr,
-	     propval_t * elbcptr)
+void _gcinfo(linebreak_t * obj, unistr_t * str, size_t pos, gcchar_t * gc)
 {
     propval_t glbc = PROP_UNKNOWN, elbc = PROP_UNKNOWN;
     size_t glen, gcol, pcol, ecol;
     propval_t lbc, eaw, gcb, ngcb, scr;
 
     if (!str || !str->str || !str->len) {
-	*glenptr = 0;
-	*gcolptr = 0;
-	*glbcptr = PROP_UNKNOWN;
-	*elbcptr = PROP_UNKNOWN;
+	gc->len = 0;
+	gc->col = 0;
+	gc->lbc = PROP_UNKNOWN;
+	gc->elbc = PROP_UNKNOWN;
 	return;
     }
 
@@ -163,10 +161,10 @@ void _gcinfo(linebreak_t * obj, unistr_t * str, size_t pos,
 	break;			/* switch (gcb) */
     }				/* switch (gcb) */
 
-    *glenptr = glen;
-    *gcolptr = gcol;
-    *glbcptr = glbc;
-    *elbcptr = elbc;
+    gc->len = glen;
+    gc->col = gcol;
+    gc->lbc = glbc;
+    gc->elbc = elbc;
 }
 
 /*
@@ -186,8 +184,9 @@ void _gcinfo(linebreak_t * obj, unistr_t * str, size_t pos,
  * - if LINEBREAK_OPTION_EASTASIAN_CONTEXT bit is set,
  *   LB_AI and EA_A are resolved to LB_ID and EA_F. Otherwise, LB_AL and EA_N,
  *   respectively.
- * - if LINEBREAK_OPTION_NONSTARTER_LOOSE bit is set,
- *   LB_CJ is resolved to LB_ID.  Otherwise it is resolved to LB_NS.
+ * - if LINEBREAK_OPTION_LEGACY_CM bit is set,
+ *   combining mark lead by a SPACE is isolated combining mark (ID).
+ *   Otherwise, such sequences are treated as degenerate cases.
  * - if LINEBREAK_OPTION_VIRAMA_AS_JOINER bit is set,
  *   virama and other letter are not broken.
  */
@@ -217,25 +216,20 @@ gcstring_t *gcstring_new(unistr_t * unistr, linebreak_t * lbobj)
     gcstr->len = len = unistr->len;
 
     if (len) {
-	size_t pos, glen, gcol;
-	propval_t glbc, elbc;
-	gcchar_t gc, *_g;
+	size_t pos;
+	gcchar_t *gc, *_g;
 
 	if ((gcstr->gcstr = malloc(sizeof(gcchar_t) * len)) == NULL) {
 	    gcstr->str = NULL;
 	    gcstring_destroy(gcstr);
 	    return NULL;
 	}
-	gc.flag = 0;
-	for (pos = 0; pos < len; pos += glen) {
-	    _gcinfo(gcstr->lbobj, unistr, pos, &glen, &gcol, &glbc, &elbc);
-	    gc.idx = pos;
-	    gc.len = glen;
-	    gc.col = gcol;
-	    gc.lbc = glbc;
-	    gc.elbc = elbc;
-	    memcpy(gcstr->gcstr + gcstr->gclen, &gc, sizeof(gcchar_t));
-	    gcstr->gclen++;
+	for (pos = 0, gc = gcstr->gcstr;
+	     pos < len;
+	     pos += gc->len, gcstr->gclen++, gc++) {
+	    gc->flag = 0;
+	    gc->idx = pos;
+	    _gcinfo(gcstr->lbobj, unistr, pos, gc);
 	}
 	if ((_g = realloc(gcstr->gcstr, sizeof(gcchar_t) * gcstr->gclen))
 	    == NULL) {

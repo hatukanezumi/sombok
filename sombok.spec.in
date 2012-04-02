@@ -16,9 +16,9 @@ BuildRequires: pkgconfig
 BuildRequires: automake
 BuildRequires: autoconf
 BuildRequires: libtool
-BuildRequires: libthai-devel
+BuildRequires: libthai-devel >= 0.1.9
 BuildRequires: doxygen
-Requires: libthai
+Requires: libthai >= 0.1.9
 
 %description -l ja
 ソンボク (Sombok) パッケージはユニコード標準附属書14 (UAX #14) で

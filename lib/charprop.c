@@ -109,6 +109,8 @@ _search_props(linebreak_t * obj, unichar_t c, propval_t * lbcptr,
 }
 
 /** Search for character properties.
+ *
+ * @note this function is for internal use.
  * 
  * Configuration parameters of linebreak object:
  *
@@ -237,7 +239,7 @@ propval_t linebreak_search_eawidth(linebreak_t * obj, unichar_t c)
 	} \
 	cur = m + (cur - map); \
 	map = m; \
-	if (cur - map < mapsiz) \
+	if (cur < map + mapsiz) \
 	    memmove(cur + 1, cur, \
 		    sizeof(mapent_t) * (mapsiz - (cur - map))); \
 	if ((new) != cur) \
@@ -247,7 +249,7 @@ propval_t linebreak_search_eawidth(linebreak_t * obj, unichar_t c)
 
 #define DELETE_CUR \
     do { \
-	if (cur - map < mapsiz - 1) \
+	if (cur < map + mapsiz - 1) \
 	    memmove(cur, cur + 1, \
 		    sizeof(mapent_t) * (mapsiz - (cur - map) - 1)); \
 	mapsiz--; \
@@ -372,7 +374,7 @@ _add_prop(linebreak_t * obj, unichar_t beg, unichar_t end,
 	    }
 	}
 
-	if (0 < cur - map && cur - map < mapsiz &&
+	if (map < cur && cur < map + mapsiz &&
 	    (cur - 1)->end + 1 == cur->beg && MAP_EQ(cur - 1, cur)) {
 	    (cur - 1)->end = cur->end;
 	    DELETE_CUR;

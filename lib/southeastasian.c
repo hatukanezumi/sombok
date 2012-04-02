@@ -83,7 +83,10 @@ void linebreak_southeastasian_flagbreak(gcstring_t * gcstr)
 		else if (gcstr->gcstr[i].flag)
 		    /* already flagged by _prep(). */
 		    ;
-		else if (gcstr->gcstr[i].idx == j + brk) {
+		else if (gcstr->gcstr[i].idx != j + brk)
+		    /* not grapheme cluster boundary. */
+		    ;
+		else {
 		    propval_t p = PROP_UNKNOWN;
 
 		    linebreak_charprop(gcstr->lbobj,

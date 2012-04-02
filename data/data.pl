@@ -346,7 +346,7 @@ for (my $c = 0; $c <= $#PROPS; $c++) {
 	    }
 	} elsif ($GC_Letter{$c} and $Brahmic_Script{$PROPS[$c]->{'sc'}}) {
 	    if ($PROPS[$c]->{'gb'}) {
-		warn sprintf "U+%04X: GB=%s; won't assign OtherLetter.\n",
+		warn sprintf "(non-fatal) U+%04X: GB=%s; won't assign OtherLetter.\n",
 			     $c, $PROPS[$c]->{'gb'};
 	    } else {
 		$PROPS[$c]->{'gb'} = 'OtherLetter';
@@ -440,7 +440,7 @@ for (my $c = 0; $c <= $#PROPS; $c++) {
 
     # check for Legacy-CM.
     if ($PROPS[$c]->{'lb'} eq 'CM' and
-	$PROPS[$c]->{'gb'} !~ 'Control|ZWJ' and
+	$PROPS[$c]->{'gb'} !~ /Control|ZWJ/ and
 	! $GC_Modifier{$c}) {
 	warn sprintf '!M: U+%04X: lb => %s, ea => %s, gb => %s, sc => %s'."\n",
 	$c,
@@ -448,6 +448,16 @@ for (my $c = 0; $c <= $#PROPS; $c++) {
 	$PROPS[$c]->{'ea'} || '-',
 	$PROPS[$c]->{'gb'} || '-',
 	$PROPS[$c]->{'sc'} || '-';
+    }
+    if ($PROPS[$c]->{'lb'} eq 'CM' and
+	$PROPS[$c]->{'gb'} !~ /Control|Extend|SpacingMark|Virama|ZWJ/) {
+	warn sprintf
+	    'CM:!extender: U+%04X: lb => %s, ea => %s, gb => %s, sc => %s'."\n",
+	    $c,
+	    $PROPS[$c]->{'lb'} || '-',
+	    $PROPS[$c]->{'ea'} || '-',
+	    $PROPS[$c]->{'gb'} || '-',
+	    $PROPS[$c]->{'sc'} || '-';
     }
 }
 

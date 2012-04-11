@@ -43,7 +43,13 @@ void _gcinfo(linebreak_t * obj, unistr_t * str, size_t pos, gcchar_t * gc)
     linebreak_charprop(obj, str->str[pos], &lbc, &eaw, &gcb, &scr);
     pos++;
     glen = 1;
-    gcol = eaw2col(obj, eaw);
+
+    if (gcb == GB_V || gcb == GB_T)
+	/* isolated hangul jamo is wide, though part of them are
+	 * neutral (N). */
+	gcol = 2;
+    else
+	gcol = eaw2col(obj, eaw);
 
     if (lbc != LB_SA)
 	glbc = lbc;
@@ -132,7 +138,12 @@ void _gcinfo(linebreak_t * obj, unistr_t * str, size_t pos, gcchar_t * gc)
 		else
 		    elbc = LB_AL;	/* ...or resolved to AL. */
 		pcol += gcol;
-		gcol = eaw2col(obj, eaw);
+		if (ngcb == GB_V || ngcb == GB_T)
+		    /* isolated hangul jamo with prepend character, though
+		     * it may be degenerate case. */
+		    gcol = 2;
+		else
+		    gcol = eaw2col(obj, eaw);
 	    }
 	    /* Virama rule: \p{ccc:Virama} × \p{gc:Letter} */
 	    else if (gcb == GB_Virama && ngcb == GB_OtherLetter &&

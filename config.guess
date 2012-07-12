@@ -4,7 +4,7 @@
 #   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010,
 #   2011, 2012 Free Software Foundation, Inc.
 
-timestamp='2012-02-10'
+timestamp='2012-06-17'
 
 # This file is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
@@ -199,6 +199,10 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
 	# contains redundant information, the shorter form:
 	# CPU_TYPE-MANUFACTURER-OPERATING_SYSTEM is used.
 	echo "${machine}-${os}${release}"
+	exit ;;
+    *:Bitrig:*:*)
+	UNAME_MACHINE_ARCH=`arch | sed 's/Bitrig.//'`
+	echo ${UNAME_MACHINE_ARCH}-unknown-bitrig${UNAME_RELEASE}
 	exit ;;
     *:OpenBSD:*:*)
 	UNAME_MACHINE_ARCH=`arch | sed 's/OpenBSD.//'`
@@ -789,6 +793,9 @@ EOF
     *:BSD/OS:*:*)
 	echo ${UNAME_MACHINE}-unknown-bsdi${UNAME_RELEASE}
 	exit ;;
+    *:MidnightBSD:*:*)
+        echo ${UNAME_MACHINE}-unknown-freebsd7.0
+        exit 0 ;;
     *:FreeBSD:*:*)
 	UNAME_PROCESSOR=`/usr/bin/uname -p`
 	case ${UNAME_PROCESSOR} in
@@ -1256,7 +1263,7 @@ EOF
     NEO-?:NONSTOP_KERNEL:*:*)
 	echo neo-tandem-nsk${UNAME_RELEASE}
 	exit ;;
-    NSE-?:NONSTOP_KERNEL:*:*)
+    NSE-*:NONSTOP_KERNEL:*:*)
 	echo nse-tandem-nsk${UNAME_RELEASE}
 	exit ;;
     NSR-?:NONSTOP_KERNEL:*:*)
@@ -1328,15 +1335,6 @@ EOF
     x86_64:VMkernel:*:*)
 	echo ${UNAME_MACHINE}-unknown-esx
 	exit ;;
-    *:MidnightBSD:*:*)
-        case ${UNAME_MACHINE} in
-            amd64)
-                echo x86_64-unknown-midnightbsd`echo ${UNAME_RELEASE}|sed -e 's/[-(].*//'` ;;
-            *)
-                echo ${UNAME_MACHINE}-unknown-midnightbsd`echo ${UNAME_RELEASE}|sed -e 's/[-(].*//'` ;;
-        esac
-        exit ;;
-
 esac
 
 #echo '(No uname command or uname output not recognized.)' 1>&2

@@ -1,3 +1,23 @@
+2.3.0beta1  2012-07-14
+	* Update UCD to 6.2.0beta at Jun 05 2012.
+	* config.guess:
+	* config.sub:
+	  - updated.
+	* data/constants.pl:
+	* data/custom.pl:
+	* data/data.pl:
+	* data/makefile:
+	  - custom Grapheme_Cluster_Break property value "ZWJ" is divided
+	    to "NonJoiner" (U+200C ZERO WIDTH NON-JOINER) and "Joiner"
+	    (U+200D ZERO WIDTH JOINER).
+	  - Store custom GCB to *.custom file.
+	* lib/charprop.c:
+	  - Added ZJ/Joiner case of guessed properties.
+	* lib/gcstring.c:
+	  - Updated GCB rules.
+	* Makefile.am:
+	  - increase -version-info from 4.5.1 to 4.6.1.
+
 2.2.1  2012-04-11
 	* lib/gcstring.c:
 	  - Treat an isolated hangul jamo as wide, though some of them

@@ -83,6 +83,9 @@ _search_props(linebreak_t * obj, unichar_t c, propval_t * lbcptr,
 	    case LB_CM:
 		*gcbptr = GB_Extend;
 		break;
+	    case LB_ZJ:
+		*gcbptr = GB_Joiner;
+		break;
 	    case LB_H2:
 		*gcbptr = GB_LV;
 		break;

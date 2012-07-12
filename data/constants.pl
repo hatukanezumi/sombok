@@ -55,7 +55,7 @@ foreach my $attr (@attr) {
 	    }
 	    close $ucd;
 
-	    %ZWJ = (0x200C => 1, 0x200D => 1);
+	    %ZWJ = (0x200C => 'NonJoiner', 0x200D => 'Joiner');
 	}
 
 	my %SA = ();
@@ -118,17 +118,13 @@ foreach my $attr (@attr) {
 		    # Extended GCB property value for virama (consonant joiner)
 		    my $ec;
 		    if ($attr eq 'gb' and $Virama{$chr}) {
-			if ($c eq 'Extend' or $c eq 'SpacingMark') {
-			    $ec = ['Virama', 'OtherLetter'];
-			} else {
-			    die sprintf "%04X is virama and %s", $chr, $c;
-			}
+			$ec = ['Virama', 'OtherLetter'];
 		    } else {
 			$ec = [$c];
 		    }
 		    # Extended GCB property value for ZWJ/ZWNJ
-		    if ($attr eq 'gb' and $ZWJ{$chr}) {
-			push @{$ec}, 'ZWJ';
+		    if ($attr eq 'gb' and defined $ZWJ{$chr}) {
+			push @{$ec}, $ZWJ{$chr};
 		    }
 
 		    foreach my $c (@$ec) {

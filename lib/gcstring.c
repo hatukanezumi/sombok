@@ -23,7 +23,7 @@
      (((e) == EA_F || (e) == EA_W)? 2: (((e) == EA_Z)? 0: 1)))
 #define IS_EXTENDER(g) \
     ((g) == GB_Extend || (g) == GB_SpacingMark || (g) == GB_Virama || \
-     (g) == GB_ZWJ)
+     (g) == GB_NonJoiner)
 
 static
 void _gcinfo(linebreak_t * obj, unistr_t * str, size_t pos, gcchar_t * gc)
@@ -57,7 +57,7 @@ void _gcinfo(linebreak_t * obj, unistr_t * str, size_t pos, gcchar_t * gc)
     else if (scr == SC_Thai)
 	glbc = lbc;
 #endif				/* USE_LIBTHAI */
-    else if (IS_EXTENDER(gcb))
+    else if (IS_EXTENDER(gcb) || gcb == GB_Joiner)
 	glbc = LB_CM;
     else
 	glbc = LB_AL;
@@ -89,10 +89,12 @@ void _gcinfo(linebreak_t * obj, unistr_t * str, size_t pos, gcchar_t * gc)
 
 	    /* Legacy-CM: Treat SP CM+ as if it were ID.  cf. [UAX #14] 9.1. */
 	    /* except ZWJ/ZWNJ that do not have general category M. */
+	    /* FIXME:As of 6.2.0beta, Behaviour of ZWJ is changed. */
 	    if (glbc == LB_SP) {
 		if ((obj->options & LINEBREAK_OPTION_LEGACY_CM) &&
-		    IS_EXTENDER(ngcb) && ngcb != GB_ZWJ &&
-		    (lbc == LB_CM || lbc == LB_SA)) {
+		    (IS_EXTENDER(ngcb) || ngcb == GB_Joiner) &&
+		    ngcb != GB_NonJoiner &&
+		    (lbc == LB_CM || lbc == LB_ZJ || lbc == LB_SA)) {
 		    glbc = LB_ID;
 		    ecol += eaw2col(obj, eaw);
 		} else
@@ -105,7 +107,8 @@ void _gcinfo(linebreak_t * obj, unistr_t * str, size_t pos, gcchar_t * gc)
 	    /* GB6 - GB8 */
 	    /*
 	     * Assume hangul syllable block is always wide, while most of
-	     * isolated junseong (V) and jongseong (T) are narrow.
+	     * isolated junseong (gcb:V) and jongseong (gcb:T) are neutral
+	     * (eaw:N).
 	     */
 	    else if ((gcb == GB_L &&
 		      (ngcb == GB_L || ngcb == GB_V || ngcb == GB_LV ||
@@ -116,8 +119,16 @@ void _gcinfo(linebreak_t * obj, unistr_t * str, size_t pos, gcchar_t * gc)
 		gcol = 2;
 		elbc = lbc;
 	    }
+	    /* GB8b */
+	    else if (gcb == GB_Joiner && ngcb == GB_After_Joiner) {
+		gcol += ecol + eaw2col(obj, eaw);
+		ecol = 0;
+		/* CM is ignored. */
+		if (lbc != LB_CM)
+		    elbc = lbc;
+	    }
 	    /* GB9, GB9a */
-	    else if (IS_EXTENDER(ngcb)) {
+	    else if (IS_EXTENDER(ngcb) || ngcb == GB_Joiner) {
 		ecol += eaw2col(obj, eaw);
 		/* CM in grapheme extender is ignored.  Virama is CM. */
 		/* SA in g. ext. is resolved to CM so it is ignored. */
@@ -128,7 +139,7 @@ void _gcinfo(linebreak_t * obj, unistr_t * str, size_t pos, gcchar_t * gc)
 	    else if (gcb == GB_Prepend) {
 		/* Here, next char shall grapheme base (or additional prepend
 		 * character), since its GCB property is neither Control,
-		 * Extend, SpacingMark, Virama nor ZWJ/ZWNJ. */
+		 * Extend, SpacingMark, Virama, NonJoiner nor Joiner. */
 		if (lbc != LB_SA)
 		    elbc = lbc;
 #ifdef USE_LIBTHAI

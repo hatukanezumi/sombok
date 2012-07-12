@@ -1,9 +1,15 @@
 #-*- perl -*-
 
+use version;
+
+my $vernum = version->new($ARGV[1])->numify;
+
 if ($ARGV[0] eq 'lb') {
     goto LB_CUSTOM;
 } elsif ($ARGV[0] eq 'ea') {
     goto EA_CUSTOM;
+} elsif ($ARGV[0] eq 'gb') {
+    goto GB_CUSTOM;
 } else {
     exit 0;
 }
@@ -28,3 +34,118 @@ while (<UD>) {
 }
 close UD;
 exit 0;
+
+GB_CUSTOM:
+
+exit 0 unless 6.001000 <= $vernum;
+
+my @codes;
+my %Virama;
+my %GC_Letter;
+my %Brahmic_Script;
+my %Brahmic;
+
+open my $ucd, '<', "UnicodeData-$ARGV[1].txt" or die $!;
+while (<$ucd>) {
+    chomp $_;
+    s/\s*#.*$//;
+    next unless /\S/;
+    my ($code, $name, $gc, $ccc) = split /;/;
+    $code = hex("0x$code");
+    $Virama{$code} = 1 if $ccc+0 == 9;
+    $GC_Letter{$code} = 1 if $gc =~ /^L/;
+    push @codes, $code;
+}
+close $ucd;
+
+my %ZWJ = (0x200C => 'NonJoiner', 0x200D => 'Joiner');
+
+open my $scr, '<', "Scripts-$ARGV[1].txt" or die $!;
+while (<$scr>) {
+    s/\s*\#.*//;
+    next unless /\S/;
+
+    my ($char, $prop) = split /\s*;\s*/, $_;
+    chomp $prop;
+    next unless $prop =~ /^(\@[\w:]+|\w+)$/;
+    my ($start, $end) = ();
+    ($start, $end) = split /\.\./, $char;
+    $end ||= $start;
+    foreach my $c (hex("0x$start") .. hex("0x$end")) {
+        $Brahmic_Script{$prop} = 1 if $Virama{$c};
+    }
+}
+close $scr;
+open $scr, '<', "Scripts-$ARGV[1].txt" or die $!;
+while (<$scr>) {
+    s/\s*\#.*//;
+    next unless /\S/;
+
+    my ($char, $prop) = split /\s*;\s*/, $_;
+    chomp $prop;
+    next unless $prop =~ /^(\@[\w:]+|\w+)$/;
+    my ($start, $end) = ();
+    ($start, $end) = split /\.\./, $char;
+    $end ||= $start;
+    foreach my $c (hex("0x$start") .. hex("0x$end")) {
+	$Brahmic{$c} = 1 if $Brahmic_Script{$prop};
+    }
+}
+close $scr;
+
+open my $gcb, '<', "GraphemeBreakProperty-$ARGV[1].txt" or die $!;
+while (<$gcb>) {
+    s/\s*\#.*//;
+    next unless /\S/;
+
+    my ($char, $prop) = split /\s*;\s*/, $_;
+    chomp $prop;
+    next unless $prop =~ /^(\@[\w:]+|\w+)$/;
+
+    my ($start, $end) = ();
+    ($start, $end) = split /\.\./, $char;
+    $end ||= $start;
+    foreach my $c (hex("0x$start") .. hex("0x$end")) {
+	$prop{$c} = $prop;
+    }
+}
+close $gcb;
+
+foreach my $c (@codes) {
+    my $prop = $prop{$c};
+
+    # Custom GCB Virama
+    if ($Virama{$c}) {
+	if ($prop =~ /^(Extend|SpacingMark)$/) {
+	    $prop = 'Virama';
+	} else {
+	    die sprintf "U+%04X is virama and %s", $c, $prop;
+	}
+    } elsif ($GC_Letter{$c} and $Brahmic{$c}) {
+	if ($prop) {
+	    warn sprintf
+		"(non-fatal) U+%04X: GB=%s; won't assign OtherLetter.\n",
+		$c, $prop;
+	} else {
+	    $prop = 'OtherLetter';
+	}
+    }
+    # Custom GCB NonJoiner and Joiner
+    elsif ($ZWJ{$c}) {
+	if ($prop eq $ZWJ{$c}) {
+	    ;
+	} elsif ($prop eq 'Extend') {
+	    $prop = $ZWJ{$c};
+	} else {
+	    die sprintf
+		"U+%04X is included in zero width joiners and %s",
+		$c, $prop;
+	}
+    }
+
+    printf "%04X ; %s\n", $c, $prop unless $prop eq $prop{$c};
+}
+
+
+exit 0;
+

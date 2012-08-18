@@ -58,8 +58,6 @@ while (<$ucd>) {
 }
 close $ucd;
 
-my %ZWJ = (0x200C => 'NonJoiner', 0x200D => 'Joiner');
-
 open my $scr, '<', "Scripts-$ARGV[1].txt" or die $!;
 while (<$scr>) {
     s/\s*\#.*//;
@@ -128,18 +126,6 @@ foreach my $c (@codes) {
 		$c, $prop;
 	} else {
 	    $prop = 'OtherLetter';
-	}
-    }
-    # Custom GCB NonJoiner and Joiner
-    elsif ($ZWJ{$c}) {
-	if ($prop eq $ZWJ{$c}) {
-	    ;
-	} elsif ($prop eq 'Extend') {
-	    $prop = $ZWJ{$c};
-	} else {
-	    die sprintf
-		"U+%04X is included in zero width joiners and %s",
-		$c, $prop;
 	}
     }
 

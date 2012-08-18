@@ -5,7 +5,6 @@
 # EAW: Z - Nonspacing
 # GCB: Virama - Virama, consonant joiner
 # GCB: OtherLetter - Letter, now limited to Brahmic scripts.
-# GCB: NonJoiner - ZERO WIDTH NON-JOINER.
 
 use version;
 
@@ -76,7 +75,7 @@ while (<RULES>) {
 
     # 6.1.0 or later: aggregate AL & HL
     s/\bAL *\| *HL\b/AL/g;
-    s/\bAL *\| *ZJ *\| *HL\b/AL | ZJ/g;
+    #XXXs/\bAL *\| *ZJ *\| *HL\b/AL | ZJ/g;
     s/[(] *AL *[)]/AL/g;
     next if /\bHL\b/; # Skip HL rules
 
@@ -389,7 +388,7 @@ for (my $c = 0; $c <= $#PROPS; $c++) {
 
     # check for Legacy-CM.
     if ($PROPS[$c]->{'lb'} eq 'CM' and
-	$PROPS[$c]->{'gb'} !~ /^(Control|NonJoiner|Joiner)$/ and
+	$PROPS[$c]->{'gb'} ne 'Control' and
 	! $GC_Modifier{$c}) {
 	warn sprintf '!M: U+%04X: lb => %s, ea => %s, gb => %s, sc => %s'."\n",
 	$c,
@@ -399,7 +398,7 @@ for (my $c = 0; $c <= $#PROPS; $c++) {
 	$PROPS[$c]->{'sc'} || '-';
     }
     if ($PROPS[$c]->{'lb'} eq 'CM' and
-	$PROPS[$c]->{'gb'} !~ /^(Control|Extend|SpacingMark|Virama|NonJoiner|Joiner)$/) {
+	$PROPS[$c]->{'gb'} !~ /^(Control|Extend|SpacingMark|Virama)$/) {
 	warn sprintf
 	    'CM:!extender: U+%04X: lb => %s, ea => %s, gb => %s, sc => %s'."\n",
 	    $c,

@@ -113,7 +113,7 @@ BB ×
 HL (HY | BA) ×
 
 # LB22
-(AL | ZJ | HL) × IN
+(AL | HL) × IN
 ID × IN
 IN × IN
 NU × IN
@@ -122,13 +122,13 @@ NU × IN
 
 # LB23
 ID × PO
-(AL | ZJ | HL) × NU
-NU × (AL | ZJ | HL)
+(AL | HL) × NU
+NU × (AL | HL)
 
 # LB24
 PR × ID
-PR × (AL | ZJ | HL)
-PO × (AL | ZJ | HL)
+PR × (AL | HL)
+PO × (AL | HL)
 
 # LB25
 #CL × PO
@@ -161,18 +161,17 @@ PR × (JL | JV | JT | H2 | H3)
 ## Finally, join alphabetic letters into words and break everything else. 
 
 # LB28
-(AL | ZJ | HL) × (AL | ZJ | HL)
+(AL | HL) × (AL | HL)
 
 # LB29
-IS × (AL | ZJ | HL)
+IS × (AL | HL)
 
 # LB30 
-(AL | ZJ | HL | NU) × OP
-CP × (AL | ZJ | HL | NU)
+(AL | HL | NU) × OP
+CP × (AL | HL | NU)
 
-# LB30a
-ZJ × ID
-ID × ZJ
+# LB30.11 (draft)
+RI × RI
 
 # LB31
 ALL ÷

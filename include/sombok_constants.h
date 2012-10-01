@@ -51,6 +51,8 @@
 #define EA_W ((propval_t)4)
 #define EA_H ((propval_t)5)
 #define EA_F ((propval_t)6)
+#define EA_ZA ((propval_t)7)
+#define EA_ZW ((propval_t)8)
 
 #define GB_CR ((propval_t)0)
 #define GB_LF ((propval_t)1)

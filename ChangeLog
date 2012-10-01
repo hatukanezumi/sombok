@@ -1,10 +1,22 @@
+2.3.0  2012-10-01
+	* Update UCD to 6.2.0.
+	* data/custom.pl:
+	* data/data.pl:
+	* lib/charprop.c:
+	* lib/gcstring.c:
+	  - EA_Z was devided to EA_Z, EA_ZA and EA_ZW which are nonspacing
+	    variants of EAW "N", "A" and "W", respectively.  Currently,
+	    there are no differences between EA_Z and EA_ZA.
+	  - VIRAMA_AS_JOINER option had been applicable to versions prior
+	    to 6.1.0.
+
 2.3.0gamma1  2012-08-18
-	* data/Rules-6.2.0beta.txt
-	* data/constants.pl
-	* data/custom.pl
-	* data/data.pl
-	* lib/charprop.c
-	* lib/gcstring.c
+	* data/Rules-6.2.0beta.txt:
+	* data/constants.pl:
+	* data/custom.pl:
+	* data/data.pl:
+	* lib/charprop.c:
+	* lib/gcstring.c:
 	  - Changes based on new drafts of UAX#14/UAX#29 (not yet published).
 	    GCB Joiner and After_Joiner and LBC ZJ are withdrawn by UC.  As
 	    also NonJoiner.

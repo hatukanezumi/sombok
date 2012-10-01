@@ -26,7 +26,7 @@ static propval_t PROPENT_HAN[] = { LB_ID, EA_W, GB_Other, SC_Han };
 static propval_t PROPENT_TAG[] = { LB_CM, EA_Z, GB_Control, SC_Common };
 
 /* Variation Selectors */
-static propval_t PROPENT_VSEL[] = { LB_CM, EA_Z, GB_Extend, SC_Inherited };
+static propval_t PROPENT_VSEL[] = { LB_CM, EA_ZA, GB_Extend, SC_Inherited };
 
 /* Private use - XX */
 static propval_t PROPENT_PRIVATE[] = { LB_AL, EA_A, GB_Other, SC_Unknown };

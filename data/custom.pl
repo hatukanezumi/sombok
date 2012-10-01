@@ -25,11 +25,33 @@ exit 0;
 
 EA_CUSTOM:
 
+my %eaw;
+open DATA, '<', "EastAsianWidth-$ARGV[1].txt";
+while (<DATA>) {
+    chomp $_;
+    s/\s*#.*//;
+    next unless /\S/;
+    my ($ucs, $c) = split /;\s*/, $_;
+
+    next unless $ucs;
+    my ($beg, $end) = split /\.\./, $ucs;
+    $end ||= $beg;
+    $beg = hex("0x$beg");
+    $end = hex("0x$end");
+
+    foreach my $chr (($beg..$end)) {
+        $eaw{$chr} = $c;
+    }
+}
+close DATA;
+
 open UD, '<', "UnicodeData-$ARGV[1].txt";
 while (<UD>) {
     ($code, $name, $cat) = split /;/;
     if ($cat =~ /^(Me|Mn|Cc|Cf|Zl|Zp)$/) {
-	print "$code;Z # $name\n";
+	my $eaw = $eaw{hex"0x$code"} || '';
+	$eaw = '' if $eaw eq 'N';
+	print "$code;Z$eaw # $name\n";
     }
 }
 close UD;
@@ -37,13 +59,15 @@ exit 0;
 
 GB_CUSTOM:
 
-exit 0 unless 6.001000 <= $vernum;
+#exit 0 unless 6.001000 <= $vernum;
 
 my @codes;
 my %Virama;
 my %GC_Letter;
 my %Brahmic_Script;
 my %Brahmic;
+my %name;
+my %gc;
 
 open my $ucd, '<', "UnicodeData-$ARGV[1].txt" or die $!;
 while (<$ucd>) {
@@ -55,6 +79,8 @@ while (<$ucd>) {
     $Virama{$code} = 1 if $ccc+0 == 9;
     $GC_Letter{$code} = 1 if $gc =~ /^L/;
     push @codes, $code;
+    $name{$code} = $name;
+    $gc{$code} = $gc;
 }
 close $ucd;
 
@@ -111,6 +137,8 @@ close $gcb;
 
 foreach my $c (@codes) {
     my $prop = $prop{$c};
+    my $name = $name{$c};
+    my $gc = $gc{$c};
 
     # Custom GCB Virama
     if ($Virama{$c}) {
@@ -129,7 +157,8 @@ foreach my $c (@codes) {
 	}
     }
 
-    printf "%04X ; %s\n", $c, $prop unless $prop eq $prop{$c};
+    printf "%04X ; %-11s # %s %s\n", $c, $prop, $gc, $name
+	unless $prop eq $prop{$c};
 }
 
 

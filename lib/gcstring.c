@@ -20,7 +20,8 @@
 #define eaw2col(o, e) \
     ((e) == EA_A ? \
      (((o)->options & LINEBREAK_OPTION_EASTASIAN_CONTEXT) ? 2 : 1) : \
-     (((e) == EA_F || (e) == EA_W)? 2: (((e) == EA_Z)? 0: 1)))
+     (((e) == EA_F || (e) == EA_W)? 2: \
+     (((e) == EA_Z || (e) == EA_ZA || (e) == EA_ZW)? 0: 1)))
 #define IS_EXTENDER(g) \
     ((g) == GB_Extend || (g) == GB_SpacingMark || (g) == GB_Virama)
 
@@ -92,7 +93,24 @@ void _gcinfo(linebreak_t * obj, unistr_t * str, size_t pos, gcchar_t * gc)
 		    IS_EXTENDER(ngcb) &&
 		    (lbc == LB_CM || lbc == LB_SA)) {
 		    glbc = LB_ID;
-		    ecol += eaw2col(obj, eaw);
+
+		    /* isolated "wide" nonspacing marks will be wide. */
+		    if (eaw == EA_ZW &&
+			(obj->options &
+			 LINEBREAK_OPTION_WIDE_NONSPACING_W)) {
+			if (gcol < 2)
+			    gcol = 2;
+		    }
+#if 0 /* XXX */
+		    else if (eaw == EA_ZA &&
+			     (obj->options &
+			      LINEBREAK_OPTION_WIDE_NONSPACING_A)) {
+			if (gcol < 2)
+			    gcol = 2;
+		    }
+#endif /* 0 */
+		    else
+			ecol += eaw2col(obj, eaw);
 		} else
 		    /* prevent degenerate case. */
 		    break;	/* while (pos < str->len) */
@@ -115,7 +133,7 @@ void _gcinfo(linebreak_t * obj, unistr_t * str, size_t pos, gcchar_t * gc)
 		gcol = 2;
 		elbc = lbc;
 	    }
-	    /* GB8.1 (by GraphemeBreakTest-6.2.0d5 2012-08-13, 19:12:06 UTC) */
+	    /* GB8a */
 	    else if (gcb == GB_Regional_Indicator &&
 		     ngcb == GB_Regional_Indicator) {
 		gcol += ecol + eaw2col(obj, eaw);

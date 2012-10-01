@@ -42,7 +42,7 @@ foreach my $attr (@attr) {
 	my $vernum = version->new($version)->numify;
 
 	my %Virama = ();
-	if (6.001000 <= $vernum) {
+	#if (6.001000 <= $vernum) {
 	    open my $ucd, '<', "UnicodeData-$version.txt" or die $!;
 	    while (<$ucd>) {
 		chomp $_;
@@ -53,7 +53,7 @@ foreach my $attr (@attr) {
 		$Virama{$code} = 1 if $ccc+0 == 9;
 	    }
 	    close $ucd;
-	}
+	#}
 
 	my %SA = ();
 	foreach my $ext ('custom', 'txt') {

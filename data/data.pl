@@ -13,7 +13,7 @@ my $version = shift @ARGV or die;
 my $vernum = version->new($version)->numify;
 
 # Find Modifier
-my $GC_Modifier = ();
+my %GC_Modifier = ();
 open my $ucd, '<', "UnicodeData-$version.txt" or die $!;
 while (<$ucd>) {
     chomp $_;
@@ -276,7 +276,7 @@ foreach my $n (1, 0) {
 		}
 		elsif (0xE0100 <= $c and $c <= 0xE01EF) {
 		    if ($cat eq 'lb' and $p ne 'CM' or
-			$cat eq 'ea' and $p ne 'Z' or
+			$cat eq 'ea' and $p ne 'ZA' or
 			$cat eq 'gb' and $p ne 'Extend' or
 			$cat eq 'sc' and $p ne 'Inherited') {
 			die sprintf 'U+%04X have %s property %s', $c, $cat, $p;

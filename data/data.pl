@@ -12,45 +12,18 @@ my @cat = split(',', shift @ARGV) or die;
 my $version = shift @ARGV or die;
 my $vernum = version->new($version)->numify;
 
-# Find Brahmic scripts
-my %GC_Letter = ();
-my $GC_Modifier = ();
-my %Virama = ();
-my %ZWJ = ();
-my %Brahmic_Script = ();
-if (6.001000 <= $vernum) {
-    open my $ucd, '<', "UnicodeData-$version.txt" or die $!;
-    while (<$ucd>) {
-	chomp $_;
-	s/\s*#.*$//;
-	next unless /\S/;
-	my ($code, $name, $gc, $ccc) = split /;/;
-	$code = hex("0x$code");
-	$Virama{$code} = 1 if $ccc+0 == 9;
-	$GC_Letter{$code} = 1 if $gc =~ /^L/;
-	$GC_Modifier{$code} = 1 if $gc =~ /^M/;
-    }
-    close $ucd;    
-
-    %ZWJ = (0x200C => 1, 0x200D => 1);
-
-    open my $scr, '<', "Scripts-$version.txt" or die $!;
-    while (<$scr>) {
-        s/\s*\#.*//;
-        next unless /\S/;
-
-        my ($char, $prop) = split /\s*;\s*/, $_;
-	chomp $prop;
-        next unless $prop =~ /^(\@[\w:]+|\w+)$/;
-        my ($start, $end) = ();
-        ($start, $end) = split /\.\./, $char;
-        $end ||= $start;
-	foreach my $c (hex("0x$start") .. hex("0x$end")) {
-	    $Brahmic_Script{$prop} = 1 if $Virama{$c};
-	}
-    }
-    close $scr;
+# Find Modifier
+my %GC_Modifier = ();
+open my $ucd, '<', "UnicodeData-$version.txt" or die $!;
+while (<$ucd>) {
+    chomp $_;
+    s/\s*#.*$//;
+    next unless /\S/;
+    my ($code, $name, $gc, $ccc) = split /;/;
+    $code = hex("0x$code");
+    $GC_Modifier{$code} = 1 if $gc =~ /^M/;
 }
+close $ucd;
 
 # Find SA classes
 my %SA = ();
@@ -100,8 +73,9 @@ while (<RULES>) {
         next;
     }
 
-    # 6.1.0beta: aggregate AL & HL
+    # 6.1.0 or later: aggregate AL & HL
     s/\bAL *\| *HL\b/AL/g;
+    #XXXs/\bAL *\| *ZJ *\| *HL\b/AL | ZJ/g;
     s/[(] *AL *[)]/AL/g;
     next if /\bHL\b/; # Skip HL rules
 
@@ -302,7 +276,7 @@ foreach my $n (1, 0) {
 		}
 		elsif (0xE0100 <= $c and $c <= 0xE01EF) {
 		    if ($cat eq 'lb' and $p ne 'CM' or
-			$cat eq 'ea' and $p ne 'Z' or
+			$cat eq 'ea' and $p ne 'ZA' or
 			$cat eq 'gb' and $p ne 'Extend' or
 			$cat eq 'sc' and $p ne 'Inherited') {
 			die sprintf 'U+%04X have %s property %s', $c, $cat, $p;
@@ -335,32 +309,6 @@ foreach my $n (1, 0) {
 
 for (my $c = 0; $c <= $#PROPS; $c++) {
     next unless $PROPS[$c];
-
-    if (6.001000 <= $vernum) {
-	# Custom GCB Virama
-	if ($Virama{$c}) {
-	    if ($PROPS[$c]->{'gb'} =~ /^(Extend|SpacingMark)$/) {
-		$PROPS[$c]->{'gb'} = 'Virama';
-	    } else {
-		die sprintf "U+%04X is virama and %s", $c, $PROPS[$c]->{'gb'};
-	    }
-	} elsif ($GC_Letter{$c} and $Brahmic_Script{$PROPS[$c]->{'sc'}}) {
-	    if ($PROPS[$c]->{'gb'}) {
-		warn sprintf "(non-fatal) U+%04X: GB=%s; won't assign OtherLetter.\n",
-			     $c, $PROPS[$c]->{'gb'};
-	    } else {
-		$PROPS[$c]->{'gb'} = 'OtherLetter';
-	    }
-	}
-	# Custom GCB ZWJ (ZERO WIDTH JOINER and ZERO WIDTH NON-JOINER)
-	elsif ($ZWJ{$c}) {
-	    if ($PROPS[$c]->{'gb'} eq 'Extend') {
-		$PROPS[$c]->{'gb'} = 'ZWJ';
-	    } else {
-		die sprintf "U+%04X is included in zero width joiners and %s", $c, $PROPS[$c]->{'gb'};
-	    }
-	}
-    }
 
     # limit scripts to SA characters.
     delete $PROPS[$c]->{'sc'} if !$SA{$c};
@@ -440,7 +388,7 @@ for (my $c = 0; $c <= $#PROPS; $c++) {
 
     # check for Legacy-CM.
     if ($PROPS[$c]->{'lb'} eq 'CM' and
-	$PROPS[$c]->{'gb'} !~ /Control|ZWJ/ and
+	$PROPS[$c]->{'gb'} ne 'Control' and
 	! $GC_Modifier{$c}) {
 	warn sprintf '!M: U+%04X: lb => %s, ea => %s, gb => %s, sc => %s'."\n",
 	$c,
@@ -450,7 +398,7 @@ for (my $c = 0; $c <= $#PROPS; $c++) {
 	$PROPS[$c]->{'sc'} || '-';
     }
     if ($PROPS[$c]->{'lb'} eq 'CM' and
-	$PROPS[$c]->{'gb'} !~ /Control|Extend|SpacingMark|Virama|ZWJ/) {
+	$PROPS[$c]->{'gb'} !~ /^(Control|Extend|SpacingMark|Virama)$/) {
 	warn sprintf
 	    'CM:!extender: U+%04X: lb => %s, ea => %s, gb => %s, sc => %s'."\n",
 	    $c,
@@ -461,6 +409,12 @@ for (my $c = 0; $c <= $#PROPS; $c++) {
     }
 }
 
+## Debug
+#for (my $c = 0; $c < 0x20000; $c++) {
+#    next unless defined $PROPS[$c];
+#    printf "%04X %-2s %-2s %-12s %-2s\n", $c, $PROPS[$c]->{'lb'},
+#	$PROPS[$c]->{'ea'}, $PROPS[$c]->{'gb'}, $PROPS[$c]->{'sc'};
+#}
 
 # Construct compact array.
 use constant BLKLEN => 1 << 5;

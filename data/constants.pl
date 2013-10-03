@@ -42,8 +42,7 @@ foreach my $attr (@attr) {
 	my $vernum = version->new($version)->numify;
 
 	my %Virama = ();
-	my %ZWJ = ();
-	if (6.001000 <= $vernum) {
+	#if (6.001000 <= $vernum) {
 	    open my $ucd, '<', "UnicodeData-$version.txt" or die $!;
 	    while (<$ucd>) {
 		chomp $_;
@@ -54,9 +53,7 @@ foreach my $attr (@attr) {
 		$Virama{$code} = 1 if $ccc+0 == 9;
 	    }
 	    close $ucd;
-
-	    %ZWJ = (0x200C => 1, 0x200D => 1);
-	}
+	#}
 
 	my %SA = ();
 	foreach my $ext ('custom', 'txt') {
@@ -118,17 +115,9 @@ foreach my $attr (@attr) {
 		    # Extended GCB property value for virama (consonant joiner)
 		    my $ec;
 		    if ($attr eq 'gb' and $Virama{$chr}) {
-			if ($c eq 'Extend' or $c eq 'SpacingMark') {
-			    $ec = ['Virama', 'OtherLetter'];
-			} else {
-			    die sprintf "%04X is virama and %s", $chr, $c;
-			}
+			$ec = ['Virama', 'OtherLetter'];
 		    } else {
 			$ec = [$c];
-		    }
-		    # Extended GCB property value for ZWJ/ZWNJ
-		    if ($attr eq 'gb' and $ZWJ{$chr}) {
-			push @{$ec}, 'ZWJ';
 		    }
 
 		    foreach my $c (@$ec) {

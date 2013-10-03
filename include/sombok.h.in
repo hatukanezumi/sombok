@@ -236,6 +236,7 @@ typedef struct linebreak_t {
 #define LINEBREAK_OPTION_COMPLEX_BREAKING (16)
 #define LINEBREAK_OPTION_NONSTARTER_LOOSE (32)
 #define LINEBREAK_OPTION_VIRAMA_AS_JOINER (64)
+#define LINEBREAK_OPTION_WIDE_NONSPACING_W (128)
 
 /** @ingroup linebreak
  * internal states. */

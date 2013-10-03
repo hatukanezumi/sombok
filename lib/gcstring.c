@@ -20,10 +20,10 @@
 #define eaw2col(o, e) \
     ((e) == EA_A ? \
      (((o)->options & LINEBREAK_OPTION_EASTASIAN_CONTEXT) ? 2 : 1) : \
-     (((e) == EA_F || (e) == EA_W)? 2: (((e) == EA_Z)? 0: 1)))
+     (((e) == EA_F || (e) == EA_W)? 2: \
+     (((e) == EA_Z || (e) == EA_ZA || (e) == EA_ZW)? 0: 1)))
 #define IS_EXTENDER(g) \
-    ((g) == GB_Extend || (g) == GB_SpacingMark || (g) == GB_Virama || \
-     (g) == GB_ZWJ)
+    ((g) == GB_Extend || (g) == GB_SpacingMark || (g) == GB_Virama)
 
 static
 void _gcinfo(linebreak_t * obj, unistr_t * str, size_t pos, gcchar_t * gc)
@@ -43,7 +43,13 @@ void _gcinfo(linebreak_t * obj, unistr_t * str, size_t pos, gcchar_t * gc)
     linebreak_charprop(obj, str->str[pos], &lbc, &eaw, &gcb, &scr);
     pos++;
     glen = 1;
-    gcol = eaw2col(obj, eaw);
+
+    if (gcb == GB_V || gcb == GB_T)
+	/* isolated hangul jamo is wide, though part of them are
+	 * neutral (N). */
+	gcol = 2;
+    else
+	gcol = eaw2col(obj, eaw);
 
     if (lbc != LB_SA)
 	glbc = lbc;
@@ -82,13 +88,29 @@ void _gcinfo(linebreak_t * obj, unistr_t * str, size_t pos, gcchar_t * gc)
 			       &scr);
 
 	    /* Legacy-CM: Treat SP CM+ as if it were ID.  cf. [UAX #14] 9.1. */
-	    /* except ZWJ/ZWNJ that do not have general category M. */
 	    if (glbc == LB_SP) {
 		if ((obj->options & LINEBREAK_OPTION_LEGACY_CM) &&
-		    IS_EXTENDER(ngcb) && ngcb != GB_ZWJ &&
+		    IS_EXTENDER(ngcb) &&
 		    (lbc == LB_CM || lbc == LB_SA)) {
 		    glbc = LB_ID;
-		    ecol += eaw2col(obj, eaw);
+
+		    /* isolated "wide" nonspacing marks will be wide. */
+		    if (eaw == EA_ZW &&
+			(obj->options &
+			 LINEBREAK_OPTION_WIDE_NONSPACING_W)) {
+			if (gcol < 2)
+			    gcol = 2;
+		    }
+#if 0 /* XXX */
+		    else if (eaw == EA_ZA &&
+			     (obj->options &
+			      LINEBREAK_OPTION_WIDE_NONSPACING_A)) {
+			if (gcol < 2)
+			    gcol = 2;
+		    }
+#endif /* 0 */
+		    else
+			ecol += eaw2col(obj, eaw);
 		} else
 		    /* prevent degenerate case. */
 		    break;	/* while (pos < str->len) */
@@ -99,7 +121,8 @@ void _gcinfo(linebreak_t * obj, unistr_t * str, size_t pos, gcchar_t * gc)
 	    /* GB6 - GB8 */
 	    /*
 	     * Assume hangul syllable block is always wide, while most of
-	     * isolated junseong (V) and jongseong (T) are narrow.
+	     * isolated junseong (gcb:V) and jongseong (gcb:T) are neutral
+	     * (eaw:N).
 	     */
 	    else if ((gcb == GB_L &&
 		      (ngcb == GB_L || ngcb == GB_V || ngcb == GB_LV ||
@@ -108,6 +131,13 @@ void _gcinfo(linebreak_t * obj, unistr_t * str, size_t pos, gcchar_t * gc)
 		      (ngcb == GB_V || ngcb == GB_T)) ||
 		     ((gcb == GB_LVT || gcb == GB_T) && ngcb == GB_T)) {
 		gcol = 2;
+		elbc = lbc;
+	    }
+	    /* GB8a */
+	    else if (gcb == GB_Regional_Indicator &&
+		     ngcb == GB_Regional_Indicator) {
+		gcol += ecol + eaw2col(obj, eaw);
+		ecol = 0;
 		elbc = lbc;
 	    }
 	    /* GB9, GB9a */
@@ -122,7 +152,7 @@ void _gcinfo(linebreak_t * obj, unistr_t * str, size_t pos, gcchar_t * gc)
 	    else if (gcb == GB_Prepend) {
 		/* Here, next char shall grapheme base (or additional prepend
 		 * character), since its GCB property is neither Control,
-		 * Extend, SpacingMark, Virama nor ZWJ/ZWNJ. */
+		 * Extend, SpacingMark, and Virama */
 		if (lbc != LB_SA)
 		    elbc = lbc;
 #ifdef USE_LIBTHAI
@@ -132,7 +162,12 @@ void _gcinfo(linebreak_t * obj, unistr_t * str, size_t pos, gcchar_t * gc)
 		else
 		    elbc = LB_AL;	/* ...or resolved to AL. */
 		pcol += gcol;
-		gcol = eaw2col(obj, eaw);
+		if (ngcb == GB_V || ngcb == GB_T)
+		    /* isolated hangul jamo with prepend character, though
+		     * it may be degenerate case. */
+		    gcol = 2;
+		else
+		    gcol = eaw2col(obj, eaw);
 	    }
 	    /* Virama rule: \p{ccc:Virama} × \p{gc:Letter} */
 	    else if (gcb == GB_Virama && ngcb == GB_OtherLetter &&

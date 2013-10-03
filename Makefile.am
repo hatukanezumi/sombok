@@ -6,7 +6,7 @@ if MALLOC_DEBUG
 libsombok_la_SOURCES += src/mymalloc.c
 endif
 libsombok_la_CFLAGS = -I. -Iinclude @LIBTHAI_CFLAGS@
-libsombok_la_LDFLAGS = -version-info 4:5:1 @LIBTHAI_LIBS@
+libsombok_la_LDFLAGS = -version-info 4:6:1 @LIBTHAI_LIBS@
 
 include_HEADERS = include/sombok_constants.h
 nodist_include_HEADERS = include/sombok.h
@@ -41,7 +41,7 @@ stamp-html: doc/doxyfile $(include_HEADERS) $(nodist_include_HEADERS) \
 endif
 
 EXTRA_DIST = sombok.spec debian/* \
-	lib/5.1.0.c lib/5.2.0.c lib/6.0.0.c \
+	lib/?.?.?.c \
 	tests/lb.sh $(TESTS) test-data/* \
 	data/makefile data/constants.pl data/custom.pl data/data.pl \
 	data/*.custom data/Rules-*.txt data/LBCLASSES \

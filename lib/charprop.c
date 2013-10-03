@@ -26,7 +26,7 @@ static propval_t PROPENT_HAN[] = { LB_ID, EA_W, GB_Other, SC_Han };
 static propval_t PROPENT_TAG[] = { LB_CM, EA_Z, GB_Control, SC_Common };
 
 /* Variation Selectors */
-static propval_t PROPENT_VSEL[] = { LB_CM, EA_Z, GB_Extend, SC_Inherited };
+static propval_t PROPENT_VSEL[] = { LB_CM, EA_ZA, GB_Extend, SC_Inherited };
 
 /* Private use - XX */
 static propval_t PROPENT_PRIVATE[] = { LB_AL, EA_A, GB_Other, SC_Unknown };
@@ -97,6 +97,9 @@ _search_props(linebreak_t * obj, unichar_t c, propval_t * lbcptr,
 		break;
 	    case LB_JT:
 		*gcbptr = GB_T;
+		break;
+	    case LB_RI:
+		*gcbptr = GB_Regional_Indicator;
 		break;
 	    default:
 		*gcbptr = GB_Other;

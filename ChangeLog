@@ -1,3 +1,62 @@
+2.3.1 2013-09-28
+	* Update UCD to 6.3.0.
+	* Typo in README.ja_JP.
+
+2.3.1beta1  2013-03-26
+	* Update UCD to 6.3.0 beta at 2013-03-02.
+
+2.3.0  2012-10-01
+	* Update UCD to 6.2.0.
+	* data/custom.pl:
+	* data/data.pl:
+	* lib/charprop.c:
+	* lib/gcstring.c:
+	  - EA_Z was devided to EA_Z, EA_ZA and EA_ZW which are nonspacing
+	    variants of EAW "N", "A" and "W", respectively.  Currently,
+	    there are no differences between EA_Z and EA_ZA.
+	  - VIRAMA_AS_JOINER option had been applicable to versions prior
+	    to 6.1.0.
+
+2.3.0gamma1  2012-08-18
+	* data/Rules-6.2.0beta.txt:
+	* data/constants.pl:
+	* data/custom.pl:
+	* data/data.pl:
+	* lib/charprop.c:
+	* lib/gcstring.c:
+	  - Changes based on new drafts of UAX#14/UAX#29 (not yet published).
+	    GCB Joiner and After_Joiner and LBC ZJ are withdrawn by UC.  As
+	    also NonJoiner.
+
+2.3.0beta1  2012-07-14
+	* Update UCD to 6.2.0beta at Jun 05 2012.
+	* config.guess:
+	* config.sub:
+	  - updated.
+	* data/constants.pl:
+	* data/custom.pl:
+	* data/data.pl:
+	* data/makefile:
+	  - custom Grapheme_Cluster_Break property value "ZWJ" is divided
+	    to "NonJoiner" (U+200C ZERO WIDTH NON-JOINER) and "Joiner"
+	    (U+200D ZERO WIDTH JOINER).
+	  - Store custom GCB to *.custom file.
+	* lib/charprop.c:
+	  - Added ZJ/Joiner case of guessed properties.
+	* lib/gcstring.c:
+	  - Updated GCB rules.
+	* Makefile.am:
+	  - increase -version-info from 4.5.1 to 4.6.1.
+
+2.2.1  2012-04-11
+	* lib/gcstring.c:
+	  - Treat an isolated hangul jamo as wide, though some of them
+	    are assigned EAW neutral (N).  cf. the discussion:
+	    http://lists.w3.org/Archives/Public/public-i18n-cjk/2011JanMar/thread.html#msg55
+	* REAME:
+	* README.ja_JP:
+	  - About naming.
+
 2.2.0  2012-04-02
 	* data/constants.pl:
 	* data/data.pl:

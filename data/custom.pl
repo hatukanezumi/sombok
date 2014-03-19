@@ -2,7 +2,7 @@
 
 use version;
 
-my $vernum = version->new($ARGV[1])->numify;
+#my $vernum = version->new($ARGV[1])->numify;
 
 if ($ARGV[0] eq 'lb') {
     goto LB_CUSTOM;

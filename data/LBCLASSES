@@ -6,6 +6,7 @@
         '6.1.0' => [qw(BK CR LF NL SP OP CL QU GL NS EX SY IS PR PO NU AL ID IN HY BA BB B2 CB ZW CM WJ H2 H3 JL JV JT CP)],
         '6.2.0' => [qw(BK CR LF NL SP OP CL QU GL NS EX SY IS PR PO NU AL ID IN HY BA BB B2 CB ZW CM WJ H2 H3 JL JV JT CP RI)],
         '6.3.0' => [qw(BK CR LF NL SP OP CL QU GL NS EX SY IS PR PO NU AL ID IN HY BA BB B2 CB ZW CM WJ H2 H3 JL JV JT CP RI)],
+        '7.0.0beta' => [qw(BK CR LF NL SP OP CL QU GL NS EX SY IS PR PO NU AL ID IN HY BA BB B2 CB ZW CM WJ H2 H3 JL JV JT CP RI)],
     },
     'ea' => {
         '5.1.0' => [qw(Z Na N A W H F ZA ZW)],
@@ -14,6 +15,7 @@
         '6.1.0' => [qw(Z Na N A W H F ZA ZW)],
         '6.2.0' => [qw(Z Na N A W H F ZA ZW)],
         '6.3.0' => [qw(Z Na N A W H F ZA ZW)],
+        '7.0.0beta' => [qw(Z Na N A W H F ZA ZW)],
     },
     'gb' => {
         '5.1.0' => [qw(CR LF Control Extend Prepend SpacingMark L V T LV LVT Other Virama OtherLetter)],
@@ -22,6 +24,7 @@
         '6.1.0' => [qw(CR LF Control Extend Prepend SpacingMark L V T LV LVT Other Virama OtherLetter)],
         '6.2.0' => [qw(CR LF Control Extend Prepend SpacingMark L V T LV LVT Other Virama OtherLetter Regional_Indicator)],
         '6.3.0' => [qw(CR LF Control Extend Prepend SpacingMark L V T LV LVT Other Virama OtherLetter Regional_Indicator)],
+        '7.0.0beta' => [qw(CR LF Control Extend Prepend SpacingMark L V T LV LVT Other Virama OtherLetter Regional_Indicator)],
     },
     'sc' => {
         '5.1.0' => [qw(Common Inherited Unknown Han Hangul Thai Lao Myanmar Khmer Tai_Le New_Tai_Lue)],
@@ -30,6 +33,7 @@
         '6.1.0' => [qw(Common Inherited Unknown Han Hangul Thai Lao Myanmar Khmer Tai_Le New_Tai_Lue Tai_Tham Tai_Viet)],
         '6.2.0' => [qw(Common Inherited Unknown Han Hangul Thai Lao Myanmar Khmer Tai_Le New_Tai_Lue Tai_Tham Tai_Viet)],
         '6.3.0' => [qw(Common Inherited Unknown Han Hangul Thai Lao Myanmar Khmer Tai_Le New_Tai_Lue Tai_Tham Tai_Viet)],
+        '7.0.0beta' => [qw(Common Inherited Unknown Han Hangul Thai Lao Myanmar Khmer Tai_Le New_Tai_Lue Tai_Tham Tai_Viet)],
     },
 );
 

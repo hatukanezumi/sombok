@@ -39,7 +39,7 @@ foreach my $attr (@attr) {
     my %classes = map { ($_ => '') } @classes;
 
     foreach my $version (@versions) {
-	my $vernum = version->new($version)->numify;
+	#my $vernum = version->new($version)->numify;
 
 	my %Virama = ();
 	#if (6.001000 <= $vernum) {

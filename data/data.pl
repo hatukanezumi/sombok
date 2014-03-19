@@ -10,7 +10,8 @@ use version;
 
 my @cat = split(',', shift @ARGV) or die;
 my $version = shift @ARGV or die;
-my $vernum = version->new($version)->numify;
+my $v = $version; $v =~ s/\A((\d+\.)*\d+)\D+/$1/;
+my $vernum = version->new($v)->numify;
 
 # Find Modifier
 my %GC_Modifier = ();

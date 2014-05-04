@@ -34,9 +34,13 @@ foreach my $ext ('custom', 'txt') {
 	chomp $_;
 	s/\s*#.*$//;
 	next unless /\S/;
-	my ($code, $prop) = split /;/;
-	$code = hex("0x$code");
-	$SA{$code} = 1 if $prop eq 'SA';
+
+	my ($char, $prop) = split /;/;
+	my ($start, $end) = split /\.\./, $char;
+	$end ||= $start;
+	foreach my $c (hex("0x$start") .. hex("0x$end")) {
+	    $SA{$c} = 1 if $prop eq 'SA';
+	}
     }
     close LB;
 }

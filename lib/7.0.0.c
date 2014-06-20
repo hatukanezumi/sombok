@@ -4,7 +4,7 @@
 
 #include "sombok_constants.h"
 #include "sombok.h"
-#define UNICODE_VERSION "7.0.0beta"
+#define UNICODE_VERSION "7.0.0"
 const char *linebreak_unicode_version = UNICODE_VERSION;
 
 const char *linebreak_propvals_EA[] = {

@@ -83,6 +83,7 @@
 #define SC_New_Tai_Lue ((propval_t)10)
 #define SC_Tai_Tham ((propval_t)11)
 #define SC_Tai_Viet ((propval_t)12)
+#define SC_Ahom ((propval_t)13)
 
 
 #define _SOMBOK_CONSTANTS_H_

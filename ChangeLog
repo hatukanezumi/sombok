@@ -1,5 +1,5 @@
 2.4.0 2015-06-21
-	* Added rules 21b and 22.02.
+	* Fix: Added rules 21b and 22.02 introduced by Unicode 8.0.0.
 	* Update -version-info from 4:6:1 to 4:7:1.
 
 2.3.3 2015-06-21

@@ -499,7 +499,7 @@ foreach my $k (sort keys %indexedclasses) {
     my @propvals = @{$indexedclasses{$k}->{$version}};
     if (uc($k) eq 'LB') {
 	if (6.001000 <= $vernum) {
-	    push @propvals, qw(SG AI SA HL CJ XX);
+	    push @propvals, qw(SG AI SA CJ XX);
 	} else {
 	    push @propvals, qw(SG AI SA XX);
 	}

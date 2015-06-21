@@ -19,7 +19,7 @@ const char *linebreak_propvals_LB[] = {
     "BK", "CR", "LF", "NL", "SP", "OP", "CL", "CP", "QU", "GL", "NS", "EX", 
     "SY", "IS", "PR", "PO", "NU", "AL", "HL", "ID", "IN", "HY", "BA", "BB", 
     "B2", "ZW", "CM", "WJ", "H2", "H3", "JL", "JV", "JT", "RI", "CB", "SG", 
-    "AI", "SA", "HL", "CJ", "XX", NULL
+    "AI", "SA", "CJ", "XX", NULL
 };
 const char *linebreak_propvals_SC[] = {
     "Common", "Inherited", "Unknown", "Han", "Hangul", "Thai", "Lao", 
@@ -45,7 +45,7 @@ r(CP)={P,P,P,P,P,D,P,P,I,I,P,P,P,P,D,D,I,I,I,D,D,I,I,D,D,P,D,P,D,D,D,D,D,D,D};
 r(QU)={P,P,P,P,P,P,P,P,I,I,I,P,P,P,I,I,I,I,I,I,I,I,I,I,I,P,I,P,I,I,I,I,I,I,I};
 r(GL)={P,P,P,P,P,I,P,P,I,I,I,P,P,P,I,I,I,I,I,I,I,I,I,I,I,P,I,P,I,I,I,I,I,I,I};
 r(NS)={P,P,P,P,P,D,P,P,I,I,I,P,P,P,D,D,D,D,D,D,D,I,I,D,D,P,D,P,D,D,D,D,D,D,D};
-r(EX)={P,P,P,P,P,D,P,P,I,I,I,P,P,P,D,D,D,D,D,D,D,I,I,D,D,P,D,P,D,D,D,D,D,D,D};
+r(EX)={P,P,P,P,P,D,P,P,I,I,I,P,P,P,D,D,D,D,D,D,I,I,I,D,D,P,D,P,D,D,D,D,D,D,D};
 r(SY)={P,P,P,P,P,D,P,P,I,I,I,P,P,P,D,D,D,D,I,D,D,I,I,D,D,P,D,P,D,D,D,D,D,D,D};
 r(IS)={P,P,P,P,P,D,P,P,I,I,I,P,P,P,D,D,D,I,I,D,D,I,I,D,D,P,D,P,D,D,D,D,D,D,D};
 r(PR)={P,P,P,P,P,D,P,P,I,I,I,P,P,P,D,D,D,I,I,I,D,I,I,D,D,P,D,P,I,I,I,I,I,D,D};

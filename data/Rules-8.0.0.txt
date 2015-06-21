@@ -117,6 +117,7 @@ SY × HL
 
 # LB22
 (AL | HL) × IN
+EX × IN
 ID × IN
 IN × IN
 NU × IN

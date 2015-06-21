@@ -1,6 +1,6 @@
 #### Rules for Unicode Line Breaking Algorithm.
-#### Based on Unicode Standard Annex #14 (UAX#14), Revision 30 (2012-09-14)
-#### by Asmus Freytag. http://www.unicode.org/reports/tr14/tr14-30.html
+#### Based on Unicode Standard Annex #14 (UAX#14), Revision 35 (2015-06-01)
+#### by Andy Heninger (ed.). http://www.unicode.org/reports/tr14/tr14-35.html
 
 ### 1 Non-tailorable Line Breaking Rules
 
@@ -110,7 +110,10 @@ CB ÷
 BB ×
 
 # LB21a
-HL (HY | BA) ×
+#HL (HY | BA) ×
+
+# LB21b
+SY × HL
 
 # LB22
 (AL | HL) × IN

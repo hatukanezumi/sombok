@@ -78,11 +78,11 @@ while (<RULES>) {
         next;
     }
 
-    # 6.1.0 or later: aggregate AL & HL
-    s/\bAL *\| *HL\b/AL/g;
-    #XXXs/\bAL *\| *ZJ *\| *HL\b/AL | ZJ/g;
+    #XXX# 6.1.0 or later: aggregate AL & HL
+    #XXXs/\bAL *\| *HL\b/AL/g;
+    #XXXAbandoned#s/\bAL *\| *ZJ *\| *HL\b/AL | ZJ/g;
     s/[(] *AL *[)]/AL/g;
-    next if /\bHL\b/; # Skip HL rules
+    #XXXnext if /\bHL\b/; # Skip HL rules
 
     my ($left, $break, $right) = split(/\s*(!|SP\*\s*×|×|÷)\s*/, $_);
     $left = &class2re($left);

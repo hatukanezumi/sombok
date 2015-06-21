@@ -288,8 +288,10 @@ propval_t linebreak_lbrule(propval_t b_idx, propval_t a_idx)
     case LB_XX:
     /* LB10: Resolve CM to AL. */
     case LB_CM:
+#if 0
     /* Resolve HL to AL. */
     case LB_HL:
+#endif
 	b_idx = LB_AL;
 	break;
     }
@@ -328,10 +330,12 @@ propval_t linebreak_lbrule(propval_t b_idx, propval_t a_idx)
 	    b_idx = LB_AL;
 	break;
 
+#if 0
     /* Resolve HL to AL. */
     case LB_HL:
 	a_idx = LB_AL;
 	break;
+#endif
     }
 
     /* LB25, simplified:
@@ -800,10 +804,12 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 		case LB_CM:
 		    blbc = LB_AL;
 		    break;
+#if 0
 		/* (As of 6.1.0): Treat HL as AL. */
 		case LB_HL:
 		    blbc = LB_AL;
 		    break;
+#endif
 		/* Optionally, treat hangul syllable as if it were AL. */
 		case LB_H2:
 		case LB_H3:
@@ -837,10 +843,12 @@ gcstring_t **_break_partial(linebreak_t * lbobj, unistr_t * input,
 		case LB_CM:
 		    albc = LB_AL;
 		    break;
+#if 0
 		/* (As of 6.1.0): Treat HL as AL. */
 		case LB_HL:
 		    albc = LB_AL;
 		    break;
+#endif
 		/* Optionally, treat hangul syllable as if it were AL. */
 		case LB_H2:
 		case LB_H3:

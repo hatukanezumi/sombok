@@ -15,10 +15,10 @@ const char *linebreak_propvals_GB[] = {
     "T", "LV", "LVT", "Other", "Virama", "OtherLetter", NULL
 };
 const char *linebreak_propvals_LB[] = {
-    "BK", "CR", "LF", "NL", "SP", "OP", "CL", "QU", "GL", "NS", "EX", "SY", 
-    "IS", "PR", "PO", "NU", "AL", "ID", "IN", "HY", "BA", "BB", "B2", "CB", 
-    "ZW", "CM", "WJ", "H2", "H3", "JL", "JV", "JT", "CP", "SG", "AI", "SA", 
-    "XX", NULL
+    "BK", "CR", "LF", "NL", "SP", "OP", "CL", "CP", "QU", "GL", "NS", "EX", 
+    "SY", "IS", "PR", "PO", "NU", "AL", "HL", "ID", "IN", "HY", "BA", "BB", 
+    "B2", "ZW", "CM", "WJ", "H2", "H3", "JL", "JV", "JT", "RI", "CB", "SG", 
+    "AI", "SA", "XX", NULL
 };
 const char *linebreak_propvals_SC[] = {
     "Common", "Inherited", "Unknown", "Han", "Hangul", "Thai", "Lao", 
@@ -32,50 +32,52 @@ const char *linebreak_propvals_SC[] = {
 #define P (LINEBREAK_ACTION_PROHIBITED)
 #define r(cc) static propval_t rule_##cc[]
 /* Note: Entries related to BK, CR, CM, LF, NL aren't used by break(). */
-    /* BkCrLfNlSpOpClQuGlNsExSyIsPrPoNuAlIdInHyBaBbB2CbZwCmWjH2H3JlJvJtCp */
-r(BK)={M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M};
-r(CR)={M,M,P,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M};
-r(LF)={M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M};
-r(NL)={M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M};
-r(SP)={P,P,P,P,P,D,P,D,D,D,P,P,P,D,D,D,D,D,D,D,D,D,D,D,P,D,P,D,D,D,D,D,P};
-r(OP)={P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P};
-r(CL)={P,P,P,P,P,D,P,I,I,P,P,P,P,D,D,D,D,D,D,I,I,D,D,D,P,D,P,D,D,D,D,D,P};
-r(QU)={P,P,P,P,P,P,P,I,I,I,P,P,P,I,I,I,I,I,I,I,I,I,I,I,P,I,P,I,I,I,I,I,P};
-r(GL)={P,P,P,P,P,I,P,I,I,I,P,P,P,I,I,I,I,I,I,I,I,I,I,I,P,I,P,I,I,I,I,I,P};
-r(NS)={P,P,P,P,P,D,P,I,I,I,P,P,P,D,D,D,D,D,D,I,I,D,D,D,P,D,P,D,D,D,D,D,P};
-r(EX)={P,P,P,P,P,D,P,I,I,I,P,P,P,D,D,D,D,D,D,I,I,D,D,D,P,D,P,D,D,D,D,D,P};
-r(SY)={P,P,P,P,P,D,P,I,I,I,P,P,P,D,D,D,D,D,D,I,I,D,D,D,P,D,P,D,D,D,D,D,P};
-r(IS)={P,P,P,P,P,D,P,I,I,I,P,P,P,D,D,D,I,D,D,I,I,D,D,D,P,D,P,D,D,D,D,D,P};
-r(PR)={P,P,P,P,P,D,P,I,I,I,P,P,P,D,D,D,I,I,D,I,I,D,D,D,P,D,P,I,I,I,I,I,P};
-r(PO)={P,P,P,P,P,D,P,I,I,I,P,P,P,D,D,D,I,D,D,I,I,D,D,D,P,D,P,D,D,D,D,D,P};
-r(NU)={P,P,P,P,P,I,P,I,I,I,P,P,P,D,D,D,I,D,I,I,I,D,D,D,P,D,P,D,D,D,D,D,P};
-r(AL)={P,P,P,P,P,I,P,I,I,I,P,P,P,D,D,I,I,D,I,I,I,D,D,D,P,D,P,D,D,D,D,D,P};
-r(ID)={P,P,P,P,P,D,P,I,I,I,P,P,P,D,I,D,D,D,I,I,I,D,D,D,P,D,P,D,D,D,D,D,P};
-r(IN)={P,P,P,P,P,D,P,I,I,I,P,P,P,D,D,D,D,D,I,I,I,D,D,D,P,D,P,D,D,D,D,D,P};
-r(HY)={P,P,P,P,P,D,P,I,D,I,P,P,P,D,D,D,D,D,D,I,I,D,D,D,P,D,P,D,D,D,D,D,P};
-r(BA)={P,P,P,P,P,D,P,I,D,I,P,P,P,D,D,D,D,D,D,I,I,D,D,D,P,D,P,D,D,D,D,D,P};
-r(BB)={P,P,P,P,P,I,P,I,I,I,P,P,P,I,I,I,I,I,I,I,I,I,I,D,P,I,P,I,I,I,I,I,P};
-r(B2)={P,P,P,P,P,D,P,I,I,I,P,P,P,D,D,D,D,D,D,I,I,D,P,D,P,D,P,D,D,D,D,D,P};
-r(CB)={P,P,P,P,P,D,P,I,I,D,P,P,P,D,D,D,D,D,D,D,D,D,D,D,P,D,P,D,D,D,D,D,P};
-r(ZW)={P,P,P,P,P,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,P,D,D,D,D,D,D,D,D};
-r(CM)={P,P,P,P,P,D,P,I,I,I,P,P,P,D,D,D,D,D,D,I,I,D,D,D,P,D,P,D,D,D,D,D,P};
-r(WJ)={P,P,P,P,P,I,P,I,I,I,P,P,P,I,I,I,I,I,I,I,I,I,I,I,P,I,P,I,I,I,I,I,P};
-r(H2)={P,P,P,P,P,D,P,I,I,I,P,P,P,D,I,D,D,D,I,I,I,D,D,D,P,D,P,D,D,D,I,I,P};
-r(H3)={P,P,P,P,P,D,P,I,I,I,P,P,P,D,I,D,D,D,I,I,I,D,D,D,P,D,P,D,D,D,D,I,P};
-r(JL)={P,P,P,P,P,D,P,I,I,I,P,P,P,D,I,D,D,D,I,I,I,D,D,D,P,D,P,I,I,I,I,D,P};
-r(JV)={P,P,P,P,P,D,P,I,I,I,P,P,P,D,I,D,D,D,I,I,I,D,D,D,P,D,P,D,D,D,I,I,P};
-r(JT)={P,P,P,P,P,D,P,I,I,I,P,P,P,D,I,D,D,D,I,I,I,D,D,D,P,D,P,D,D,D,D,I,P};
-r(CP)={P,P,P,P,P,D,P,I,I,P,P,P,P,D,D,I,I,D,D,I,I,D,D,D,P,D,P,D,D,D,D,D,P};
+    /* BkCrLfNlSpOpClCpQuGlNsExSyIsPrPoNuAlHlIdInHyBaBbB2ZwCmWjH2H3JlJvJtRiCb */
+r(BK)={M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M};
+r(CR)={M,M,P,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M};
+r(LF)={M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M};
+r(NL)={M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M,M};
+r(SP)={P,P,P,P,P,D,P,P,D,D,D,P,P,P,D,D,D,D,D,D,D,D,D,D,D,P,D,P,D,D,D,D,D,D,D};
+r(OP)={P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P,P};
+r(CL)={P,P,P,P,P,D,P,P,I,I,P,P,P,P,D,D,D,D,D,D,D,I,I,D,D,P,D,P,D,D,D,D,D,D,D};
+r(CP)={P,P,P,P,P,D,P,P,I,I,P,P,P,P,D,D,I,I,D,D,D,I,I,D,D,P,D,P,D,D,D,D,D,D,D};
+r(QU)={P,P,P,P,P,P,P,P,I,I,I,P,P,P,I,I,I,I,I,I,I,I,I,I,I,P,I,P,I,I,I,I,I,I,I};
+r(GL)={P,P,P,P,P,I,P,P,I,I,I,P,P,P,I,I,I,I,I,I,I,I,I,I,I,P,I,P,I,I,I,I,I,I,I};
+r(NS)={P,P,P,P,P,D,P,P,I,I,I,P,P,P,D,D,D,D,D,D,D,I,I,D,D,P,D,P,D,D,D,D,D,D,D};
+r(EX)={P,P,P,P,P,D,P,P,I,I,I,P,P,P,D,D,D,D,D,D,D,I,I,D,D,P,D,P,D,D,D,D,D,D,D};
+r(SY)={P,P,P,P,P,D,P,P,I,I,I,P,P,P,D,D,D,D,D,D,D,I,I,D,D,P,D,P,D,D,D,D,D,D,D};
+r(IS)={P,P,P,P,P,D,P,P,I,I,I,P,P,P,D,D,D,I,D,D,D,I,I,D,D,P,D,P,D,D,D,D,D,D,D};
+r(PR)={P,P,P,P,P,D,P,P,I,I,I,P,P,P,D,D,D,I,D,I,D,I,I,D,D,P,D,P,I,I,I,I,I,D,D};
+r(PO)={P,P,P,P,P,D,P,P,I,I,I,P,P,P,D,D,D,I,D,D,D,I,I,D,D,P,D,P,D,D,D,D,D,D,D};
+r(NU)={P,P,P,P,P,I,P,P,I,I,I,P,P,P,D,D,D,I,D,D,I,I,I,D,D,P,D,P,D,D,D,D,D,D,D};
+r(AL)={P,P,P,P,P,I,P,P,I,I,I,P,P,P,D,D,I,I,D,D,I,I,I,D,D,P,D,P,D,D,D,D,D,D,D};
+r(HL)={P,P,P,P,P,D,P,P,I,I,I,P,P,P,D,D,D,D,D,D,D,I,I,D,D,P,D,P,D,D,D,D,D,D,D};
+r(ID)={P,P,P,P,P,D,P,P,I,I,I,P,P,P,D,I,D,D,D,D,I,I,I,D,D,P,D,P,D,D,D,D,D,D,D};
+r(IN)={P,P,P,P,P,D,P,P,I,I,I,P,P,P,D,D,D,D,D,D,I,I,I,D,D,P,D,P,D,D,D,D,D,D,D};
+r(HY)={P,P,P,P,P,D,P,P,I,D,I,P,P,P,D,D,D,D,D,D,D,I,I,D,D,P,D,P,D,D,D,D,D,D,D};
+r(BA)={P,P,P,P,P,D,P,P,I,D,I,P,P,P,D,D,D,D,D,D,D,I,I,D,D,P,D,P,D,D,D,D,D,D,D};
+r(BB)={P,P,P,P,P,I,P,P,I,I,I,P,P,P,I,I,I,I,I,I,I,I,I,I,I,P,I,P,I,I,I,I,I,I,D};
+r(B2)={P,P,P,P,P,D,P,P,I,I,I,P,P,P,D,D,D,D,D,D,D,I,I,D,P,P,D,P,D,D,D,D,D,D,D};
+r(ZW)={P,P,P,P,P,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,D,P,D,D,D,D,D,D,D,D,D};
+r(CM)={P,P,P,P,P,D,P,P,I,I,I,P,P,P,D,D,D,D,D,D,D,I,I,D,D,P,D,P,D,D,D,D,D,D,D};
+r(WJ)={P,P,P,P,P,I,P,P,I,I,I,P,P,P,I,I,I,I,I,I,I,I,I,I,I,P,I,P,I,I,I,I,I,I,I};
+r(H2)={P,P,P,P,P,D,P,P,I,I,I,P,P,P,D,I,D,D,D,D,I,I,I,D,D,P,D,P,D,D,D,I,I,D,D};
+r(H3)={P,P,P,P,P,D,P,P,I,I,I,P,P,P,D,I,D,D,D,D,I,I,I,D,D,P,D,P,D,D,D,D,I,D,D};
+r(JL)={P,P,P,P,P,D,P,P,I,I,I,P,P,P,D,I,D,D,D,D,I,I,I,D,D,P,D,P,I,I,I,I,D,D,D};
+r(JV)={P,P,P,P,P,D,P,P,I,I,I,P,P,P,D,I,D,D,D,D,I,I,I,D,D,P,D,P,D,D,D,I,I,D,D};
+r(JT)={P,P,P,P,P,D,P,P,I,I,I,P,P,P,D,I,D,D,D,D,I,I,I,D,D,P,D,P,D,D,D,D,I,D,D};
+r(RI)={P,P,P,P,P,D,P,P,I,I,I,P,P,P,D,D,D,D,D,D,D,I,I,D,D,P,D,P,D,D,D,D,D,D,D};
+r(CB)={P,P,P,P,P,D,P,P,I,I,D,P,P,P,D,D,D,D,D,D,D,D,D,D,D,P,D,P,D,D,D,D,D,D,D};
 #undef r
 propval_t *linebreak_rules[] = {
-    rule_BK, rule_CR, rule_LF, rule_NL, rule_SP, rule_OP, rule_CL, rule_QU, 
-    rule_GL, rule_NS, rule_EX, rule_SY, rule_IS, rule_PR, rule_PO, rule_NU, 
-    rule_AL, rule_ID, rule_IN, rule_HY, rule_BA, rule_BB, rule_B2, rule_CB, 
-    rule_ZW, rule_CM, rule_WJ, rule_H2, rule_H3, rule_JL, rule_JV, rule_JT, 
-    rule_CP
+    rule_BK, rule_CR, rule_LF, rule_NL, rule_SP, rule_OP, rule_CL, rule_CP, 
+    rule_QU, rule_GL, rule_NS, rule_EX, rule_SY, rule_IS, rule_PR, rule_PO, 
+    rule_NU, rule_AL, rule_HL, rule_ID, rule_IN, rule_HY, rule_BA, rule_BB, 
+    rule_B2, rule_ZW, rule_CM, rule_WJ, rule_H2, rule_H3, rule_JL, rule_JV, 
+    rule_JT, rule_RI, rule_CB
 };
 
-size_t linebreak_rulessiz = 33;
+size_t linebreak_rulessiz = 35;
 
 unsigned short linebreak_prop_index[] = {
     0, 32, 64, 94, 125, 157, 189, 219, 248, 276, 307, 333, 345, 345, 363,
